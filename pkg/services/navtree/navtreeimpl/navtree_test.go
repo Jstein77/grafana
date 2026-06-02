@@ -9,12 +9,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/accesscontrol/accesscontrolmock"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
 	"github.com/grafana/grafana/pkg/services/dashboards"
+	"github.com/grafana/grafana/pkg/services/navtree"
 	"github.com/grafana/grafana/pkg/services/search/model"
 	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/grafana/grafana/pkg/services/star/startest"
 	"github.com/grafana/grafana/pkg/services/user"
+	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
 
@@ -156,5 +160,40 @@ func TestBuildStarredItemsNavLinks(t *testing.T) {
 		require.Equal(t, "A Dashboard", navLinks[0].Text)
 		require.Equal(t, "B Dashboard", navLinks[1].Text)
 		require.Equal(t, "C Dashboard", navLinks[2].Text)
+	})
+}
+
+func TestBuildLabsNavLink(t *testing.T) {
+	reqCtx := &contextmodel.ReqContext{
+		SignedInUser: &user.SignedInUser{
+			UserID: 1,
+			OrgID:  1,
+		},
+	}
+
+	t.Run("adds Labs section for feature management readers", func(t *testing.T) {
+		service := ServiceImpl{
+			cfg:           setting.NewCfg(),
+			accessControl: accesscontrolmock.New().WithPermissions([]ac.Permission{{Action: ac.ActionFeatureManagementRead}}),
+		}
+
+		labs := service.buildLabsNavLink(reqCtx)
+		require.NotNil(t, labs)
+		require.Equal(t, navtree.NavIDLabs, labs.Id)
+		require.Equal(t, "/labs", labs.Url)
+		require.Equal(t, "rocket", labs.Icon)
+		require.True(t, labs.IsNew)
+		require.Len(t, labs.Children, 1)
+		require.Equal(t, navtree.NavIDLabsFeatureFlags, labs.Children[0].Id)
+		require.Equal(t, "/labs/feature-flags", labs.Children[0].Url)
+	})
+
+	t.Run("does not add Labs section without feature management read access", func(t *testing.T) {
+		service := ServiceImpl{
+			cfg:           setting.NewCfg(),
+			accessControl: accesscontrolmock.New().WithPermissions(nil),
+		}
+
+		require.Nil(t, service.buildLabsNavLink(reqCtx))
 	})
 }
