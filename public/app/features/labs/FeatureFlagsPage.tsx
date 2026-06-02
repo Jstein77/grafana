@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { useMemo, useState } from 'react';
 import { useAsync } from 'react-use';
 
-import { GrafanaTheme2 } from '@grafana/data';
+import type { GrafanaTheme2 } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
 import { getBackendSrv } from '@grafana/runtime';
 import { Alert, Badge, FilterInput, LoadingPlaceholder, ScrollContainer, Stack, Text, useStyles2 } from '@grafana/ui';
@@ -31,12 +31,14 @@ interface ResolvedToggleState {
   toggles?: ToggleStatus[];
 }
 
+const EMPTY_TOGGLES: ToggleStatus[] = [];
+
 export default function FeatureFlagsPage() {
   const styles = useStyles2(getStyles);
   const [query, setQuery] = useState('');
   const { loading, error, value } = useAsync(() => getBackendSrv().get<ResolvedToggleState>('/api/featuremgmt'), []);
 
-  const toggles = value?.toggles ?? [];
+  const toggles = value?.toggles ?? EMPTY_TOGGLES;
   const normalizedQuery = query.trim().toLowerCase();
   const filteredToggles = useMemo(() => {
     if (!normalizedQuery) {
