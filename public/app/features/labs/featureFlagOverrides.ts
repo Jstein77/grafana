@@ -10,6 +10,8 @@ export interface FeatureFlagRow {
   source: 'server' | 'local';
 }
 
+const featureFlagNameCollator = new Intl.Collator();
+
 export function parseFeatureFlagOverrides(value = store.get(FEATURE_TOGGLE_STORAGE_KEY) || ''): FeatureFlagOverrides {
   return value.split(',').reduce<FeatureFlagOverrides>((acc, feature) => {
     const [name, rawValue] = feature.split('=');
@@ -26,7 +28,7 @@ export function parseFeatureFlagOverrides(value = store.get(FEATURE_TOGGLE_STORA
 
 export function saveFeatureFlagOverrides(overrides: FeatureFlagOverrides) {
   const serialized = Object.entries(overrides)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => featureFlagNameCollator.compare(a, b))
     .map(([name, enabled]) => `${name}=${enabled ? 'true' : 'false'}`)
     .join(',');
 
@@ -38,10 +40,9 @@ export function saveFeatureFlagOverrides(overrides: FeatureFlagOverrides) {
 }
 
 export function getFeatureFlagRows(featureToggles: FeatureToggles, overrides: FeatureFlagOverrides): FeatureFlagRow[] {
-  const toggleValues = featureToggles as Record<string, boolean | undefined>;
   const names = new Set<string>();
 
-  for (const [name, enabled] of Object.entries(toggleValues)) {
+  for (const [name, enabled] of Object.entries(featureToggles)) {
     if (enabled) {
       names.add(name);
     }
@@ -57,9 +58,9 @@ export function getFeatureFlagRows(featureToggles: FeatureToggles, overrides: Fe
 
       return {
         name,
-        enabled: hasOverride ? overrides[name] : Boolean(toggleValues[name]),
+        enabled: hasOverride ? overrides[name] : Boolean(Reflect.get(featureToggles, name)),
         source: hasOverride ? 'local' : 'server',
       } satisfies FeatureFlagRow;
     })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => featureFlagNameCollator.compare(a.name, b.name));
 }

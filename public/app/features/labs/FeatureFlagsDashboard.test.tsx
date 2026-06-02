@@ -1,6 +1,7 @@
+import { render, screen, within } from 'test/test-utils';
+
 import { type FeatureToggles, store } from '@grafana/data';
 import { config } from '@grafana/runtime';
-import { render, screen, within } from 'test/test-utils';
 
 import FeatureFlagsDashboard from './FeatureFlagsDashboard';
 import { FEATURE_TOGGLE_STORAGE_KEY } from './featureFlagOverrides';

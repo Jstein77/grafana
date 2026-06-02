@@ -15,8 +15,8 @@ import {
   Text,
   useStyles2,
 } from '@grafana/ui';
-import config from 'app/core/config';
 import { Page } from 'app/core/components/Page/Page';
+import config from 'app/core/config';
 
 import {
   getFeatureFlagRows,
@@ -48,7 +48,7 @@ export default function FeatureFlagsDashboard() {
     saveFeatureFlagOverrides(nextOverrides);
     setOverrides(nextOverrides);
     setFeatureToggles(nextFeatureToggles);
-    config.featureToggles[name as keyof FeatureToggles] = enabled;
+    Reflect.set(config.featureToggles, name, enabled);
     setHasPendingReload(true);
   };
 
@@ -57,8 +57,8 @@ export default function FeatureFlagsDashboard() {
     delete nextOverrides[name];
 
     const nextFeatureToggles = { ...featureToggles };
-    if (!nextFeatureToggles[name as keyof FeatureToggles]) {
-      delete nextFeatureToggles[name as keyof FeatureToggles];
+    if (!Reflect.get(nextFeatureToggles, name)) {
+      Reflect.deleteProperty(nextFeatureToggles, name);
     }
 
     saveFeatureFlagOverrides(nextOverrides);
