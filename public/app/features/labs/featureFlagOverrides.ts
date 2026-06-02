@@ -12,7 +12,11 @@ export interface FeatureFlagRow {
 
 const featureFlagNameCollator = new Intl.Collator();
 
-export function parseFeatureFlagOverrides(value = store.get(FEATURE_TOGGLE_STORAGE_KEY) || ''): FeatureFlagOverrides {
+function getStoredFeatureFlagOverrides(): string {
+  return String(store.get(FEATURE_TOGGLE_STORAGE_KEY) || '');
+}
+
+export function parseFeatureFlagOverrides(value = getStoredFeatureFlagOverrides()): FeatureFlagOverrides {
   return value.split(',').reduce<FeatureFlagOverrides>((acc, feature) => {
     const [name, rawValue] = feature.split('=');
     const trimmedName = name?.trim();
