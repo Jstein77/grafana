@@ -1,4 +1,3 @@
-const structuredLogger = createStructuredLogger('public/app/features/plugins/components/AppRootPage');
 // Libraries
 import { type AnyAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
@@ -43,6 +42,7 @@ import { PluginErrorBoundary } from './PluginErrorBoundary';
 import { buildPluginPageContext, PluginPageContext } from './PluginPageContext';
 import { RestrictedGrafanaApisProvider } from './restrictedGrafanaApis/RestrictedGrafanaApisProvider';
 
+const structuredLogger = createStructuredLogger('public/app/features/plugins/components/AppRootPage');
 interface Props {
   // The ID of the plugin we would like to load and display
   pluginId?: string;

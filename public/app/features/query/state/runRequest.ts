@@ -1,4 +1,3 @@
-const structuredLogger = createStructuredLogger('public/app/features/query/state/runRequest');
 // Libraries
 import { isString, map as isArray } from 'lodash';
 import { from, merge, type Observable, of, timer } from 'rxjs';
@@ -29,6 +28,7 @@ import { type ExpressionQuery } from 'app/features/expressions/types';
 import { cancelNetworkRequestsOnUnsubscribe } from './processing/canceler';
 import { emitDataRequestEvent } from './queryAnalytics';
 
+const structuredLogger = createStructuredLogger('public/app/features/query/state/runRequest');
 type MapOfResponsePackets = { [str: string]: DataQueryResponse };
 
 interface RunningQueryState {

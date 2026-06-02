@@ -1,8 +1,9 @@
-import { createStructuredLogger } from '@grafana/data';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import { type OpenAPIV3 } from 'openapi-types';
 import path from 'path';
+
+import { createStructuredLogger } from './logger';
 
 const structuredLogger = createStructuredLogger('packages/grafana-api-clients/src/generator/helpers');
 type PlopActionFunction = (

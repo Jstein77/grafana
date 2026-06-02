@@ -1,4 +1,3 @@
-const structuredLogger = createStructuredLogger('packages/grafana-prometheus/src/result_transformer');
 // Core Grafana history https://github.com/grafana/grafana/blob/v11.0.0-preview/public/app/plugins/datasource/prometheus/result_transformer.ts
 import { flatten, forOwn, groupBy, partition } from 'lodash';
 
@@ -25,6 +24,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 
 import { type ExemplarTraceIdDestination, type PromMetric, type PromQuery, type PromValue } from './types';
 
+const structuredLogger = createStructuredLogger('packages/grafana-prometheus/src/result_transformer');
 // handles case-insensitive Inf, +Inf, -Inf (with optional "inity" suffix)
 const INFINITY_SAMPLE_REGEX = /^[+-]?inf(?:inity)?$/i;
 

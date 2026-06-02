@@ -1,4 +1,3 @@
-const structuredLogger = createStructuredLogger('packages/grafana-ui/src/components/ThemeDemos/EmotionPerfTest');
 /* eslint-disable @grafana/i18n/no-untranslated-strings */
 /** @jsxImportSource @emotion/react */
 import { css, cx } from '@emotion/css';
@@ -10,6 +9,8 @@ import { type GrafanaTheme2, createStructuredLogger } from '@grafana/data';
 import { useStyles2, useTheme2 } from '../../themes/ThemeContext';
 import { Button } from '../Button/Button';
 import { Stack } from '../Layout/Stack/Stack';
+
+const structuredLogger = createStructuredLogger('packages/grafana-ui/src/components/ThemeDemos/EmotionPerfTest');
 
 export function EmotionPerfTest() {
   structuredLogger.info('process.env.NODE_ENV', process.env.NODE_ENV);

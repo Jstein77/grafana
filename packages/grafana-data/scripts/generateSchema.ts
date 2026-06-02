@@ -1,9 +1,9 @@
-import { createStructuredLogger } from '@grafana/data';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { NewThemeOptionsSchema } from '../src/themes/createTheme';
+import { createStructuredLogger } from '../src/utils/logger';
 
 const structuredLogger = createStructuredLogger('packages/grafana-data/scripts/generateSchema');
 const __filename = fileURLToPath(import.meta.url);

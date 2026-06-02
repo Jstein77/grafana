@@ -1,6 +1,3 @@
-const structuredLogger = createStructuredLogger(
-  'public/app/features/explore/TraceView/components/model/transform-trace-data'
-);
 // Copyright (c) 2017 Uber Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +26,9 @@ import { getServiceDisplayName } from '../utils/service-name';
 
 import { getTraceName } from './trace-viewer';
 
+const structuredLogger = createStructuredLogger(
+  'public/app/features/explore/TraceView/components/model/transform-trace-data'
+);
 function asTagArray(tags: unknown): TraceKeyValuePair[] {
   return Array.isArray(tags) ? tags : [];
 }

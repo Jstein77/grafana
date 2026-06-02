@@ -1,4 +1,3 @@
-const structuredLogger = createStructuredLogger('packages/grafana-prometheus/src/language_provider');
 // Core Grafana history https://github.com/grafana/grafana/blob/v11.0.0-preview/public/app/plugins/datasource/prometheus/language_provider.ts
 import Prism from 'prismjs';
 
@@ -24,6 +23,7 @@ import { buildVisualQueryFromString } from './querybuilder/parsing';
 import { LabelsApiClient, type ResourceApiClient, SeriesApiClient } from './resource_clients';
 import { type PromMetricsMetadata, type PromQuery } from './types';
 
+const structuredLogger = createStructuredLogger('packages/grafana-prometheus/src/language_provider');
 interface PrometheusBaseLanguageProvider {
   datasource: PrometheusDatasource;
 

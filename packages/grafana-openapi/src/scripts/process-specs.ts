@@ -1,7 +1,8 @@
-import { createStructuredLogger } from '@grafana/data';
 import fs from 'fs';
 import { type OpenAPIV3 } from 'openapi-types';
 import path from 'path';
+
+import { createStructuredLogger } from './logger';
 
 const structuredLogger = createStructuredLogger('packages/grafana-openapi/src/scripts/process-specs');
 /**
