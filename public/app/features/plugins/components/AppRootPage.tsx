@@ -1,3 +1,4 @@
+const structuredLogger = createStructuredLogger('public/app/features/plugins/components/AppRootPage');
 // Libraries
 import { type AnyAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
@@ -13,6 +14,7 @@ import {
   OrgRole,
   PluginType,
   PluginContextProvider,
+  createStructuredLogger,
 } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
 import { config, locationSearchToObject } from '@grafana/runtime';
@@ -249,7 +251,7 @@ async function loadAppPlugin(pluginId: string, dispatch: React.Dispatch<AnyActio
     );
     const error = err instanceof Error ? err : new Error(getMessageFromError(err));
     pluginsLogger.logError(error);
-    console.error(error);
+    structuredLogger.error(error);
   }
 }
 

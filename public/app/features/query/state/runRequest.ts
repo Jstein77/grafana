@@ -1,3 +1,4 @@
+const structuredLogger = createStructuredLogger('public/app/features/query/state/runRequest');
 // Libraries
 import { isString, map as isArray } from 'lodash';
 import { from, merge, type Observable, of, timer } from 'rxjs';
@@ -17,6 +18,7 @@ import {
   LoadingState,
   type PanelData,
   type TimeRange,
+  createStructuredLogger,
 } from '@grafana/data';
 import { config, isMigrationHandler, migrateRequest, toDataQueryError, isExpressionReference } from '@grafana/runtime';
 import { backendSrv } from 'app/core/services/backend_srv';
@@ -161,7 +163,7 @@ export function runRequest(
     }),
     // handle errors
     catchError((err) => {
-      console.error('runRequest.catchError', err);
+      structuredLogger.error('runRequest.catchError', err);
       return of({
         ...state.panelData,
         state: LoadingState.Error,
