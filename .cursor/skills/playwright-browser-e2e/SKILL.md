@@ -1,12 +1,15 @@
 ---
 name: playwright-browser-e2e
-description: Use Playwright's browser runner to execute Grafana end-to-end tests, debug failures, and collect actionable test evidence.
+description: Runs Playwright in browser mode to simulate end-to-end testing, debug failures, and collect evidence. Use when the user asks for Browser-based Playwright E2E simulation, Playwright end-to-end testing, or /create-skill workflows for browser testing.
+disable-model-invocation: true
 ---
 
 # Playwright browser end-to-end testing
 
 ## Instructions
 When the user asks for end-to-end browser testing with Playwright, run these steps directly using the Shell tool.
+
+That uses Playwright to simulate end-to-end testing
 
 ### 1) Preflight
 Run from the repo root:
@@ -59,6 +62,14 @@ yarn playwright show-report
 - Include pass/fail outcome and failing test names.
 - If failures occur, include the rerun command with narrowed scope.
 - Include report/trace location when available.
+
+## Examples
+- User asks: "Run Browser E2E for login and dashboard search."  
+  Command: `yarn e2e:playwright --grep "login|dashboard search"`
+- User asks: "Debug a flaky Playwright test in Browser mode."  
+  Command: `yarn e2e:playwright:debug`
+- User asks: "Run one Playwright spec against my local Grafana."  
+  Command: `GRAFANA_URL=http://localhost:3000 yarn e2e:playwright e2e-playwright/<path>/<test>.spec.ts`
 
 ## Notes
 - `yarn e2e:playwright` starts its own Grafana test server when `GRAFANA_URL` is not set.
