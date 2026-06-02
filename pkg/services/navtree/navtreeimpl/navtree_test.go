@@ -164,11 +164,13 @@ func TestBuildStarredItemsNavLinks(t *testing.T) {
 }
 
 func TestBuildLabsNavLink(t *testing.T) {
+	httpReq, _ := http.NewRequest(http.MethodGet, "", nil)
 	reqCtx := &contextmodel.ReqContext{
 		SignedInUser: &user.SignedInUser{
 			UserID: 1,
 			OrgID:  1,
 		},
+		Context: &web.Context{Req: httpReq},
 	}
 
 	t.Run("adds Labs section for feature management readers", func(t *testing.T) {
