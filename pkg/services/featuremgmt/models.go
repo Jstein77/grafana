@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-
-	featuretoggleapi "github.com/grafana/grafana/pkg/services/featuremgmt/feature_toggle_api"
 )
 
 //go:generate mockery --name FeatureToggles --structname MockFeatureToggles --inpackage --filename feature_toggles_mock.go --with-expecter
@@ -31,9 +29,6 @@ type FeatureToggles interface {
 	// Get the enabled flags -- this *may* also include disabled flags (with value false)
 	// but it is guaranteed to have the enabled ones listed
 	GetEnabled(ctx context.Context) map[string]bool
-
-	// GetResolvedState returns all known feature flags with their current effective state.
-	GetResolvedState(ctx context.Context) featuretoggleapi.ResolvedToggleState
 }
 
 func AnyEnabled(f FeatureToggles, flags ...string) bool {

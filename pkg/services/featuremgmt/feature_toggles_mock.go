@@ -5,7 +5,6 @@ package featuremgmt
 import (
 	context "context"
 
-	feature_toggle_api "github.com/grafana/grafana/pkg/services/featuremgmt/feature_toggle_api"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -66,52 +65,6 @@ func (_c *MockFeatureToggles_GetEnabled_Call) Return(_a0 map[string]bool) *MockF
 }
 
 func (_c *MockFeatureToggles_GetEnabled_Call) RunAndReturn(run func(context.Context) map[string]bool) *MockFeatureToggles_GetEnabled_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetResolvedState provides a mock function with given fields: ctx
-func (_m *MockFeatureToggles) GetResolvedState(ctx context.Context) feature_toggle_api.ResolvedToggleState {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetResolvedState")
-	}
-
-	var r0 feature_toggle_api.ResolvedToggleState
-	if rf, ok := ret.Get(0).(func(context.Context) feature_toggle_api.ResolvedToggleState); ok {
-		r0 = rf(ctx)
-	} else {
-		r0 = ret.Get(0).(feature_toggle_api.ResolvedToggleState)
-	}
-
-	return r0
-}
-
-// MockFeatureToggles_GetResolvedState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetResolvedState'
-type MockFeatureToggles_GetResolvedState_Call struct {
-	*mock.Call
-}
-
-// GetResolvedState is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockFeatureToggles_Expecter) GetResolvedState(ctx interface{}) *MockFeatureToggles_GetResolvedState_Call {
-	return &MockFeatureToggles_GetResolvedState_Call{Call: _e.mock.On("GetResolvedState", ctx)}
-}
-
-func (_c *MockFeatureToggles_GetResolvedState_Call) Run(run func(ctx context.Context)) *MockFeatureToggles_GetResolvedState_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
-	})
-	return _c
-}
-
-func (_c *MockFeatureToggles_GetResolvedState_Call) Return(_a0 feature_toggle_api.ResolvedToggleState) *MockFeatureToggles_GetResolvedState_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockFeatureToggles_GetResolvedState_Call) RunAndReturn(run func(context.Context) feature_toggle_api.ResolvedToggleState) *MockFeatureToggles_GetResolvedState_Call {
 	_c.Call.Return(run)
 	return _c
 }
