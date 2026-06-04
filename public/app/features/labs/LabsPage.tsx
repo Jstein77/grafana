@@ -88,7 +88,10 @@ export default function LabsPage() {
     setFeatureToggles((previousFeatureToggles) => ({ ...previousFeatureToggles, [featureName]: enabled }));
     const localStorageFeatureToggles = parseFeatureToggleOverrides(store.get(FEATURE_TOGGLE_STORAGE_KEY));
     localStorageFeatureToggles[featureName] = enabled;
-    store.set(FEATURE_TOGGLE_STORAGE_KEY, serializeFeatureToggleOverrides(localStorageFeatureToggles));
+    const safeLocalStorageFeatureToggles = Object.fromEntries(
+      Object.entries(localStorageFeatureToggles).filter(([name]) => isSafeRuntimeFeatureFlag(name))
+    );
+    store.set(FEATURE_TOGGLE_STORAGE_KEY, serializeFeatureToggleOverrides(safeLocalStorageFeatureToggles));
     if (isRuntimeFeatureToggleName(featureName)) {
       config.featureToggles[featureName] = enabled;
     }
