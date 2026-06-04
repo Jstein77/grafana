@@ -22,7 +22,9 @@ function translateNav(navTree: NavModelItem[]): NavModelItem[] {
 }
 
 function containsNavItem(navTree: NavModelItem[], itemId: string): boolean {
-  return navTree.some((navItem) => navItem.id === itemId || (navItem.children && containsNavItem(navItem.children, itemId)));
+  return navTree.some(
+    (navItem) => navItem.id === itemId || (navItem.children && containsNavItem(navItem.children, itemId))
+  );
 }
 
 function insertLabsAtMatchingLevel(
