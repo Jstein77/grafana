@@ -194,6 +194,7 @@ spec:
                 $ref: '#/components/schemas/TemplateString'
               type: object
             missingSeriesEvalsToResolve:
+              description: +k8s:validation:minimum=0
               minimum: 0
               type: integer
             noDataState:
@@ -203,6 +204,9 @@ spec:
               additionalProperties: false
               properties:
                 activeTimeIntervals:
+                  description: '+k8s:validation:items:minLength=1
+
+                    +k8s:validation:items:pattern="^.+$"'
                   items:
                     $ref: '#/components/schemas/TimeIntervalRef'
                   type: array
@@ -212,9 +216,18 @@ spec:
                   type: array
                 groupInterval:
                   $ref: '#/components/schemas/PromDuration'
+                  description: '+k8s:validation:minLength=1
+
+                    +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"'
                 groupWait:
                   $ref: '#/components/schemas/PromDuration'
+                  description: '+k8s:validation:minLength=1
+
+                    +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"'
                 muteTimeIntervals:
+                  description: '+k8s:validation:items:minLength=1
+
+                    +k8s:validation:items:pattern="^.+$"'
                   items:
                     $ref: '#/components/schemas/TimeIntervalRef'
                   type: array
@@ -224,6 +237,9 @@ spec:
                   type: string
                 repeatInterval:
                   $ref: '#/components/schemas/PromDuration'
+                  description: '+k8s:validation:minLength=1
+
+                    +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"'
               required:
               - receiver
               type: object
@@ -238,6 +254,9 @@ spec:
                   type: string
                   pattern: ^[a-zA-Z0-9_-]+$
                 panelID:
+                  description: '+k8s:validation:minimum=0
+
+                    +k8s:validation:exclusiveMinimum'
                   exclusiveMinimum: true
                   minimum: 0
                   type: integer

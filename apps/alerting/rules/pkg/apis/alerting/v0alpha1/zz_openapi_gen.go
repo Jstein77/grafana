@@ -302,8 +302,9 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleSpec(ref common.ReferenceCallbac
 					},
 					"missingSeriesEvalsToResolve": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"integer"},
-							Format: "int64",
+							Minimum: ptr.To[float64](0),
+							Type:    []string{"integer"},
+							Format:  "int64",
 						},
 					},
 					"noDataState": {
@@ -429,24 +430,44 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleV0alpha1SpecNotificationSettings
 					},
 					"groupWait": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"groupInterval": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"repeatInterval": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"muteTimeIntervals": {
 						SchemaProps: spec.SchemaProps{
+							AllOf: []spec.Schema{
+								{
+									SchemaProps: spec.SchemaProps{
+										Items: &spec.SchemaOrArray{
+											Schema: &spec.Schema{
+												SchemaProps: spec.SchemaProps{
+													MinLength: ptr.To[int64](1),
+													Pattern:   "^.+$",
+												},
+											},
+										},
+									},
+								},
+							},
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -461,6 +482,20 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleV0alpha1SpecNotificationSettings
 					},
 					"activeTimeIntervals": {
 						SchemaProps: spec.SchemaProps{
+							AllOf: []spec.Schema{
+								{
+									SchemaProps: spec.SchemaProps{
+										Items: &spec.SchemaOrArray{
+											Schema: &spec.Schema{
+												SchemaProps: spec.SchemaProps{
+													MinLength: ptr.To[int64](1),
+													Pattern:   "^.+$",
+												},
+											},
+										},
+									},
+								},
+							},
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -497,9 +532,11 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleV0alpha1SpecPanelRef(ref common.
 					},
 					"panelID": {
 						SchemaProps: spec.SchemaProps{
-							Default: 0,
-							Type:    []string{"integer"},
-							Format:  "int64",
+							Default:          0,
+							Minimum:          ptr.To[float64](0),
+							ExclusiveMinimum: true,
+							Type:             []string{"integer"},
+							Format:           "int64",
 						},
 					},
 				},

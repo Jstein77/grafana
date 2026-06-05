@@ -96,6 +96,7 @@ export interface Spec {
 	// +k8s:validation:minLength=1
 	// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
 	keepFiringFor?: string;
+	// +k8s:validation:minimum=0
 	missingSeriesEvalsToResolve?: number;
 	noDataState: string;
 	execErrState: string;
@@ -103,10 +104,20 @@ export interface Spec {
 		// +k8s:validation:minLength=1
 		receiver: string;
 		groupBy?: string[];
+		// +k8s:validation:minLength=1
+		// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
 		groupWait?: PromDuration;
+		// +k8s:validation:minLength=1
+		// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
 		groupInterval?: PromDuration;
+		// +k8s:validation:minLength=1
+		// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
 		repeatInterval?: PromDuration;
+		// +k8s:validation:items:minLength=1
+		// +k8s:validation:items:pattern="^.+$"
 		muteTimeIntervals?: TimeIntervalRef[];
+		// +k8s:validation:items:minLength=1
+		// +k8s:validation:items:pattern="^.+$"
 		activeTimeIntervals?: TimeIntervalRef[];
 	};
 	// Expressions must contain at least one entry. Admission validation enforces exactly one expression with source=true.
@@ -116,6 +127,8 @@ export interface Spec {
 		// +k8s:validation:minLength=1
 		// +k8s:validation:pattern="^[a-zA-Z0-9_-]+$"
 		dashboardUID: string;
+		// +k8s:validation:minimum=0
+		// +k8s:validation:exclusiveMinimum
 		panelID: number;
 	};
 }

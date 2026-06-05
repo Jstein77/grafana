@@ -95,6 +95,7 @@ spec:
                   type: string
                 type: object
               missingSeriesEvalsToResolve:
+                description: +k8s:validation:minimum=0
                 minimum: 0
                 type: integer
               noDataState:
@@ -103,6 +104,9 @@ spec:
               notificationSettings:
                 properties:
                   activeTimeIntervals:
+                    description: '+k8s:validation:items:minLength=1
+
+                      +k8s:validation:items:pattern="^.+$"'
                     items:
                       description: 'TimeIntervalRef matches the non-empty TimeIntervalSpec.name validation from the notifications
                         app.
@@ -133,6 +137,9 @@ spec:
                     minLength: 1
                     pattern: ^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$
                   muteTimeIntervals:
+                    description: '+k8s:validation:items:minLength=1
+
+                      +k8s:validation:items:pattern="^.+$"'
                     items:
                       description: 'TimeIntervalRef matches the non-empty TimeIntervalSpec.name validation from the notifications
                         app.
@@ -168,6 +175,9 @@ spec:
                     type: string
                     pattern: ^[a-zA-Z0-9_-]+$
                   panelID:
+                    description: '+k8s:validation:minimum=0
+
+                      +k8s:validation:exclusiveMinimum'
                     exclusiveMinimum: true
                     minimum: 0
                     type: integer

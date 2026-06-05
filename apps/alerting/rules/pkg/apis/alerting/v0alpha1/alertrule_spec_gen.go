@@ -121,7 +121,8 @@ type AlertRuleSpec struct {
 	For *string `json:"for,omitempty"`
 	// +k8s:validation:minLength=1
 	// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
-	KeepFiringFor               *string                                    `json:"keepFiringFor,omitempty"`
+	KeepFiringFor *string `json:"keepFiringFor,omitempty"`
+	// +k8s:validation:minimum=0
 	MissingSeriesEvalsToResolve *int64                                     `json:"missingSeriesEvalsToResolve,omitempty"`
 	NoDataState                 string                                     `json:"noDataState"`
 	ExecErrState                string                                     `json:"execErrState"`
@@ -149,12 +150,22 @@ func (AlertRuleSpec) OpenAPIModelName() string {
 // +k8s:openapi-gen=true
 type AlertRuleV0alpha1SpecNotificationSettings struct {
 	// +k8s:validation:minLength=1
-	Receiver            string                     `json:"receiver"`
-	GroupBy             []string                   `json:"groupBy,omitempty"`
-	GroupWait           *AlertRulePromDuration     `json:"groupWait,omitempty"`
-	GroupInterval       *AlertRulePromDuration     `json:"groupInterval,omitempty"`
-	RepeatInterval      *AlertRulePromDuration     `json:"repeatInterval,omitempty"`
-	MuteTimeIntervals   []AlertRuleTimeIntervalRef `json:"muteTimeIntervals,omitempty"`
+	Receiver string   `json:"receiver"`
+	GroupBy  []string `json:"groupBy,omitempty"`
+	// +k8s:validation:minLength=1
+	// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
+	GroupWait *AlertRulePromDuration `json:"groupWait,omitempty"`
+	// +k8s:validation:minLength=1
+	// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
+	GroupInterval *AlertRulePromDuration `json:"groupInterval,omitempty"`
+	// +k8s:validation:minLength=1
+	// +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
+	RepeatInterval *AlertRulePromDuration `json:"repeatInterval,omitempty"`
+	// +k8s:validation:items:minLength=1
+	// +k8s:validation:items:pattern="^.+$"
+	MuteTimeIntervals []AlertRuleTimeIntervalRef `json:"muteTimeIntervals,omitempty"`
+	// +k8s:validation:items:minLength=1
+	// +k8s:validation:items:pattern="^.+$"
 	ActiveTimeIntervals []AlertRuleTimeIntervalRef `json:"activeTimeIntervals,omitempty"`
 }
 
@@ -173,7 +184,9 @@ type AlertRuleV0alpha1SpecPanelRef struct {
 	// +k8s:validation:minLength=1
 	// +k8s:validation:pattern="^[a-zA-Z0-9_-]+$"
 	DashboardUID string `json:"dashboardUID"`
-	PanelID      int64  `json:"panelID"`
+	// +k8s:validation:minimum=0
+	// +k8s:validation:exclusiveMinimum
+	PanelID int64 `json:"panelID"`
 }
 
 // NewAlertRuleV0alpha1SpecPanelRef creates a new AlertRuleV0alpha1SpecPanelRef object.
