@@ -1,4 +1,3 @@
-import { createStructuredLogger } from '@grafana/data';
 import { config, locationService } from '@grafana/runtime';
 import { type Dashboard } from '@grafana/schema';
 import { type Status, type Spec as DashboardV2Spec } from '@grafana/schema/apis/dashboard.grafana.app/v2';
@@ -9,8 +8,6 @@ import { type DashboardDataDTO } from 'app/types/dashboard';
 import { type SaveDashboardCommand } from '../components/SaveDashboard/types';
 
 import { type DashboardWithAccessInfo } from './types';
-
-const structuredLogger = createStructuredLogger('public/app/features/dashboard/api/utils.ts');
 
 export function isV2StoredVersion(version: string | undefined): boolean {
   return version === 'v2alpha1' || version === 'v2beta1' || version === 'v2';

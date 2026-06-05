@@ -20,6 +20,16 @@ const structuredLogger = {
       source: 'packages/grafana-i18n/src/i18n.tsx',
     });
   },
+  warn: (...args: unknown[]) => {
+    const logger = globalThis['console'];
+
+    logger?.warn({
+      args,
+      level: 'warn',
+      message: typeof args[0] === 'string' ? args[0] : 'Grafana i18n log event',
+      source: 'packages/grafana-i18n/src/i18n.tsx',
+    });
+  },
 };
 
 let tFunc: I18NextTFunction<string[], undefined> | undefined;

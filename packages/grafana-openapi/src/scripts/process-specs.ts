@@ -2,9 +2,22 @@ import fs from 'fs';
 import { type OpenAPIV3 } from 'openapi-types';
 import path from 'path';
 
-import { createStructuredLogger } from '@grafana/data';
+const structuredLogger = {
+  error: (...args: unknown[]) => writeStructuredLog('error', args),
+  log: (...args: unknown[]) => writeStructuredLog('log', args),
+};
 
-const structuredLogger = createStructuredLogger('packages/grafana-openapi/src/scripts/process-specs.ts');
+function writeStructuredLog(level: 'error' | 'log', args: unknown[]) {
+  const stream = level === 'log' ? process.stdout : process.stderr;
+  stream.write(
+    JSON.stringify({
+      args,
+      level,
+      message: typeof args[0] === 'string' ? args[0] : 'Grafana OpenAPI log event',
+      source: 'packages/grafana-openapi/src/scripts/process-specs.ts',
+    }) + '\n'
+  );
+}
 
 /**
  * Process an OpenAPI spec to remove k8s metadata from names and paths:

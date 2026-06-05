@@ -1,7 +1,3 @@
-import { createStructuredLogger } from '@grafana/data';
-
-const structuredLogger = createStructuredLogger('public/app/plugins/datasource/cloudwatch/aws_url.ts');
-
 const JSURL = require('jsurl');
 
 export interface AwsUrl {
@@ -15,9 +11,9 @@ export interface AwsUrl {
   source: string[];
 }
 
-const defaultURL = 'structuredLogger.aws.amazon.com';
-const usGovURL = 'structuredLogger.amazonaws-us-gov.com';
-const chinaURL = 'structuredLogger.amazonaws.cn';
+const defaultURL = 'console.aws.amazon.com';
+const usGovURL = 'console.amazonaws-us-gov.com';
+const chinaURL = 'console.amazonaws.cn';
 
 export function getLogsEndpoint(region: string): string {
   let url = defaultURL;

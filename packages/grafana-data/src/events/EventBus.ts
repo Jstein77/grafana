@@ -2,8 +2,6 @@ import EventEmitter from 'eventemitter3';
 import { type Unsubscribable, Observable, type Subscriber } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { createStructuredLogger } from '../logging/structuredLogger';
-
 import {
   type EventBus,
   type LegacyEmitter,
@@ -14,8 +12,6 @@ import {
   type AppEvent,
   type EventFilterOptions,
 } from './types';
-
-const structuredLogger = createStructuredLogger('packages/grafana-data/src/events/EventBus.ts');
 
 /**
  * @alpha

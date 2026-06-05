@@ -1,7 +1,7 @@
 import { merge, type Observable, ReplaySubject, Subject, Subscription, timer, type Unsubscribable } from 'rxjs';
 import { finalize, map, mapTo, mergeAll, reduce, share, takeUntil } from 'rxjs/operators';
 
-import { createStructuredLogger, type AnnotationQuery } from '@grafana/data';
+import { type AnnotationQuery } from '@grafana/data';
 import { RefreshEvent } from '@grafana/runtime';
 import { dedupAnnotations } from 'app/features/annotations/events_processing';
 
@@ -19,10 +19,6 @@ import {
   type DashboardQueryRunnerWorkerResult,
 } from './types';
 import { getAnnotationsByPanelId } from './utils';
-
-const structuredLogger = createStructuredLogger(
-  'public/app/features/query/state/DashboardQueryRunner/DashboardQueryRunner.ts'
-);
 
 class DashboardQueryRunnerImpl implements DashboardQueryRunner {
   private readonly results: ReplaySubject<DashboardQueryRunnerWorkerResult>;

@@ -1,9 +1,4 @@
-import { createStructuredLogger } from '@grafana/data';
 import { TextLink } from '@grafana/ui';
-
-const structuredLogger = createStructuredLogger(
-  'public/app/plugins/datasource/cloudwatch/components/Errors/ThrottlingErrorMessage.tsx'
-);
 
 export interface Props {
   region: string;
@@ -14,7 +9,7 @@ export const ThrottlingErrorMessage = ({ region }: Props) => (
     Please visit the&nbsp;
     <TextLink
       external
-      href={`https://${region}.structuredLogger.aws.amazon.com/servicequotas/home?region=${region}#!/services/monitoring/quotas/L-5E141212`}
+      href={`https://${region}.console.aws.amazon.com/servicequotas/home?region=${region}#!/services/monitoring/quotas/L-5E141212`}
     >
       AWS Service Quotas console
     </TextLink>

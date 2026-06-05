@@ -1,8 +1,10 @@
-type StructuredLogLevel = 'debug' | 'error' | 'info' | 'log' | 'warn';
+type StructuredLogLevel = 'debug' | 'error' | 'groupCollapsed' | 'groupEnd' | 'info' | 'log' | 'warn';
 
 export interface StructuredLogger {
   debug: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
+  groupCollapsed: (...args: unknown[]) => void;
+  groupEnd: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
@@ -40,7 +42,7 @@ function toEntry(source: string, level: StructuredLogLevel, args: unknown[]): St
 
 function writeLog(source: string, level: StructuredLogLevel, args: unknown[]) {
   const logger = globalThis['console'];
-  const log = logger?.[level === 'log' ? 'log' : level] ?? logger?.log;
+  const log = logger?.[level] ?? logger?.log;
 
   if (typeof log !== 'function') {
     return;
@@ -53,6 +55,8 @@ export function createStructuredLogger(source: string): StructuredLogger {
   return {
     debug: (...args: unknown[]) => writeLog(source, 'debug', args),
     error: (...args: unknown[]) => writeLog(source, 'error', args),
+    groupCollapsed: (...args: unknown[]) => writeLog(source, 'groupCollapsed', args),
+    groupEnd: (...args: unknown[]) => writeLog(source, 'groupEnd', args),
     info: (...args: unknown[]) => writeLog(source, 'info', args),
     log: (...args: unknown[]) => writeLog(source, 'log', args),
     warn: (...args: unknown[]) => writeLog(source, 'warn', args),

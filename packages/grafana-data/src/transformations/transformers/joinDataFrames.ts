@@ -1,15 +1,10 @@
 import { getTimeField, sortDataFrame } from '../../dataframe/processDataFrame';
-import { createStructuredLogger } from '../../logging/structuredLogger';
 import { type DataFrame, type Field, FieldType, TIME_SERIES_VALUE_FIELD_NAME } from '../../types/dataFrame';
 import { type FieldMatcher } from '../../types/transformations';
 import { fieldMatchers } from '../matchers';
 import { FieldMatcherID } from '../matchers/ids';
 
 import { JoinMode } from './joinByField';
-
-const structuredLogger = createStructuredLogger(
-  'packages/grafana-data/src/transformations/transformers/joinDataFrames.ts'
-);
 
 export function pickBestJoinField(data: DataFrame[]): FieldMatcher {
   const { timeField } = getTimeField(data[0]);

@@ -2,7 +2,6 @@ import { type RefObject } from 'react';
 import uPlot, { type Cursor } from 'uplot';
 
 import {
-  createStructuredLogger,
   DataFrameType,
   formattedValueToString,
   getValueFormat,
@@ -25,8 +24,6 @@ import { pointWithin, Quadtree, type Rect } from '../barchart/quadtree';
 
 import { type HeatmapData } from './fields';
 import { type FieldConfig, HeatmapSelectionMode, type YAxisConfig } from './panelcfg.gen';
-
-const structuredLogger = createStructuredLogger('public/app/plugins/panel/heatmap/utils.ts');
 
 /** Validates and returns a safe log base (2 or 10), defaults to 2 if invalid */
 export function toLogBase(value: number | undefined): 2 | 10 {

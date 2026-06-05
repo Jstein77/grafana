@@ -32,7 +32,7 @@ export const createLogger = (name: string): Logger => {
   }
 
   return {
-    logger: (id: string, throttle = false, ...t: Args) => {
+    logger: (id, throttle = false, ...t) => {
       if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test' || !loggingEnabled) {
         return;
       }

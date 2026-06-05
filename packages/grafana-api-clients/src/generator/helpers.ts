@@ -3,9 +3,23 @@ import fs from 'fs';
 import { type OpenAPIV3 } from 'openapi-types';
 import path from 'path';
 
-import { createStructuredLogger } from '@grafana/data';
+const structuredLogger = {
+  error: (...args: unknown[]) => writeStructuredLog('error', args),
+  log: (...args: unknown[]) => writeStructuredLog('log', args),
+  warn: (...args: unknown[]) => writeStructuredLog('warn', args),
+};
 
-const structuredLogger = createStructuredLogger('packages/grafana-api-clients/src/generator/helpers.ts');
+function writeStructuredLog(level: 'error' | 'log' | 'warn', args: unknown[]) {
+  const stream = level === 'log' ? process.stdout : process.stderr;
+  stream.write(
+    JSON.stringify({
+      args,
+      level,
+      message: typeof args[0] === 'string' ? args[0] : 'Grafana API generator log event',
+      source: 'packages/grafana-api-clients/src/generator/helpers.ts',
+    }) + '\n'
+  );
+}
 
 type PlopActionFunction = (
   answers: Record<string, unknown>,

@@ -1,9 +1,3 @@
-import { createStructuredLogger } from '@grafana/data';
-
-const structuredLogger = createStructuredLogger(
-  'public/app/plugins/datasource/azuremonitor/azureMetadata/logsResourceTypes.ts'
-);
-
 /**
 This list is obtained parsing https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-categories
 To programatically get the list, execute in the browser console:
@@ -35,7 +29,7 @@ That list is not complete so we should merge it with the one below. You can do w
   const u = require('lodash')
   const newList = [list from above]
   const logsResourceTypes = [this list]
-  structuredLogger.dir(u.uniq(logsResourceTypes.concat(newList)).sort(), {'maxArrayLength': null})
+  process.stdout.write(JSON.stringify(u.uniq(logsResourceTypes.concat(newList)).sort(), null, 2))
  
  */
 
