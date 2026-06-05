@@ -1,7 +1,14 @@
 package v0alpha1
 
+import "strings"
+
+// TimeIntervalName is referenced by alert rule notification settings.
+// +k8s:validation:minLength=1
+// +k8s:validation:pattern="^.+$"
+TimeIntervalName: string & strings.MinRunes(1) & =~"^.+$"
+
 TimeIntervalSpec: {
-	name: string
+	name: TimeIntervalName
 	time_intervals: [...#Interval]
 }
 

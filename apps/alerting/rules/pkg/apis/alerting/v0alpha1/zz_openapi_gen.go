@@ -4,6 +4,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	common "k8s.io/kube-openapi/pkg/common"
 	spec "k8s.io/kube-openapi/pkg/validation/spec"
+	ptr "k8s.io/utils/ptr"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -98,6 +99,8 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleExpression(ref common.ReferenceC
 					"datasourceUID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The UID of the datasource to run this expression against. If omitted, the expression will be run against the `__expr__` datasource",
+							MinLength:   ptr.To[int64](1),
+							Pattern:     "^[a-zA-Z0-9_-]+$",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -132,9 +135,11 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleIntervalTrigger(ref common.Refer
 				Properties: map[string]spec.Schema{
 					"interval": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 				},
@@ -200,16 +205,20 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleRelativeTimeRange(ref common.Ref
 				Properties: map[string]spec.Schema{
 					"from": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"to": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 				},
@@ -227,9 +236,10 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleSpec(ref common.ReferenceCallbac
 				Properties: map[string]spec.Schema{
 					"title": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"paused": {
@@ -276,14 +286,18 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleSpec(ref common.ReferenceCallbac
 					},
 					"for": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"keepFiringFor": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"missingSeriesEvalsToResolve": {
@@ -313,7 +327,9 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleSpec(ref common.ReferenceCallbac
 					},
 					"expressions": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
+							Description:   "Expressions must contain at least one entry. Admission validation enforces exactly one expression with source=true.",
+							MinProperties: ptr.To[int64](1),
+							Type:          []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
 								Schema: &spec.Schema{
@@ -391,9 +407,10 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleV0alpha1SpecNotificationSettings
 				Properties: map[string]spec.Schema{
 					"receiver": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"groupBy": {
@@ -471,9 +488,11 @@ func schema_pkg_apis_alerting_v0alpha1_AlertRuleV0alpha1SpecPanelRef(ref common.
 				Properties: map[string]spec.Schema{
 					"dashboardUID": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^[a-zA-Z0-9_-]+$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"panelID": {
@@ -610,6 +629,8 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleExpression(ref common.Refere
 					"datasourceUID": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The UID of the datasource to run this expression against. If omitted, the expression will be run against the `__expr__` datasource",
+							MinLength:   ptr.To[int64](1),
+							Pattern:     "^[a-zA-Z0-9_-]+$",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -644,9 +665,11 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleIntervalTrigger(ref common.R
 				Properties: map[string]spec.Schema{
 					"interval": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 				},
@@ -712,16 +735,20 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleRelativeTimeRange(ref common
 				Properties: map[string]spec.Schema{
 					"from": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"to": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 				},
@@ -739,9 +766,10 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleSpec(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"title": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"paused": {
@@ -773,14 +801,18 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleSpec(ref common.ReferenceCal
 					},
 					"metric": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^[a-zA-Z_:][a-zA-Z0-9_:]*$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 					"expressions": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
+							Description:   "Expressions must contain at least one entry. Admission validation enforces exactly one expression with source=true.",
+							MinProperties: ptr.To[int64](1),
+							Type:          []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
 								Schema: &spec.Schema{
@@ -794,9 +826,11 @@ func schema_pkg_apis_alerting_v0alpha1_RecordingRuleSpec(ref common.ReferenceCal
 					},
 					"targetDatasourceUID": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default:   "",
+							MinLength: ptr.To[int64](1),
+							Pattern:   "^[a-zA-Z0-9_-]+$",
+							Type:      []string{"string"},
+							Format:    "",
 						},
 					},
 				},

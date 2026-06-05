@@ -26,6 +26,10 @@ spec:
                 additionalProperties:
                   properties:
                     datasourceUID:
+                      description: |-
+                        +k8s:validation:minLength=1
+                        +k8s:validation:pattern="^[a-zA-Z0-9_-]+$"
+                      minLength: 1
                       type: string
                     model:
                       type: object
@@ -36,8 +40,14 @@ spec:
                     relativeTimeRange:
                       properties:
                         from:
+                          description: |-
+                            +k8s:validation:minLength=1
+                            +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$"
                           type: string
                         to:
+                          description: |-
+                            +k8s:validation:minLength=1
+                            +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$"
                           type: string
                       required:
                       - from
@@ -54,12 +64,18 @@ spec:
                   - model
                   type: object
                 description: |-
-                  TODO: validate that only one can specify source=true
-                  & struct.MinFields(1) This doesn't work in Cue <v0.12.0 as per
+                  Expressions must contain at least one entry. Admission validation enforces exactly one expression with source=true.
+                  +k8s:validation:minProperties=1
                 type: object
               for:
+                description: |-
+                  +k8s:validation:minLength=1
+                  +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                 type: string
               keepFiringFor:
+                description: |-
+                  +k8s:validation:minLength=1
+                  +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                 type: string
               labels:
                 additionalProperties:
@@ -75,8 +91,11 @@ spec:
                 properties:
                   activeTimeIntervals:
                     items:
-                      description: 'TODO(@moustafab): validate regex for time interval
-                        ref'
+                      description: |-
+                        TimeIntervalRef matches the non-empty TimeIntervalSpec.name validation from the notifications app.
+                        +k8s:validation:minLength=1
+                        +k8s:validation:pattern="^.+$"
+                      minLength: 1
                       type: string
                     type: array
                   groupBy:
@@ -84,18 +103,32 @@ spec:
                       type: string
                     type: array
                   groupInterval:
+                    description: |-
+                      +k8s:validation:minLength=1
+                      +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                     type: string
                   groupWait:
+                    description: |-
+                      +k8s:validation:minLength=1
+                      +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                     type: string
                   muteTimeIntervals:
                     items:
-                      description: 'TODO(@moustafab): validate regex for time interval
-                        ref'
+                      description: |-
+                        TimeIntervalRef matches the non-empty TimeIntervalSpec.name validation from the notifications app.
+                        +k8s:validation:minLength=1
+                        +k8s:validation:pattern="^.+$"
+                      minLength: 1
                       type: string
                     type: array
                   receiver:
+                    description: +k8s:validation:minLength=1
+                    minLength: 1
                     type: string
                   repeatInterval:
+                    description: |-
+                      +k8s:validation:minLength=1
+                      +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                     type: string
                 required:
                 - receiver
@@ -103,6 +136,9 @@ spec:
               panelRef:
                 properties:
                   dashboardUID:
+                    description: |-
+                      +k8s:validation:minLength=1
+                      +k8s:validation:pattern="^[a-zA-Z0-9_-]+$"
                     minLength: 1
                     type: string
                   panelID:
@@ -116,10 +152,15 @@ spec:
               paused:
                 type: boolean
               title:
+                description: +k8s:validation:minLength=1
+                minLength: 1
                 type: string
               trigger:
                 properties:
                   interval:
+                    description: |-
+                      +k8s:validation:minLength=1
+                      +k8s:validation:pattern="^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?|0)$"
                     type: string
                 required:
                 - interval

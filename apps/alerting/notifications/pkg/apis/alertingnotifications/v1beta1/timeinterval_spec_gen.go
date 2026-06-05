@@ -2,6 +2,12 @@
 
 package v1beta1
 
+// TimeIntervalName is referenced by notification policy and alert rule settings.
+// +k8s:validation:minLength=1
+// +k8s:validation:pattern="^.+$"
+// +k8s:openapi-gen=true
+type TimeIntervalTimeIntervalName string
+
 // +k8s:openapi-gen=true
 type TimeIntervalInterval struct {
 	Times       []TimeIntervalTimeRange `json:"times,omitempty"`
@@ -40,8 +46,8 @@ func (TimeIntervalTimeRange) OpenAPIModelName() string {
 
 // +k8s:openapi-gen=true
 type TimeIntervalSpec struct {
-	Name          string                 `json:"name"`
-	TimeIntervals []TimeIntervalInterval `json:"time_intervals"`
+	Name          TimeIntervalTimeIntervalName `json:"name"`
+	TimeIntervals []TimeIntervalInterval       `json:"time_intervals"`
 }
 
 // NewTimeIntervalSpec creates a new TimeIntervalSpec object.
