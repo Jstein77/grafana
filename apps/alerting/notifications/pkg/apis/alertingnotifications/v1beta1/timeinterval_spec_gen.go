@@ -2,7 +2,7 @@
 
 package v1beta1
 
-// TimeIntervalName is referenced by notification policy and alert rule settings.
+// #TimeIntervalName is referenced by notification policy and alert rule settings.
 // +k8s:validation:minLength=1
 // +k8s:validation:pattern="^.+$"
 // +k8s:openapi-gen=true
