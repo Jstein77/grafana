@@ -1,6 +1,7 @@
 import { map } from 'rxjs';
 
 import {
+  createStructuredLogger,
   type DataFrame,
   DataTransformerID,
   FieldType,
@@ -26,6 +27,8 @@ import {
 } from '@grafana/schema';
 
 import { convertDurationToMilliseconds, niceLinearIncrs, niceTimeIncrs } from './utils';
+
+const structuredLogger = createStructuredLogger('public/app/features/transformers/calculateHeatmap/heatmap.ts');
 
 export interface HeatmapTransformerOptions extends HeatmapCalculationOptions {
   /** the raw values will still exist in results after transformation */
@@ -592,7 +595,7 @@ function heatmap(xs: number[], ys: number[], opts?: HeatmapOpts) {
     yBinIncr = yIncrs[Math.max(yIncrIdx, 0)];
   }
 
-  // console.log({
+  // structuredLogger.log({
   //   yBinIncr,
   //   xBinIncr,
   // });

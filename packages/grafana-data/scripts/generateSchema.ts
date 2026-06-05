@@ -2,7 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { createStructuredLogger } from '@grafana/data';
+
 import { NewThemeOptionsSchema } from '../src/themes/createTheme';
+
+const structuredLogger = createStructuredLogger('packages/grafana-data/scripts/generateSchema.ts');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,4 +23,4 @@ fs.writeFileSync(
   )
 );
 
-console.log('Successfully generated theme schema');
+structuredLogger.log('Successfully generated theme schema');
