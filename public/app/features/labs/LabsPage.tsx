@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { ChangeEvent, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 
 import { GrafanaTheme2, store } from '@grafana/data';
 import { t } from '@grafana/i18n';
@@ -79,7 +79,7 @@ export default function LabsPage() {
       .filter((featureName) => featureName.toLowerCase().includes(searchValue));
   }, [featureToggles, search]);
 
-  const onToggleChange = (featureName: string, event: ChangeEvent<HTMLInputElement>) => {
+  const onToggleChange = (featureName: string, event: FormEvent<HTMLInputElement>) => {
     if (!canWriteFeatureFlags || !isSafeRuntimeFeatureFlag(featureName)) {
       return;
     }
