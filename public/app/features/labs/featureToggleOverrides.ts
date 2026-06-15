@@ -4,6 +4,8 @@ export const FEATURE_TOGGLE_STORAGE_KEY = 'grafana.featureToggles';
 
 export type FeatureToggleOverrides = Record<string, boolean>;
 
+const featureToggleNameCollator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
 export function parseFeatureToggleOverrides(value: string | undefined): FeatureToggleOverrides {
   const overrides: FeatureToggleOverrides = {};
 
@@ -27,7 +29,7 @@ export function parseFeatureToggleOverrides(value: string | undefined): FeatureT
 
 export function serializeFeatureToggleOverrides(overrides: FeatureToggleOverrides): string {
   return Object.entries(overrides)
-    .sort(([first], [second]) => first.localeCompare(second))
+    .sort(([first], [second]) => featureToggleNameCollator.compare(first, second))
     .map(([name, enabled]) => `${name}=${enabled ? '1' : '0'}`)
     .join(',');
 }

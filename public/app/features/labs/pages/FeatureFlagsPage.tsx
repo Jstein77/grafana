@@ -23,6 +23,7 @@ interface FeatureFlagRow {
 }
 
 const FEATURE_FLAG_NAME_PATTERN = /^[A-Za-z0-9_.-]+$/;
+const featureToggleNameCollator = new Intl.Collator(undefined, { sensitivity: 'base' });
 
 export default function FeatureFlagsPage() {
   const styles = useStyles2(getStyles);
@@ -50,7 +51,7 @@ export default function FeatureFlagsPage() {
         };
       })
       .filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
-      .sort((first, second) => first.name.localeCompare(second.name));
+      .sort((first, second) => featureToggleNameCollator.compare(first.name, second.name));
   }, [overrides, query]);
 
   const enabledCount = rows.filter((row) => row.enabled).length;
@@ -138,6 +139,7 @@ export default function FeatureFlagsPage() {
               )}
               invalid={newFlagName.length > 0 && !isValidFeatureFlagName(newFlagName.trim())}
               error={t('labs.feature-flags.add-override-error', 'Use letters, numbers, underscore, dash, or dot.')}
+              noMargin
             >
               <Input
                 value={newFlagName}
