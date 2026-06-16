@@ -1,28 +1,29 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { AppEvents } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
 import { getAppEvents, reportInteraction } from '@grafana/runtime';
-import { Box, Button, Stack } from '@grafana/ui';
-import { Job, RepositoryView } from 'app/api/clients/provisioning/v0alpha1';
-import { DescendantCount } from 'app/features/browse-dashboards/components/BrowseActions/DescendantCount';
+import { Button, Stack } from '@grafana/ui';
+import { type Job, type RepositoryView } from 'app/api/clients/provisioning/v0alpha1';
+import { AffectedFolderContents } from 'app/features/browse-dashboards/components/BrowseActions/AffectedFolderContents';
+import { getSelectedFolderUIDs } from 'app/features/browse-dashboards/components/BrowseActions/utils';
 import { collectSelectedItems } from 'app/features/browse-dashboards/utils/dashboards';
 import { JobStatus } from 'app/features/provisioning/Job/JobStatus';
 import { useGetResourceRepositoryView } from 'app/features/provisioning/hooks/useGetResourceRepositoryView';
-import { GENERAL_FOLDER_UID } from 'app/features/search/constants';
+import { isRootFolderUID } from 'app/features/search/constants';
 
 import { ProvisioningAlert } from '../../Shared/ProvisioningAlert';
-import { StepStatusInfo } from '../../Wizard/types';
+import { type StepStatusInfo } from '../../Wizard/types';
 import { useSelectionRepoValidation } from '../../hooks/useSelectionRepoValidation';
-import { StatusInfo } from '../../types';
+import { type StatusInfo } from '../../types';
 import { RepoInvalidStateBanner } from '../Shared/RepoInvalidStateBanner';
 import { ResourceEditFormSharedFields } from '../Shared/ResourceEditFormSharedFields';
 import { getCanPushToConfiguredBranch, getDefaultWorkflow } from '../defaults';
 import { generateTimestamp } from '../utils/timestamp';
 
-import { DeleteJobSpec, useBulkActionJob } from './useBulkActionJob';
-import { BulkActionFormData, BulkActionProvisionResourceProps } from './utils';
+import { type DeleteJobSpec, useBulkActionJob } from './useBulkActionJob';
+import { type BulkActionFormData, type BulkActionProvisionResourceProps } from './utils';
 
 interface FormProps extends BulkActionProvisionResourceProps {
   initialValues: BulkActionFormData;
@@ -57,7 +58,11 @@ function FormContent({ initialValues, selectedItems, repository, canPushToConfig
       dashboardCount,
     });
 
-    // Create the delete job spec
+    // Create the delete job spec.
+    // TODO(grafana/git-ui-sync-project#1162): DeleteJobOptions has no
+    // `message` field on the backend yet — once it gains one, pass
+    // `withSavedByTrailer(<default or data.comment>)` so the
+    // Grafana-saved-by trailer rides through to the resulting git commit.
     const jobSpec: DeleteJobSpec = {
       action: 'delete',
       delete: {
@@ -103,12 +108,24 @@ function FormContent({ initialValues, selectedItems, repository, canPushToConfig
             </>
           ) : (
             <>
-              <Box paddingBottom={2}>
-                <Trans i18nKey="browse-dashboards.bulk-delete-resources-form.delete-warning">
-                  This will delete selected folders and their descendants. In total, this will affect:
-                </Trans>
-                <DescendantCount selectedItems={{ ...selectedItems, panel: {}, $all: false }} />
-              </Box>
+              <AffectedFolderContents
+                selectedItems={selectedItems}
+                defaultMessage={
+                  <Trans i18nKey="browse-dashboards.bulk-delete-resources-form.delete-warning">
+                    This will delete selected folders and their descendants.
+                  </Trans>
+                }
+                emptyMessage={t('browse-dashboards.bulk-delete-resources-form.folder-empty', '', {
+                  count: getSelectedFolderUIDs(selectedItems).length,
+                  defaultValue_one: 'Selected folder is empty',
+                  defaultValue_other: 'Selected folders are empty',
+                })}
+                nonEmptyMessage={t('browse-dashboards.bulk-delete-resources-form.folder-not-empty', '', {
+                  count: getSelectedFolderUIDs(selectedItems).length,
+                  defaultValue_one: 'Selected folder contains other resources that will be deleted',
+                  defaultValue_other: 'Selected folders contain other resources that will be deleted',
+                })}
+              />
               <ResourceEditFormSharedFields
                 resourceType="folder"
                 isNew={false}
@@ -140,12 +157,18 @@ export function BulkDeleteProvisionedResource({
   onDismiss,
 }: BulkActionProvisionResourceProps) {
   // Check if we're on the root browser dashboards page
-  const isRootPage = !folderUid || folderUid === GENERAL_FOLDER_UID;
+  const isRootPage = isRootFolderUID(folderUid);
   const { selectedItemsRepoUID } = useSelectionRepoValidation(selectedItems);
+
+  // Capture the repo UID so it survives selection state changes during/after job execution
+  const resolvedRepoUID = useRef(selectedItemsRepoUID);
+  if (selectedItemsRepoUID) {
+    resolvedRepoUID.current = selectedItemsRepoUID;
+  }
 
   // For root provisioned folders, the folder UID is the repository name
   const { repository, isReadOnlyRepo } = useGetResourceRepositoryView({
-    folderName: isRootPage ? selectedItemsRepoUID : folderUid,
+    folderName: isRootPage ? resolvedRepoUID.current : folderUid,
   });
   const canPushToConfiguredBranch = getCanPushToConfiguredBranch(repository);
   const timestamp = generateTimestamp();

@@ -2,27 +2,20 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
-  RepositoryView,
+  type RepositoryView,
   useCreateRepositoryJobsMutation,
   useDeleteRepositoryFilesWithPathMutation,
 } from 'app/api/clients/provisioning/v0alpha1';
-import { FolderDTO } from 'app/types/folders';
+import { type FolderDTO } from 'app/types/folders';
 
 import {
-  ProvisionedFolderFormDataResult,
+  type ProvisionedFolderFormDataResult,
   useProvisionedFolderFormData,
 } from '../../hooks/useProvisionedFolderFormData';
 
 import { DeleteProvisionedFolderForm } from './DeleteProvisionedFolderForm';
 
 // Mock dependencies
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual('@grafana/runtime'),
-  getAppEvents: jest.fn(() => ({
-    publish: jest.fn(),
-  })),
-}));
-
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom-v5-compat', () => ({
   useNavigate: () => mockNavigate,
@@ -57,8 +50,10 @@ jest.mock('app/api/clients/provisioning/v0alpha1', () => ({
 
 jest.mock('../../hooks/useProvisionedFolderFormData');
 
-jest.mock('app/features/browse-dashboards/components/BrowseActions/DescendantCount', () => ({
-  DescendantCount: () => <div data-testid="descendant-count">2 folders, 5 dashboards</div>,
+jest.mock('app/features/browse-dashboards/components/BrowseActions/AffectedFolderContents', () => ({
+  AffectedFolderContents: jest.fn(({ defaultMessage }) => (
+    <div data-testid="affected-folder-contents">{defaultMessage}</div>
+  )),
 }));
 
 jest.mock('../Shared/ResourceEditFormSharedFields', () => ({
@@ -216,7 +211,7 @@ describe('DeleteProvisionedFolderForm', () => {
       setup();
       // delete warning and descendant count
       expect(screen.getByText(/This will delete this folder and all its descendants/)).toBeInTheDocument();
-      expect(screen.getByTestId('descendant-count')).toBeInTheDocument();
+      expect(screen.getByTestId('affected-folder-contents')).toBeInTheDocument();
 
       // delete and cancel buttons
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
@@ -271,10 +266,32 @@ describe('DeleteProvisionedFolderForm', () => {
       await waitFor(() => {
         expect(mockDeleteRepoFile).toHaveBeenCalledWith({
           name: 'test-repo',
-          path: 'folders/test-folder.json/',
+          path: 'folders/test-folder.json',
           ref: 'main', // branch workflow sets ref
           message: 'Custom delete message',
         });
+      });
+    });
+
+    it('renders the message from the repo commit template when comment is empty', async () => {
+      const { mockDeleteRepoFile, clickDeleteButton } = setup(
+        {},
+        {
+          ...defaultHookData,
+          repository: {
+            ...defaultHookData.repository!,
+            commit: { singleResourceMessageTemplate: 'chore({{resourceKind}}s): {{action}} {{title}}' },
+          },
+          initialValues: { ...mockFormData, workflow: 'branch' as const, comment: '' },
+        }
+      );
+
+      await clickDeleteButton();
+
+      await waitFor(() => {
+        expect(mockDeleteRepoFile).toHaveBeenCalledWith(
+          expect.objectContaining({ message: 'chore(folders): delete Test Folder' })
+        );
       });
     });
 
@@ -341,6 +358,7 @@ describe('DeleteProvisionedFolderForm', () => {
         const expectedParams = new URLSearchParams();
         expectedParams.set('new_pull_request_url', 'https://github.com/test/repo/pull/new');
         expectedParams.set('repo_type', 'git');
+        expectedParams.set('action', 'delete');
         const expectedUrl = `/dashboards?${expectedParams.toString()}`;
 
         expect(mockNavigate).toHaveBeenCalledWith(expectedUrl);

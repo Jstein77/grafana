@@ -5,7 +5,7 @@ import {
   useGetStarsQuery as useLegacyGetStarsQuery,
   useStarDashboardByUidMutation as useLegacyStarDashboardMutation,
   useUnstarDashboardByUidMutation as useLegacyUnstarDashboardMutation,
-} from '@grafana/api-clients/rtkq/legacy/user';
+} from '@grafana/api-clients/internal/rtkq/legacy/user';
 import { locationUtil } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { useAddStarMutation, useRemoveStarMutation, useListStarsQuery } from 'app/api/clients/collections/v1alpha1';
@@ -105,7 +105,7 @@ export const useStarredItems = (group: string, kind: string) => {
 /**
  * Hook to update the nav menu with starred items
  */
-export const useUpdateNavStarredItems = () => {
+const useUpdateNavStarredItems = () => {
   return ({ id, title }: { id: string; title: string }, isStarred: boolean) => {
     const url = locationUtil.assureBaseUrl(`/d/${id}`);
     return dispatch(setStarred({ id, title, url, isStarred }));

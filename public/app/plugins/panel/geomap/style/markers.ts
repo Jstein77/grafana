@@ -2,11 +2,11 @@ import { Fill, RegularShape, Stroke, Circle, Style, Icon, Text } from 'ol/style'
 import type { FlatStyle } from 'ol/style/flat';
 import tinycolor from 'tinycolor2';
 
-import { Registry, RegistryItem, textUtil } from '@grafana/data';
+import { Registry, type RegistryItem, textUtil } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { getPublicOrAbsoluteUrl } from 'app/features/dimensions/resource';
 
-import { defaultStyleConfig, DEFAULT_SIZE, StyleConfigValues, StyleMaker } from './types';
+import { defaultStyleConfig, DEFAULT_SIZE, type StyleConfigValues, type StyleMaker } from './types';
 import { getDisplacement } from './utils';
 
 interface SymbolMaker extends RegistryItem {
@@ -32,7 +32,7 @@ const MarkerShapePath = {
   x: 'img/icons/marker/x-mark.svg',
 };
 
-export function getFillColor(cfg: StyleConfigValues) {
+function getFillColor(cfg: StyleConfigValues) {
   const opacity = cfg.opacity == null ? 0.8 : cfg.opacity;
   if (opacity === 1) {
     return new Fill({ color: cfg.color });
@@ -44,7 +44,7 @@ export function getFillColor(cfg: StyleConfigValues) {
   return undefined;
 }
 
-export function getStrokeStyle(cfg: StyleConfigValues) {
+function getStrokeStyle(cfg: StyleConfigValues) {
   const opacity = cfg.opacity == null ? 0.8 : cfg.opacity;
   if (opacity === 1) {
     return new Stroke({ color: cfg.color, width: cfg.lineWidth ?? 1 });
@@ -314,7 +314,7 @@ export function getMarkerAsPath(shape?: string): string | undefined {
 }
 
 // Common expressions used across different style types
-export const colorExpression = ['color', ['get', 'red'], ['get', 'green'], ['get', 'blue'], ['get', 'opacity']];
+const colorExpression = ['color', ['get', 'red'], ['get', 'green'], ['get', 'blue'], ['get', 'opacity']];
 export const sizeExpression = ['get', 'size'];
 export const opacityExpression = ['get', 'opacity'];
 export const rotationExpression = ['get', 'rotation'];

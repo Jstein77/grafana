@@ -1,16 +1,20 @@
 package resourcepermissions
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/open-feature/go-sdk/openfeature"
 	"go.opentelemetry.io/otel"
 
+	iamv0 "github.com/grafana/grafana/apps/iam/pkg/apis/iam/v0alpha1"
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/api/routing"
+	grafanarest "github.com/grafana/grafana/pkg/apiserver/rest"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -26,6 +30,8 @@ import (
 
 var tracer = otel.Tracer("github.com/grafana/grafana/pkg/accesscontrol/resourcepermissions")
 
+var ofClient = openfeature.NewDefaultClient()
+
 type api struct {
 	cfg                *setting.Cfg
 	ac                 accesscontrol.AccessControl
@@ -33,11 +39,11 @@ type api struct {
 	service            *Service
 	permissions        []string
 	features           featuremgmt.FeatureToggles
-	restConfigProvider apiserver.RestConfigProvider
+	restConfigProvider apiserver.DirectRestConfigProvider
 	logger             log.Logger
 }
 
-func newApi(cfg *setting.Cfg, ac accesscontrol.AccessControl, router routing.RouteRegister, manager *Service, features featuremgmt.FeatureToggles, restConfigProvider apiserver.RestConfigProvider) *api {
+func newApi(cfg *setting.Cfg, ac accesscontrol.AccessControl, router routing.RouteRegister, manager *Service, features featuremgmt.FeatureToggles, restConfigProvider apiserver.DirectRestConfigProvider) *api {
 	permissions := make([]string, 0, len(manager.permissions))
 	// reverse the permissions order for display
 	for i := len(manager.permissions) - 1; i >= 0; i-- {
@@ -56,15 +62,14 @@ func newApi(cfg *setting.Cfg, ac accesscontrol.AccessControl, router routing.Rou
 }
 
 // shouldUseK8sAPIs returns true if both feature flags for K8s API redirect are enabled
-func (a *api) shouldUseK8sAPIs() bool {
-	//nolint:staticcheck // not yet migrated to OpenFeature
-	return a.features.IsEnabledGlobally(featuremgmt.FlagKubernetesAuthZResourcePermissionsRedirect) &&
-		a.features.IsEnabledGlobally(featuremgmt.FlagKubernetesAuthzResourcePermissionApis)
+func (a *api) shouldUseK8sAPIs(ctx context.Context) bool {
+	return ofClient.Boolean(ctx, featuremgmt.FlagKubernetesAuthZResourcePermissionsRedirect, false, openfeature.TransactionContext(ctx)) &&
+		ofClient.Boolean(ctx, featuremgmt.FlagKubernetesAuthzResourcePermissionApis, false, openfeature.TransactionContext(ctx))
 }
 
 // getFallbackStatus returns "fallback" if K8s redirect is enabled, "success" otherwise
-func (a *api) getFallbackStatus() string {
-	if a.shouldUseK8sAPIs() {
+func (a *api) getFallbackStatus(ctx context.Context) string {
+	if a.shouldUseK8sAPIs(ctx) {
 		return "fallback"
 	}
 	return "success"
@@ -87,10 +92,11 @@ func (a *api) registerEndpoints() {
 			}
 
 			gotParams := web.Params(c.Req)
-			resourceID := gotParams[":resourceID"]
-			resourceID, err := resTranslator(c.Req.Context(), c.OrgID, resourceID)
+			resourceUID := gotParams[":resourceID"]
+			translatedID, err := resTranslator(c.Req.Context(), c.OrgID, resourceUID)
 			if err == nil {
-				gotParams[":resourceID"] = resourceID
+				gotParams[":resourceUID"] = resourceUID // preserve original UID for the K8s adapter
+				gotParams[":resourceID"] = translatedID // overwrite with numeric ID for auth middleware
 				web.SetURLParams(c.Req, gotParams)
 			} else {
 				c.JsonApiErr(http.StatusNotFound, "Not found", nil)
@@ -99,9 +105,9 @@ func (a *api) registerEndpoints() {
 	}(a.service.options.ResourceTranslator)
 
 	a.router.Group(fmt.Sprintf("/api/access-control/%s", a.service.options.Resource), func(r routing.RouteRegister) {
-		actionRead := fmt.Sprintf("%s.permissions:read", a.service.options.Resource)
-		actionWrite := fmt.Sprintf("%s.permissions:write", a.service.options.Resource)
-		scope := accesscontrol.Scope(a.service.options.Resource, a.service.options.ResourceAttribute, accesscontrol.Parameter(":resourceID"))
+		actionRead := a.service.options.GetAction("read")
+		actionWrite := a.service.options.GetAction("write")
+		scope := a.service.options.GetScope(a.service.options.ResourceAttribute, accesscontrol.Parameter(":resourceID"))
 		r.Get("/description", auth(accesscontrol.EvalPermission(actionRead)), routing.Wrap(a.getDescription))
 		r.Get("/:resourceID", resourceResolver, auth(accesscontrol.EvalPermission(actionRead, scope)), routing.Wrap(a.getPermissions))
 		r.Post("/:resourceID", resourceResolver, licenseMW, auth(accesscontrol.EvalPermission(actionWrite, scope)), routing.Wrap(a.setPermissions))
@@ -207,10 +213,31 @@ func (a *api) getPermissions(c *contextmodel.ReqContext) response.Response {
 
 	resourceID := web.Params(c.Req)[":resourceID"]
 
-	//nolint:staticcheck // not yet migrated to OpenFeature
-	if a.features.IsEnabledGlobally(featuremgmt.FlagKubernetesAuthZResourcePermissionsRedirect) &&
-		a.features.IsEnabledGlobally(featuremgmt.FlagKubernetesAuthzResourcePermissionApis) {
-		k8sPermissions, err := a.getResourcePermissionsFromK8s(c.Req.Context(), c.Namespace, resourceID)
+	if a.service.options.RequestValidator != nil {
+		if _, err := a.service.options.RequestValidator(c.Req, c.GetOrgID(), resourceID); err != nil {
+			return response.Err(err)
+		}
+	}
+
+	// Teams-specific redirect: read team permissions from Team.Spec.Members instead of
+	// the generic resource permissions API. Falls back to legacy on failure.
+	if a.service.options.Resource == "teams" && ofClient.Boolean(ctx, featuremgmt.FlagKubernetesTeamsRedirect, false, openfeature.TransactionContext(ctx)) {
+		teamPermissions, err := a.getTeamPermissionsFromMembers(c, c.Namespace, resourceID)
+		if err != nil {
+			span.RecordError(err)
+			if errors.Is(err, ErrRestConfigNotAvailable) {
+				a.logger.Debug("k8s API not available for team permissions via team members, falling back to legacy", "error", err, "resourceID", resourceID)
+			} else {
+				a.logger.Warn("Failed to get team permissions from team members k8s API, falling back to legacy", "error", err, "resourceID", resourceID)
+			}
+		} else {
+			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "get", a.service.options.Resource, "success").Inc()
+			return response.JSON(http.StatusOK, teamPermissions)
+		}
+	}
+
+	if a.service.options.Resource != "teams" && a.shouldUseK8sAPIs(ctx) {
+		k8sPermissions, err := a.getResourcePermissionsFromK8s(c, c.Namespace, resourceID)
 		if err == nil {
 			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "get", a.service.options.Resource, "success").Inc()
 			return response.JSON(http.StatusOK, k8sPermissions)
@@ -223,7 +250,7 @@ func (a *api) getPermissions(c *contextmodel.ReqContext) response.Response {
 		}
 	}
 
-	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "get", a.service.options.Resource, a.getFallbackStatus()).Inc()
+	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "get", a.service.options.Resource, a.getFallbackStatus(ctx)).Inc()
 	permissions, err := a.service.GetPermissions(c.Req.Context(), c.SignedInUser, resourceID)
 	if err != nil {
 		return response.ErrOrFallback(http.StatusInternalServerError, "Failed to get permissions", err)
@@ -321,6 +348,16 @@ func (a *api) setUserPermission(c *contextmodel.ReqContext) response.Response {
 	}
 	resourceID := web.Params(c.Req)[":resourceID"]
 
+	if a.service.options.RequestValidator != nil {
+		enrichedCtx, err := a.service.options.RequestValidator(c.Req, c.GetOrgID(), resourceID)
+		if err != nil {
+			return response.Err(err)
+		}
+		if enrichedCtx != nil {
+			c.Req = c.Req.WithContext(enrichedCtx)
+		}
+	}
+
 	resp := a.validateTeamResource(c, resourceID)
 	if resp != nil {
 		return resp
@@ -331,8 +368,32 @@ func (a *api) setUserPermission(c *contextmodel.ReqContext) response.Response {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
 
-	if a.shouldUseK8sAPIs() {
-		err := a.setUserPermissionToK8s(c.Req.Context(), c.Namespace, resourceID, userID, cmd.Permission)
+	// Teams-specific redirect: write the membership to Team.Spec.Members via the K8s API.
+	if a.service.options.Resource == "teams" && ofClient.Boolean(ctx, featuremgmt.FlagKubernetesTeamsRedirect, false, openfeature.TransactionContext(ctx)) {
+		err := a.setUserPermissionInTeamMembers(c, c.Namespace, resourceID, userID, cmd.Permission)
+		if errors.Is(err, ErrExternalTeamMember) {
+			return response.Err(err)
+		}
+		if err != nil {
+			span.RecordError(err)
+			a.logger.Warn("Failed to set user permission via team members k8s API", "error", err, "resourceID", resourceID)
+		} else {
+			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "set_user", a.service.options.Resource, "success").Inc()
+		}
+
+		// In Mode4/5 unified storage is authoritative: return the K8s result and do not fall
+		// back to legacy (which would fail for identities that exist only in unified storage).
+		// In Mode0-3 we dual-write, so continue to the legacy path below.
+		if a.cfg.UnifiedStorageConfig(iamv0.TeamResourceInfo.GroupResource().String()).DualWriterMode > grafanarest.Mode3 {
+			if err != nil {
+				return response.Err(err)
+			}
+			return permissionSetResponse(cmd)
+		}
+	}
+
+	if a.service.options.Resource != "teams" && a.shouldUseK8sAPIs(ctx) {
+		err := a.setUserPermissionToK8s(c, c.Namespace, resourceID, userID, cmd.Permission)
 		if err == nil {
 			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "set_user", a.service.options.Resource, "success").Inc()
 			return permissionSetResponse(cmd)
@@ -345,7 +406,7 @@ func (a *api) setUserPermission(c *contextmodel.ReqContext) response.Response {
 		}
 	}
 
-	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_user", a.service.options.Resource, a.getFallbackStatus()).Inc()
+	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_user", a.service.options.Resource, a.getFallbackStatus(ctx)).Inc()
 	_, err = a.service.SetUserPermission(c.Req.Context(), c.GetOrgID(), accesscontrol.User{ID: userID}, resourceID, cmd.Permission)
 	if err != nil {
 		return response.Err(err)
@@ -398,13 +459,23 @@ func (a *api) setTeamPermission(c *contextmodel.ReqContext) response.Response {
 	}
 	resourceID := web.Params(c.Req)[":resourceID"]
 
+	if a.service.options.RequestValidator != nil {
+		enrichedCtx, err := a.service.options.RequestValidator(c.Req, c.GetOrgID(), resourceID)
+		if err != nil {
+			return response.Err(err)
+		}
+		if enrichedCtx != nil {
+			c.Req = c.Req.WithContext(enrichedCtx)
+		}
+	}
+
 	var cmd setPermissionCommand
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
 
-	if a.shouldUseK8sAPIs() {
-		err := a.setTeamPermissionToK8s(c.Req.Context(), c.Namespace, resourceID, teamID, cmd.Permission)
+	if a.shouldUseK8sAPIs(ctx) {
+		err := a.setTeamPermissionToK8s(c, c.Namespace, resourceID, teamID, cmd.Permission)
 		if err == nil {
 			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "set_team", a.service.options.Resource, "success").Inc()
 			return permissionSetResponse(cmd)
@@ -417,7 +488,7 @@ func (a *api) setTeamPermission(c *contextmodel.ReqContext) response.Response {
 		}
 	}
 
-	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_team", a.service.options.Resource, a.getFallbackStatus()).Inc()
+	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_team", a.service.options.Resource, a.getFallbackStatus(ctx)).Inc()
 	_, err = a.service.SetTeamPermission(c.Req.Context(), c.GetOrgID(), teamID, resourceID, cmd.Permission)
 	if err != nil {
 		return response.Err(err)
@@ -467,13 +538,23 @@ func (a *api) setBuiltinRolePermission(c *contextmodel.ReqContext) response.Resp
 	builtInRole := web.Params(c.Req)[":builtInRole"]
 	resourceID := web.Params(c.Req)[":resourceID"]
 
+	if a.service.options.RequestValidator != nil {
+		enrichedCtx, err := a.service.options.RequestValidator(c.Req, c.GetOrgID(), resourceID)
+		if err != nil {
+			return response.Err(err)
+		}
+		if enrichedCtx != nil {
+			c.Req = c.Req.WithContext(enrichedCtx)
+		}
+	}
+
 	cmd := setPermissionCommand{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "bad request data", err)
 	}
 
-	if a.shouldUseK8sAPIs() {
-		err := a.setBuiltInRolePermissionToK8s(c.Req.Context(), c.Namespace, resourceID, builtInRole, cmd.Permission)
+	if a.shouldUseK8sAPIs(ctx) {
+		err := a.setBuiltInRolePermissionToK8s(c, c.Namespace, resourceID, builtInRole, cmd.Permission)
 		if err == nil {
 			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "set_builtin_role", a.service.options.Resource, "success").Inc()
 			return permissionSetResponse(cmd)
@@ -484,7 +565,7 @@ func (a *api) setBuiltinRolePermission(c *contextmodel.ReqContext) response.Resp
 		}
 	}
 
-	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_builtin_role", a.service.options.Resource, a.getFallbackStatus()).Inc()
+	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_builtin_role", a.service.options.Resource, a.getFallbackStatus(ctx)).Inc()
 	_, err := a.service.SetBuiltInRolePermission(c.Req.Context(), c.GetOrgID(), builtInRole, resourceID, cmd.Permission)
 	if err != nil {
 		return response.Err(err)
@@ -525,16 +606,27 @@ type SetResourcePermissionsParams struct {
 func (a *api) setPermissions(c *contextmodel.ReqContext) response.Response {
 	ctx, span := tracer.Start(c.Req.Context(), "accesscontrol.resourcepermissions.setPermissions")
 	defer span.End()
+	c.Req = c.Req.WithContext(ctx)
 
 	resourceID := web.Params(c.Req)[":resourceID"]
+
+	if a.service.options.RequestValidator != nil {
+		enrichedCtx, err := a.service.options.RequestValidator(c.Req, c.GetOrgID(), resourceID)
+		if err != nil {
+			return response.Err(err)
+		}
+		if enrichedCtx != nil {
+			c.Req = c.Req.WithContext(enrichedCtx)
+		}
+	}
 
 	cmd := setPermissionsCommand{}
 	if err := web.Bind(c.Req, &cmd); err != nil {
 		return response.Error(http.StatusBadRequest, "Bad request data: "+err.Error(), err)
 	}
 
-	if a.shouldUseK8sAPIs() {
-		err := a.setResourcePermissionsToK8s(c.Req.Context(), c.Namespace, resourceID, cmd.Permissions)
+	if a.shouldUseK8sAPIs(ctx) {
+		err := a.setResourcePermissionsToK8s(c, c.Namespace, resourceID, cmd.Permissions)
 		if err == nil {
 			metrics.MAccessResourcePermissionsBackend.WithLabelValues("k8s", "set_bulk", a.service.options.Resource, "success").Inc()
 			return response.Success("Permissions updated")
@@ -545,8 +637,8 @@ func (a *api) setPermissions(c *contextmodel.ReqContext) response.Response {
 		}
 	}
 
-	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_bulk", a.service.options.Resource, a.getFallbackStatus()).Inc()
-	_, err := a.service.SetPermissions(ctx, c.GetOrgID(), resourceID, cmd.Permissions...)
+	metrics.MAccessResourcePermissionsBackend.WithLabelValues("legacy", "set_bulk", a.service.options.Resource, a.getFallbackStatus(ctx)).Inc()
+	_, err := a.service.SetPermissions(c.Req.Context(), c.GetOrgID(), resourceID, cmd.Permissions...)
 	if err != nil {
 		return response.Err(err)
 	}

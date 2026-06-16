@@ -1,5 +1,5 @@
 import { Chance } from 'chance';
-import { HttpResponse, http } from 'msw';
+import { HttpResponse, http, type HttpResponseResolver } from 'msw';
 
 import type {
   DescendantCounts,
@@ -311,6 +311,27 @@ const getFolderListHandler = () =>
 
     return HttpResponse.json(response);
   });
+
+export const customCreateFolderHandler = (resolver: HttpResponseResolver) =>
+  http.post('/apis/folder.grafana.app/v1beta1/namespaces/:namespace/folders', resolver);
+
+const customFolderCountsHandler = (resolver: HttpResponseResolver) =>
+  http.get('/apis/folder.grafana.app/:version/namespaces/:namespace/folders/:folderUid/counts', resolver);
+
+export const mockFolderCountsHandler = (panels: number, rules: number) =>
+  customFolderCountsHandler(() =>
+    HttpResponse.json({
+      kind: 'DescendantCounts',
+      apiVersion: 'folder.grafana.app/v1beta1',
+      counts: [
+        { group: 'sql-fallback', resource: 'library_elements', count: panels },
+        { group: 'sql-fallback', resource: 'alertrules', count: rules },
+      ],
+    })
+  );
+
+export const mockFolderCountsErrorHandler = (status = 500) =>
+  customFolderCountsHandler(() => HttpResponse.json({ message: 'error' }, { status }));
 
 export default [
   getFolderListHandler(),
