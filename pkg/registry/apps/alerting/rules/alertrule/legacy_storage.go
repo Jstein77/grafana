@@ -270,7 +270,7 @@ func (s *legacyStorage) Create(ctx context.Context, obj runtime.Object, createVa
 	}
 
 	if p.GenerateName != "" {
-		return nil, fmt.Errorf("generate-name is not supported in legacy storage mode")
+		return nil, k8serrors.NewBadRequest("generate-name is not supported in legacy storage mode")
 	}
 	model, provenance, err := convertToDomainModel(info.OrgID, p)
 	if err != nil {
@@ -357,7 +357,7 @@ func (s *legacyStorage) Delete(ctx context.Context, name string, deleteValidatio
 	}
 	p, ok := old.(*model.AlertRule)
 	if !ok {
-		return nil, false, k8serrors.NewBadRequest("expected valid recording rule object")
+		return nil, false, k8serrors.NewBadRequest("expected valid alert rule object")
 	}
 
 	sourceProv := p.GetProvenanceStatus()
@@ -372,4 +372,8 @@ func (s *legacyStorage) Delete(ctx context.Context, name string, deleteValidatio
 	}
 
 	return old, false, nil
+}
+
+func (s *legacyStorage) DeleteCollection(_ context.Context, _ rest.ValidateObjectFunc, _ *metav1.DeleteOptions, _ *internalversion.ListOptions) (runtime.Object, error) {
+	return nil, k8serrors.NewMethodNotSupported(ResourceInfo.GroupResource(), "deleteCollection")
 }
