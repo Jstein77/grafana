@@ -9,6 +9,23 @@ A centralized logger registry built on top of [Grafana Faro Web SDK](https://git
 - **Logger registry** — singleton record that stores one `MonitoringLogger` per source. Initialized once at app boot via `initializeLoggersRegistry()`, which iterates over `Loggers` automatically.
 - **`MonitoringLogger`** — object with five methods: `logDebug`, `logInfo`, `logWarning`, `logError`, `logMeasurement`.
 
+## Structured logging conventions
+
+- Register a logger source in `loggers.ts` before calling `getLogger(...)`.
+- Use a static message string and pass operational data in the context object.
+- Do not add new raw `console.*` calls in product code. Use `logToConsole: true` on the registry entry when local console output is needed during development.
+- Prefer feature-local wrappers (for example, alerting's `Analytics.ts`) when a feature logs frequently.
+
+```ts
+// Good
+logger.logError(new Error('Failed to fetch scope'), { scopeName: name });
+
+// Avoid
+console.error('Failed to fetch scope:', name, err);
+```
+
+Legacy logger source names remain supported, but new loggers should use `grafana.<area>.<feature>`.
+
 ## How to add a new logger
 
 1. **Add an entry to the `Loggers` object** in `loggers.ts`. Follow the naming convention `grafana.<area>.<feature>`:

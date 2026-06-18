@@ -25,56 +25,56 @@ func NewXormLogger(level glog.Lvl, grafanaLog glog.Logger) *XormLogger {
 // Error implement core.ILogger
 func (s *XormLogger) Error(v ...any) {
 	if s.level <= glog.LvlError {
-		s.grafanaLog.Error(fmt.Sprint(v...))
+		s.grafanaLog.Error("xorm error", "message", fmt.Sprint(v...))
 	}
 }
 
 // Errorf implement core.ILogger
 func (s *XormLogger) Errorf(format string, v ...any) {
 	if s.level <= glog.LvlError {
-		s.grafanaLog.Error(fmt.Sprintf(format, v...))
+		s.grafanaLog.Error("xorm error", "format", format, "args", fmt.Sprint(v...))
 	}
 }
 
 // Debug implement core.ILogger
 func (s *XormLogger) Debug(v ...any) {
 	if s.level <= glog.LvlDebug {
-		s.grafanaLog.Debug(fmt.Sprint(v...))
+		s.grafanaLog.Debug("xorm debug", "message", fmt.Sprint(v...))
 	}
 }
 
 // Debugf implement core.ILogger
 func (s *XormLogger) Debugf(format string, v ...any) {
 	if s.level <= glog.LvlDebug {
-		s.grafanaLog.Debug(fmt.Sprintf(format, v...))
+		s.grafanaLog.Debug("xorm debug", "format", format, "args", fmt.Sprint(v...))
 	}
 }
 
 // Info implement core.ILogger
 func (s *XormLogger) Info(v ...any) {
 	if s.level <= glog.LvlInfo {
-		s.grafanaLog.Info(fmt.Sprint(v...))
+		s.grafanaLog.Info("xorm info", "message", fmt.Sprint(v...))
 	}
 }
 
 // Infof implement core.ILogger
 func (s *XormLogger) Infof(format string, v ...any) {
 	if s.level <= glog.LvlInfo {
-		s.grafanaLog.Info(fmt.Sprintf(format, v...))
+		s.grafanaLog.Info("xorm info", "format", format, "args", fmt.Sprint(v...))
 	}
 }
 
 // Warn implement core.ILogger
 func (s *XormLogger) Warn(v ...any) {
 	if s.level <= glog.LvlWarn {
-		s.grafanaLog.Warn(fmt.Sprint(v...))
+		s.grafanaLog.Warn("xorm warning", "message", fmt.Sprint(v...))
 	}
 }
 
 // Warnf implement core.ILogger
 func (s *XormLogger) Warnf(format string, v ...any) {
 	if s.level <= glog.LvlWarn {
-		s.grafanaLog.Warn(fmt.Sprintf(format, v...))
+		s.grafanaLog.Warn("xorm warning", "format", format, "args", fmt.Sprint(v...))
 	}
 }
 

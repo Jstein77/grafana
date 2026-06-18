@@ -694,6 +694,19 @@ module.exports = [
     },
   },
 
+  {
+    name: 'grafana/structured-logging',
+    files: [
+      'public/app/features/scopes/**/*.{ts,tsx}',
+      'public/app/features/variables/**/*.{ts,tsx}',
+      'public/app/features/dashboard-scene/**/*.{ts,tsx}',
+    ],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.story.{ts,tsx}', '**/logging.ts'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+
   // {
   //   name: 'grafana/plugin-external-import-paths',
   //   files: [

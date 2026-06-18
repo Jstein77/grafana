@@ -20,7 +20,7 @@ import (
 logger := log.New("my-logger")
 logger.Debug("Debug msg")
 logger.Info("Info msg")
-logger.Warning("Warning msg")
+logger.Warn("Warning msg")
 logger.Error("Error msg", "error", fmt.Errorf("BOOM"))
 ```
 
@@ -34,7 +34,22 @@ Start the log message with a capital letter, for example, `logger.Info("Hello wo
 
 To be consistent with Go identifiers, prefer using camelCase style when naming log keys; for example, `remoteAddr`.
 
-Use the key `Error` when logging Go errors; for example, `logger.Error("Something failed", "error", fmt.Errorf("BOOM"))`.
+Use the key `error` when logging Go errors; for example, `logger.Error("Something failed", "error", fmt.Errorf("BOOM"))`.
+
+### Structured logging
+
+Use static log messages and put operational data in key/value fields. Do not embed values in the message with `fmt.Sprintf`, string concatenation, or printf-style formatting.
+
+```go
+// Good
+logger.Error("Failed to list events", "error", err, "userId", userID)
+
+// Avoid
+logger.Error(fmt.Sprintf("failed to list event: %s", err))
+logger.Error("failed to list event: %s", err)
+```
+
+Prefer `logger.FromContext(ctx)` in request-scoped code so contextual fields such as `traceID` are included automatically.
 
 ### Validate and sanitize input coming from user input
 
@@ -73,7 +88,7 @@ func doSomething(ctx context.Context) {
   ctxLogger := logger.FromContext(ctx)
   ctxLogger.Debug("Debug msg")
   ctxLogger.Info("Info msg")
-  ctxLogger.Warning("Warning msg")
+  ctxLogger.Warn("Warning msg")
   ctxLogger.Error("Error msg", "error", fmt.Errorf("BOOM"))
 }
 ```

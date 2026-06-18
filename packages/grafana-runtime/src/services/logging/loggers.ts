@@ -7,6 +7,10 @@ export const Loggers = {
   'grafana/runtime.plugins.meta': { logToConsole: true },
   'grafana/runtime.plugins.settings': { logToConsole: true },
   'grafana/runtime.utils.getCachedPromise': {},
+  'grafana.features.scopes': { logToConsole: true },
+  'grafana.features.variables': { logToConsole: true },
+  'grafana.dashboard.scenes': { logToConsole: true },
+  'grafana.plugins.sql': { logToConsole: true },
 
   /* existing loggers that keep their existing source name */
   sandbox: {},

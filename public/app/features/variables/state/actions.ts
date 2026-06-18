@@ -41,6 +41,7 @@ import { cleanEditorState } from '../editor/reducer';
 import { ensureStringValues } from '../ensureStringValues';
 import { hasCurrent, hasLegacyVariableSupport, hasOptions, hasStandardVariableSupport, isMulti } from '../guard';
 import { getAllAffectedPanelIdsForVariableChange, getPanelVars } from '../inspect/utils';
+import { logError as logVariableError } from '../logging';
 import { cleanPickerState } from '../pickers/OptionsPicker/reducer';
 import { alignCurrentWithMulti } from '../shared/multiOptions';
 import { toStateKey } from '../toStateKey';
@@ -81,6 +82,10 @@ import {
 } from './transactionReducer';
 import { type KeyedVariableIdentifier } from './types';
 import { cleanVariables } from './variablesReducer';
+
+function logVariablesError(error: unknown) {
+  logVariableError(error instanceof Error ? error : new Error(String(error)));
+}
 
 export const initDashboardTemplating = (key: string, dashboard: DashboardModel): ThunkResult<void> => {
   return (dispatch, getState) => {
@@ -778,7 +783,7 @@ export const onTimeRangeUpdated =
       await Promise.all(promises);
       dependencies.events.publish(new VariablesTimeRangeProcessDone({ variableIds }));
     } catch (error) {
-      console.error(error);
+      logVariablesError(error);
       dispatch(notifyApp(createVariableErrorNotification('Template variable service failed', error)));
     }
   };
@@ -932,7 +937,7 @@ export const initVariablesTransaction =
       dispatch(toKeyedAction(uid, variablesCompleteTransaction({ uid })));
     } catch (err) {
       dispatch(notifyApp(createVariableErrorNotification('Templating init failed', err)));
-      console.error(err);
+      logVariablesError(err);
     }
   };
 
@@ -1003,7 +1008,7 @@ export const updateOptions =
       dispatch(toKeyedAction(rootStateKey, variableStateFailed(toVariablePayload(identifier, { error }))));
 
       if (!rethrow) {
-        console.error(error);
+        logVariablesError(error);
         dispatch(notifyApp(createVariableErrorNotification('Error updating options:', error, identifier)));
       }
 
@@ -1083,7 +1088,7 @@ export function upgradeLegacyQueries(
       );
     } catch (err) {
       dispatch(notifyApp(createVariableErrorNotification('Failed to upgrade legacy queries', err)));
-      console.error(err);
+      logVariablesError(err);
     }
   };
 }

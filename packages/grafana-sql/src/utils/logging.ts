@@ -1,4 +1,3 @@
-// eslint-disable-next-line @grafana/no-direct-create-monitoring-logger
-import { createMonitoringLogger, type MonitoringLogger } from '@grafana/runtime';
+import { getLogger } from '@grafana/runtime/unstable';
 
-export const sqlPluginLogger: MonitoringLogger = createMonitoringLogger('features.plugins.sql');
+export const sqlPluginLogger = getLogger('grafana.plugins.sql');

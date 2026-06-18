@@ -68,9 +68,9 @@ func (s simpleSecret) ReEncrypt(ctx context.Context, secretsSrv *manager.Secrets
 	}
 
 	if anyFailure {
-		logger.Warn(fmt.Sprintf("Column %s from %s has been re-encrypted with errors", s.columnName, s.tableName))
+		logger.Warn("Column re-encryption completed with errors", "columnName", s.columnName, "tableName", s.tableName)
 	} else {
-		logger.Info(fmt.Sprintf("Column %s from %s has been re-encrypted successfully", s.columnName, s.tableName))
+		logger.Info("Column re-encryption completed successfully", "columnName", s.columnName, "tableName", s.tableName)
 	}
 
 	return !anyFailure
@@ -139,9 +139,9 @@ func (s b64Secret) ReEncrypt(ctx context.Context, secretsSrv *manager.SecretsSer
 	}
 
 	if anyFailure {
-		logger.Warn(fmt.Sprintf("Column %s from %s has been re-encrypted with errors", s.columnName, s.tableName))
+		logger.Warn("Column re-encryption completed with errors", "columnName", s.columnName, "tableName", s.tableName)
 	} else {
-		logger.Info(fmt.Sprintf("Column %s from %s has been re-encrypted successfully", s.columnName, s.tableName))
+		logger.Info("Column re-encryption completed successfully", "columnName", s.columnName, "tableName", s.tableName)
 	}
 
 	return !anyFailure
@@ -202,9 +202,9 @@ func (s jsonSecret) ReEncrypt(ctx context.Context, secretsSrv *manager.SecretsSe
 	}
 
 	if anyFailure {
-		logger.Warn(fmt.Sprintf("Secure json data secrets from %s have been re-encrypted with errors", s.tableName))
+		logger.Warn("Secure json data secrets re-encryption completed with errors", "tableName", s.tableName)
 	} else {
-		logger.Info(fmt.Sprintf("Secure json data secrets from %s have been re-encrypted successfully", s.tableName))
+		logger.Info("Secure json data secrets re-encryption completed successfully", "tableName", s.tableName)
 	}
 
 	return !anyFailure

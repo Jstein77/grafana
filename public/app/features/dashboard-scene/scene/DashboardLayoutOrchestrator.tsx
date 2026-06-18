@@ -3,7 +3,6 @@ import { type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 
 import { type GrafanaTheme2 } from '@grafana/data';
-import { logWarning } from '@grafana/runtime';
 import {
   sceneGraph,
   type SceneComponentProps,
@@ -17,6 +16,7 @@ import { useStyles2 } from '@grafana/ui';
 import { getLayoutType } from 'app/features/dashboard/utils/tracking';
 
 import { dashboardEditActions, DashboardStateChangedEvent, ObjectsReorderedOnCanvasEvent } from '../edit-pane/shared';
+import { logWarning } from '../logging';
 import { DashboardInteractions } from '../utils/interactions';
 import { getDefaultVizPanel, getLayoutForObject } from '../utils/utils';
 
@@ -240,9 +240,7 @@ export class DashboardLayoutOrchestrator extends SceneObjectBase<DashboardLayout
               sourceDropTarget.state.layout.endExternalDrag();
             }
           } else {
-            const warningMessage = 'No grid item to drag';
-            console.warn(warningMessage);
-            logWarning(warningMessage);
+            logWarning('No grid item to drag');
           }
         });
       } else {
