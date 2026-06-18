@@ -20,6 +20,7 @@ import {
 } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { TimePickerSettings } from 'app/features/dashboard/components/DashboardSettings/TimePickerSettings';
+import { ThemePicker } from 'app/features/dashboard/components/ShareModal/ThemePicker';
 import { GenAIDashDescriptionButton } from 'app/features/dashboard/components/GenAI/GenAIDashDescriptionButton';
 import { GenAIDashTitleButton } from 'app/features/dashboard/components/GenAI/GenAIDashTitleButton';
 import { MoveProvisionedDashboardDrawer } from 'app/features/provisioning/components/Dashboards/MoveProvisionedDashboardDrawer';
@@ -34,6 +35,7 @@ import { dashboardSceneGraph } from '../utils/dashboardSceneGraph';
 import { getDashboardSceneFor } from '../utils/utils';
 
 import { DeleteDashboardButton } from './DeleteDashboardButton';
+import { getDashboardThemeSelection } from '../scene/dashboardTheme';
 import { type DashboardEditView, type DashboardEditViewState, useDashboardEditPageNav } from './utils';
 
 export interface GeneralSettingsEditViewState extends DashboardEditViewState {
@@ -171,6 +173,10 @@ export class GeneralSettingsEditView
     this._dashboard.setState({ preload });
   };
 
+  public onThemeChange = (value: string) => {
+    this._dashboard.setState({ style: value === 'current' ? undefined : value });
+  };
+
   public onDeleteDashboard = () => {};
 
   public onProvisionedFolderChange = async (newUID?: string, newTitle?: string) => {
@@ -208,7 +214,7 @@ export class GeneralSettingsEditView
 function GeneralSettingsEditViewComponent({ model }: SceneComponentProps<GeneralSettingsEditView>) {
   const dashboard = model.getDashboard();
   const { navModel, pageNav } = useDashboardEditPageNav(dashboard, model.getUrlKey());
-  const { title, description, tags, meta, editable } = dashboard.useState();
+  const { title, description, tags, meta, editable, style } = dashboard.useState();
   const { showMoveModal, moveModalProps } = model.useState();
   const { sync: graphTooltip } = model.getCursorSync()?.useState() || {};
   const { timeZone, weekStart, UNSAFE_nowDelay: nowDelay } = model.getTimeRange().useState();
@@ -329,6 +335,20 @@ function GeneralSettingsEditViewComponent({ model }: SceneComponentProps<General
               onSuccess={model.onMoveSuccess}
             />
           )}
+
+          <Field
+            noMargin
+            label={t('dashboard-settings.general.theme-label', 'Theme')}
+            description={t(
+              'dashboard-settings.general.theme-description',
+              'Choose a color theme for this dashboard. Default uses your profile theme.'
+            )}
+          >
+            <ThemePicker
+              selectedTheme={getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)}
+              onChange={model.onThemeChange}
+            />
+          </Field>
 
           <Field
             noMargin

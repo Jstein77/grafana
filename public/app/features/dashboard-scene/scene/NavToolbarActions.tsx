@@ -30,6 +30,7 @@ import { isLibraryPanel } from '../utils/utils';
 import { type DashboardScene } from './DashboardScene';
 import { GoToSnapshotOriginButton } from './GoToSnapshotOriginButton';
 import { ManagedDashboardNavBarBadge } from './ManagedDashboardNavBarBadge';
+import { DashboardThemeToggle } from './new-toolbar/actions/DashboardThemeToggle';
 import { Actions } from './new-toolbar/Actions';
 import { BreadcrumbActions } from './new-toolbar/BreadcrumbActions';
 import { PublicDashboardBadge } from './new-toolbar/actions/PublicDashboardBadge';
@@ -97,6 +98,12 @@ export function ToolbarActions({ dashboard }: Props) {
     // This adds the presence indicators in enterprise
     addDynamicActions(toolbarActions, dynamicDashNavActions.left, 'left-actions');
   }
+
+  toolbarActions.push({
+    group: 'icon-actions',
+    condition: isShowingDashboard && !isEditing,
+    render: () => <DashboardThemeToggle key="dashboard-theme-toggle" dashboard={dashboard} />,
+  });
 
   toolbarActions.push({
     group: 'icon-actions',
