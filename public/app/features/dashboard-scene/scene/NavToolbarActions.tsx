@@ -30,9 +30,9 @@ import { isLibraryPanel } from '../utils/utils';
 import { type DashboardScene } from './DashboardScene';
 import { GoToSnapshotOriginButton } from './GoToSnapshotOriginButton';
 import { ManagedDashboardNavBarBadge } from './ManagedDashboardNavBarBadge';
-import { DashboardThemeToggle } from './new-toolbar/actions/DashboardThemeToggle';
 import { Actions } from './new-toolbar/Actions';
 import { BreadcrumbActions } from './new-toolbar/BreadcrumbActions';
+import { DashboardThemeToggle } from './new-toolbar/actions/DashboardThemeToggle';
 import { PublicDashboardBadge } from './new-toolbar/actions/PublicDashboardBadge';
 
 interface Props {
