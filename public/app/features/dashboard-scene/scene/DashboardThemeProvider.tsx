@@ -9,12 +9,13 @@ import { resolveDashboardTheme } from './dashboardTheme';
 
 interface DashboardThemeProviderProps {
   style?: string;
+  search?: string;
   children: React.ReactNode;
 }
 
-export function DashboardThemeProvider({ style, children }: DashboardThemeProviderProps) {
+export function DashboardThemeProvider({ style, search = '', children }: DashboardThemeProviderProps) {
   const globalTheme = useTheme2();
-  const theme = useMemo(() => resolveDashboardTheme(style, globalTheme), [style, globalTheme]);
+  const theme = useMemo(() => resolveDashboardTheme(style, globalTheme), [style, globalTheme, search]);
 
   return (
     <ThemeContext.Provider value={theme}>

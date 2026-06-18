@@ -336,19 +336,16 @@ function GeneralSettingsEditViewComponent({ model }: SceneComponentProps<General
             />
           )}
 
-          <Field
-            noMargin
-            label={t('dashboard-settings.general.theme-label', 'Theme')}
+          <ThemePicker
+            selectedTheme={
+              getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)
+            }
+            onChange={model.onThemeChange}
             description={t(
               'dashboard-settings.general.theme-description',
               'Choose a color theme for this dashboard. Default uses your profile theme.'
             )}
-          >
-            <ThemePicker
-              selectedTheme={getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)}
-              onChange={model.onThemeChange}
-            />
-          </Field>
+          />
 
           <Field
             noMargin

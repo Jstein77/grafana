@@ -82,7 +82,7 @@ export function DashboardSceneRenderer({ model }: SceneComponentProps<DashboardS
 
   if (editview) {
     return (
-      <DashboardThemeProvider style={style}>
+      <DashboardThemeProvider style={style} search={location.search}>
         <editview.Component model={editview} />
         {overlay && <overlay.Component model={overlay} />}
       </DashboardThemeProvider>
@@ -106,22 +106,22 @@ export function DashboardSceneRenderer({ model }: SceneComponentProps<DashboardS
   }
 
   return (
-  <>
-    {layoutOrchestrator && <layoutOrchestrator.Component model={layoutOrchestrator} />}
-    <DashboardThemeProvider style={style}>
-      <Page navModel={navModel} pageNav={pageNav} layout={PageLayoutType.Custom}>
-        {editPanel && <editPanel.Component model={editPanel} />}
-        {!editPanel && (
-          <DashboardEditPaneSplitter
-            dashboard={model}
-            isEditing={isEditing}
-            controls={controls && <controls.Component model={controls} />}
-            body={renderBody()}
-          />
-        )}
-        {overlay && <overlay.Component model={overlay} />}
-      </Page>
-    </DashboardThemeProvider>
-  </>
+    <>
+      {layoutOrchestrator && <layoutOrchestrator.Component model={layoutOrchestrator} />}
+      <DashboardThemeProvider style={style} search={location.search}>
+        <Page navModel={navModel} pageNav={pageNav} layout={PageLayoutType.Custom}>
+          {editPanel && <editPanel.Component model={editPanel} />}
+          {!editPanel && (
+            <DashboardEditPaneSplitter
+              dashboard={model}
+              isEditing={isEditing}
+              controls={controls && <controls.Component model={controls} />}
+              body={renderBody()}
+            />
+          )}
+          {overlay && <overlay.Component model={overlay} />}
+        </Page>
+      </DashboardThemeProvider>
+    </>
   );
 }
