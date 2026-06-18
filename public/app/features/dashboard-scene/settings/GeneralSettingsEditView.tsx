@@ -337,7 +337,9 @@ function GeneralSettingsEditViewComponent({ model }: SceneComponentProps<General
           )}
 
           <ThemePicker
-            selectedTheme={getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)}
+            selectedTheme={
+              getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)
+            }
             onChange={model.onThemeChange}
             description={t(
               'dashboard-settings.general.theme-description',
