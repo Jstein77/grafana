@@ -20,22 +20,22 @@ import {
 } from '@grafana/ui';
 import { Page } from 'app/core/components/Page/Page';
 import { TimePickerSettings } from 'app/features/dashboard/components/DashboardSettings/TimePickerSettings';
-import { ThemePicker } from 'app/features/dashboard/components/ShareModal/ThemePicker';
 import { GenAIDashDescriptionButton } from 'app/features/dashboard/components/GenAI/GenAIDashDescriptionButton';
 import { GenAIDashTitleButton } from 'app/features/dashboard/components/GenAI/GenAIDashTitleButton';
+import { ThemePicker } from 'app/features/dashboard/components/ShareModal/ThemePicker';
 import { MoveProvisionedDashboardDrawer } from 'app/features/provisioning/components/Dashboards/MoveProvisionedDashboardDrawer';
 import { ProvisioningAwareFolderPicker } from 'app/features/provisioning/components/Shared/ProvisioningAwareFolderPicker';
 
 import { updateNavModel } from '../pages/utils';
 import { type DashboardScene } from '../scene/DashboardScene';
 import { NavToolbarActions } from '../scene/NavToolbarActions';
+import { getDashboardThemeSelection } from '../scene/dashboardTheme';
 import { AutoGridLayoutManager } from '../scene/layout-auto-grid/AutoGridLayoutManager';
 import { DefaultGridLayoutManager } from '../scene/layout-default/DefaultGridLayoutManager';
 import { dashboardSceneGraph } from '../utils/dashboardSceneGraph';
 import { getDashboardSceneFor } from '../utils/utils';
 
 import { DeleteDashboardButton } from './DeleteDashboardButton';
-import { getDashboardThemeSelection } from '../scene/dashboardTheme';
 import { type DashboardEditView, type DashboardEditViewState, useDashboardEditPageNav } from './utils';
 
 export interface GeneralSettingsEditViewState extends DashboardEditViewState {
@@ -336,19 +336,14 @@ function GeneralSettingsEditViewComponent({ model }: SceneComponentProps<General
             />
           )}
 
-          <Field
-            noMargin
-            label={t('dashboard-settings.general.theme-label', 'Theme')}
+          <ThemePicker
+            selectedTheme={getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)}
+            onChange={model.onThemeChange}
             description={t(
               'dashboard-settings.general.theme-description',
               'Choose a color theme for this dashboard. Default uses your profile theme.'
             )}
-          >
-            <ThemePicker
-              selectedTheme={getDashboardThemeSelection(style) === 'default' ? 'current' : getDashboardThemeSelection(style)}
-              onChange={model.onThemeChange}
-            />
-          </Field>
+          />
 
           <Field
             noMargin

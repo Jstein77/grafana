@@ -53,8 +53,7 @@ describe('dashboardTheme', () => {
     });
 
     it('prefers the URL theme over the dashboard style', () => {
-      window.history.replaceState({}, '', '?theme=dark');
-      const theme = resolveDashboardTheme('light', lightTheme);
+      const theme = resolveDashboardTheme('light', darkTheme, '?theme=dark');
       expect(theme.isDark).toBe(true);
     });
   });
@@ -67,13 +66,11 @@ describe('dashboardTheme', () => {
     });
 
     it('returns a valid theme from the URL', () => {
-      window.history.replaceState({}, '', '?theme=light');
-      expect(getUrlDashboardTheme()).toBe('light');
+      expect(getUrlDashboardTheme('?theme=light')).toBe('light');
     });
 
     it('returns undefined for invalid values', () => {
-      window.history.replaceState({}, '', '?theme=current');
-      expect(getUrlDashboardTheme()).toBeUndefined();
+      expect(getUrlDashboardTheme('?theme=current')).toBeUndefined();
     });
   });
 

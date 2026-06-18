@@ -12,13 +12,17 @@ export function getDashboardThemeSelection(style?: string): DashboardThemeSelect
   return isDashboardThemeStyle(style) ? style : 'default';
 }
 
-export function getUrlDashboardTheme(): DashboardThemeStyle | undefined {
-  const theme = new URLSearchParams(window.location.search).get('theme');
+export function getUrlDashboardTheme(search = window.location.search): DashboardThemeStyle | undefined {
+  const theme = new URLSearchParams(search).get('theme');
   return isDashboardThemeStyle(theme) ? theme : undefined;
 }
 
-export function resolveDashboardTheme(style: string | undefined, globalTheme: GrafanaTheme2): GrafanaTheme2 {
-  const urlTheme = getUrlDashboardTheme();
+export function resolveDashboardTheme(
+  style: string | undefined,
+  globalTheme: GrafanaTheme2,
+  search = window.location.search
+): GrafanaTheme2 {
+  const urlTheme = getUrlDashboardTheme(search);
   if (urlTheme) {
     return getThemeById(urlTheme);
   }
@@ -32,8 +36,9 @@ export function resolveDashboardTheme(style: string | undefined, globalTheme: Gr
 
 export function getNextDashboardThemeStyle(
   currentStyle: string | undefined,
-  globalTheme: GrafanaTheme2
+  globalTheme: GrafanaTheme2,
+  search = window.location.search
 ): DashboardThemeStyle {
-  const effectiveTheme = resolveDashboardTheme(currentStyle, globalTheme);
+  const effectiveTheme = resolveDashboardTheme(currentStyle, globalTheme, search);
   return effectiveTheme.isDark ? 'light' : 'dark';
 }
