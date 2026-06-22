@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { memo } from 'react';
 
 import { FeatureState, type GrafanaTheme2, type ThemeRegistryItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
@@ -6,22 +7,29 @@ import { FeatureBadge, RadioButtonDot, useStyles2 } from '@grafana/ui';
 
 import { ThemePreview } from '../Theme/ThemePreview';
 
+import { getCachedPreviewTheme } from './getCachedPreviewTheme';
+
 interface ThemeCardProps {
   themeOption: ThemeRegistryItem;
   isExperimental?: boolean;
   isSelected?: boolean;
-  onSelect: () => void;
+  onSelect: (themeId: string) => void;
 }
 
-export function ThemeCard({ themeOption, isExperimental, isSelected, onSelect }: ThemeCardProps) {
-  const theme = themeOption.build();
+export const ThemeCard = memo(function ThemeCard({
+  themeOption,
+  isExperimental,
+  isSelected,
+  onSelect,
+}: ThemeCardProps) {
+  const theme = getCachedPreviewTheme(themeOption);
   const label = getTranslatedThemeName(themeOption);
   const styles = useStyles2(getStyles);
 
   return (
     // this is a convenience for mouse users. keyboard/screen reader users will use the radio button
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions,jsx-a11y/click-events-have-key-events
-    <div className={styles.card} onClick={onSelect}>
+    <div className={styles.card} onClick={() => onSelect(themeOption.id)}>
       <div className={styles.header}>
         <RadioButtonDot
           id={`theme-${theme.name}`}
@@ -31,7 +39,7 @@ export function ThemeCard({ themeOption, isExperimental, isSelected, onSelect }:
             // prevent propagation so that onSelect is only called once when clicking the radio button
             event.stopPropagation();
           }}
-          onChange={onSelect}
+          onChange={() => onSelect(themeOption.id)}
           checked={isSelected}
         />
         {isExperimental && <FeatureBadge featureState={FeatureState.experimental} />}
@@ -39,7 +47,7 @@ export function ThemeCard({ themeOption, isExperimental, isSelected, onSelect }:
       <ThemePreview theme={theme} />
     </div>
   );
-}
+});
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {

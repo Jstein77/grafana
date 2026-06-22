@@ -31,5 +31,6 @@ describe('ThemeCard', () => {
 
     // Check that onSelect was called only once
     expect(onSelectMock).toHaveBeenCalledTimes(1);
+    expect(onSelectMock).toHaveBeenCalledWith('dark');
   });
 });

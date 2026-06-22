@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { useCallback, useMemo } from 'react';
 
 import { type GrafanaTheme2, type ThemeRegistryItem } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
@@ -15,16 +16,26 @@ interface Props {
 
 export function ThemeSelectorDrawer({ onClose }: Props) {
   const styles = useStyles2(getStyles);
-  const themes = getSelectableThemes();
+  const themes = useMemo(() => getSelectableThemes(), []);
   const currentTheme = useTheme2();
 
-  const onChange = (theme: ThemeRegistryItem) => {
+  const onChange = useCallback((theme: ThemeRegistryItem) => {
     reportInteraction('grafana_preferences_theme_changed', {
       toTheme: theme.id,
       preferenceType: 'theme_drawer',
     });
     changeTheme(theme.id, false);
-  };
+  }, []);
+
+  const onSelect = useCallback(
+    (themeId: string) => {
+      const theme = themes.find((themeOption) => themeOption.id === themeId);
+      if (theme) {
+        onChange(theme);
+      }
+    },
+    [onChange, themes]
+  );
 
   const subTitle = (
     <Trans i18nKey="shared-preferences.fields.theme-description">
@@ -52,7 +63,7 @@ export function ThemeSelectorDrawer({ onClose }: Props) {
             themeOption={themeOption}
             isExperimental={themeOption.isExtra}
             key={themeOption.id}
-            onSelect={() => onChange(themeOption)}
+            onSelect={onSelect}
             isSelected={currentTheme.name === themeOption.name}
           />
         ))}
