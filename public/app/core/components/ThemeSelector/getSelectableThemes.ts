@@ -3,6 +3,7 @@ import { getFeatureFlagClient, FlagKeys } from '@grafana/runtime/internal';
 
 export function getSelectableThemes() {
   const allowedExtraThemes = [
+    'amethyst',
     'deut_prot_dark',
     'deut_prot_light',
     'tritanopia_dark',

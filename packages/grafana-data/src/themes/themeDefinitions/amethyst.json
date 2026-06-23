@@ -1,0 +1,76 @@
+{
+  "name": "Amethyst",
+  "id": "amethyst",
+  "colors": {
+    "mode": "dark",
+    "border": {
+      "weak": "rgba(214, 181, 255, 0.12)",
+      "medium": "rgba(214, 181, 255, 0.22)",
+      "strong": "rgba(214, 181, 255, 0.34)"
+    },
+    "text": {
+      "primary": "#F3EAFE",
+      "secondary": "rgba(243, 234, 254, 0.72)",
+      "disabled": "rgba(243, 234, 254, 0.48)",
+      "link": "#D6B5FF",
+      "maxContrast": "#FFFFFF"
+    },
+    "primary": {
+      "main": "#B877FF",
+      "text": "#D6B5FF",
+      "border": "#C996FF",
+      "name": "primary",
+      "shade": "#9A5EE6",
+      "transparent": "#B877FF26",
+      "contrastText": "#1B1027",
+      "borderTransparent": "#C996FF40"
+    },
+    "secondary": {
+      "main": "rgba(214, 181, 255, 0.10)",
+      "shade": "rgba(214, 181, 255, 0.16)",
+      "transparent": "rgba(214, 181, 255, 0.08)",
+      "text": "#E8D8FF",
+      "contrastText": "#F3EAFE",
+      "border": "rgba(214, 181, 255, 0.14)",
+      "name": "secondary",
+      "borderTransparent": "rgba(214, 181, 255, 0.28)"
+    },
+    "info": {
+      "main": "#8D7CFF",
+      "text": "#C9C2FF",
+      "border": "#A197FF"
+    },
+    "error": {
+      "main": "#F06292"
+    },
+    "success": {
+      "main": "#38C172"
+    },
+    "warning": {
+      "main": "#F7B955"
+    },
+    "background": {
+      "canvas": "#160E20",
+      "primary": "#21132F",
+      "secondary": "#2C1B3E",
+      "elevated": "#2C1B3E"
+    },
+    "action": {
+      "hover": "rgba(214, 181, 255, 0.12)",
+      "selected": "rgba(184, 119, 255, 0.18)",
+      "selectedBorder": "#B877FF",
+      "focus": "rgba(214, 181, 255, 0.18)",
+      "hoverOpacity": 0.08,
+      "disabledText": "rgba(243, 234, 254, 0.48)",
+      "disabledBackground": "rgba(214, 181, 255, 0.04)",
+      "disabledOpacity": 0.38
+    },
+    "gradients": {
+      "brandHorizontal": "linear-gradient(270deg, #B877FF 0%, #7C4DFF 100%)",
+      "brandVertical": "linear-gradient(0deg, #B877FF 0%, #7C4DFF 100%)"
+    },
+    "contrastThreshold": 3,
+    "hoverFactor": 0.03,
+    "tonalOffset": 0.15
+  }
+}
