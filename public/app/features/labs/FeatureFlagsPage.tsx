@@ -25,6 +25,7 @@ const getInitialFeatureToggles = () => {
 export default function FeatureFlagsPage() {
   const styles = useStyles2(getStyles);
   const [query, setQuery] = useState('');
+  const [filterResetKey, setFilterResetKey] = useState(0);
   const [overrides, setOverrides] = useState<FeatureToggleOverrides>(() => getStoredFeatureToggleOverrides());
   const initialFeatureToggles = useRef(getInitialFeatureToggles());
   const featureToggles = config.featureToggles;
@@ -62,6 +63,7 @@ export default function FeatureFlagsPage() {
     setStoredFeatureToggleOverrides({});
     setOverrides({});
     setQuery('');
+    setFilterResetKey((key) => key + 1);
     for (const row of rows) {
       applyRuntimeToggle(row.name, Boolean(initialFeatureToggles.current[row.name]));
     }
@@ -86,6 +88,7 @@ export default function FeatureFlagsPage() {
 
           <div className={styles.toolbar}>
             <FilterInput
+              key={filterResetKey}
               value={query}
               onChange={setQuery}
               placeholder={t('labs.feature-flags.search.placeholder', 'Search feature flags')}
