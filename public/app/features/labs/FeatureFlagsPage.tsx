@@ -33,6 +33,18 @@ export default function FeatureFlagsPage() {
     return rows.filter((row) => row.name.toLowerCase().includes(normalizedQuery));
   }, [query, rows]);
   const overrideCount = rows.filter((row) => row.hasOverride).length;
+  const summary =
+    overrideCount === 1
+      ? t(
+          'labs.feature-flags.summary-singular-override',
+          'Showing {{visible}} of {{total}} enabled feature flags. 1 local override active.',
+          { visible: filteredRows.length, total: rows.length }
+        )
+      : t(
+          'labs.feature-flags.summary',
+          'Showing {{visible}} of {{total}} enabled feature flags. {{overrides}} local overrides active.',
+          { visible: filteredRows.length, total: rows.length, overrides: overrideCount }
+        );
 
   const setFeatureEnabled = (name: string, enabled: boolean) => {
     const nextOverrides = { ...overrides, [name]: enabled };
@@ -76,13 +88,7 @@ export default function FeatureFlagsPage() {
             </Button>
           </div>
 
-          <Text color="secondary">
-            {t(
-              'labs.feature-flags.summary',
-              'Showing {{visible}} of {{total}} enabled feature flags. {{overrides}} local overrides active.',
-              { visible: filteredRows.length, total: rows.length, overrides: overrideCount }
-            )}
-          </Text>
+          <Text color="secondary">{summary}</Text>
 
           {rows.length === 0 ? (
             <EmptyState message={t('labs.feature-flags.empty', 'No enabled feature flags found')} variant="not-found" />
