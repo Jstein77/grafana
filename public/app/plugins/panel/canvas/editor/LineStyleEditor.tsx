@@ -7,9 +7,10 @@ import { Field, RadioButtonGroup, Switch } from '@grafana/ui';
 import { LineStyle } from '../types';
 
 const options: Array<SelectableValue<LineStyle>> = [
-  { value: LineStyle.Solid, label: 'Solid' },
-  { value: LineStyle.Dashed, label: 'Dashed' },
-  { value: LineStyle.Dotted, label: 'Dotted' },
+  { value: LineStyle.Solid, label: t('canvas.line-style-options.label-solid', 'Solid') },
+  { value: LineStyle.Dashed, label: t('canvas.line-style-options.label-dashed', 'Dashed') },
+  { value: LineStyle.Dotted, label: t('canvas.line-style-options.label-dotted', 'Dotted') },
+  { value: LineStyle.Double, label: t('canvas.line-style-options.label-double', 'Double') },
 ];
 
 export interface LineStyleConfig {
@@ -51,7 +52,7 @@ export const LineStyleEditor = ({ value, onChange }: Props) => {
   return (
     <>
       <RadioButtonGroup value={value.style} options={options} onChange={onLineStyleChange} fullWidth />
-      {value.style !== LineStyle.Solid && (
+      {value.style !== LineStyle.Solid && value.style !== LineStyle.Double && (
         <>
           <br />
           <Field label={t('canvas.line-style-editor.label-animate', 'Animate')}>
