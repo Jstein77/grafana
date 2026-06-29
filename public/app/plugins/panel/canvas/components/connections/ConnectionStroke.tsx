@@ -109,7 +109,6 @@ export const ConnectionLineStroke = ({
         style={style}
       />
       <line
-        id={id}
         stroke={stroke}
         pointerEvents={pointerEvents}
         strokeWidth={halfWidth}
