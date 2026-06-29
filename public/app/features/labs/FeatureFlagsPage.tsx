@@ -15,15 +15,14 @@ import {
 } from './featureFlagOverrides';
 
 const applyRuntimeToggle = (name: string, enabled: boolean) => {
-  const featureToggles = config.featureToggles as Record<string, boolean>;
-  featureToggles[name] = enabled;
+  Object.assign(config.featureToggles, { [name]: enabled });
 };
 
 export default function FeatureFlagsPage() {
   const styles = useStyles2(getStyles);
   const [query, setQuery] = useState('');
   const [overrides, setOverrides] = useState<FeatureToggleOverrides>(() => getStoredFeatureToggleOverrides());
-  const featureToggles = config.featureToggles as Partial<Record<string, boolean>>;
+  const featureToggles = config.featureToggles;
   const rows = useMemo(() => getFeatureToggleRows(featureToggles, overrides), [featureToggles, overrides]);
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -60,8 +59,8 @@ export default function FeatureFlagsPage() {
         <Stack direction="column" gap={2}>
           <Alert severity="info" title={t('labs.feature-flags.local-overrides.title', 'Local browser overrides')}>
             <Trans i18nKey="labs.feature-flags.local-overrides.description">
-              Changes are saved to this browser and applied immediately to Grafana&apos;s frontend feature toggle config.
-              Reload Grafana after changing a flag to ensure every feature reads the new value.
+              Changes are saved to this browser and applied immediately to Grafana&apos;s frontend feature toggle
+              config. Reload Grafana after changing a flag to ensure every feature reads the new value.
             </Trans>
           </Alert>
 
@@ -86,10 +85,7 @@ export default function FeatureFlagsPage() {
           </Text>
 
           {rows.length === 0 ? (
-            <EmptyState
-              message={t('labs.feature-flags.empty', 'No enabled feature flags found')}
-              variant="not-found"
-            />
+            <EmptyState message={t('labs.feature-flags.empty', 'No enabled feature flags found')} variant="not-found" />
           ) : (
             <div className={styles.tableWrapper}>
               <table className="filter-table" data-testid="labs-feature-flags-table">

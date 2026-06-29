@@ -47,10 +47,7 @@ export function setStoredFeatureToggleOverrides(overrides: FeatureToggleOverride
   store.set(FEATURE_TOGGLES_STORAGE_KEY, formatFeatureToggleOverrides(overrides));
 }
 
-export function getFeatureToggleRows(
-  featureToggles: Partial<Record<string, boolean>>,
-  overrides: FeatureToggleOverrides
-): FeatureToggleRow[] {
+export function getFeatureToggleRows(featureToggles: object, overrides: FeatureToggleOverrides): FeatureToggleRow[] {
   const names = new Set<string>();
 
   for (const [name, enabled] of Object.entries(featureToggles)) {
@@ -65,7 +62,11 @@ export function getFeatureToggleRows(
 
   return [...names].sort(compareFeatureNames).map((name) => ({
     name,
-    enabled: overrides[name] ?? Boolean(featureToggles[name]),
+    enabled: overrides[name] ?? isFeatureEnabled(featureToggles, name),
     hasOverride: Object.prototype.hasOwnProperty.call(overrides, name),
   }));
+}
+
+function isFeatureEnabled(featureToggles: object, name: string): boolean {
+  return Object.entries(featureToggles).some(([featureName, enabled]) => featureName === name && enabled === true);
 }
