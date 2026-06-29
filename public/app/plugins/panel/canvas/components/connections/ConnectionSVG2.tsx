@@ -17,8 +17,8 @@ import {
   getConnectionStyles,
 } from '../../utils';
 
-import { CONNECTION_VERTEX_ADD_ID, CONNECTION_VERTEX_ID } from './Connections';
 import { ConnectionLineStroke, ConnectionPathStroke } from './ConnectionStroke';
+import { CONNECTION_VERTEX_ADD_ID, CONNECTION_VERTEX_ID } from './Connections';
 
 type Props = {
   setLineRef: (anchorElement: SVGLineElement) => void;

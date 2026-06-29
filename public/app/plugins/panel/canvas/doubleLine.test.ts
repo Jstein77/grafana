@@ -1,10 +1,10 @@
-import { getStrokeDasharray } from './utils';
-import { LineStyle, StrokeDasharray } from './types';
 import {
   getDoubleLineSeparation,
   getParallelLineCoords,
   getPerpendicularUnitVector,
 } from './components/connections/doubleLineUtils';
+import { LineStyle, StrokeDasharray } from './types';
+import { getStrokeDasharray } from './utils';
 
 describe('canvas utils', () => {
   describe('getStrokeDasharray', () => {

@@ -1,17 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { type SelectableValue, type StandardEditorProps } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { Field, RadioButtonGroup, Switch } from '@grafana/ui';
 
 import { LineStyle } from '../types';
-
-const options: Array<SelectableValue<LineStyle>> = [
-  { value: LineStyle.Solid, label: t('canvas.line-style-options.label-solid', 'Solid') },
-  { value: LineStyle.Dashed, label: t('canvas.line-style-options.label-dashed', 'Dashed') },
-  { value: LineStyle.Dotted, label: t('canvas.line-style-options.label-dotted', 'Dotted') },
-  { value: LineStyle.Double, label: t('canvas.line-style-options.label-double', 'Double') },
-];
 
 export interface LineStyleConfig {
   style: LineStyle;
@@ -34,6 +27,16 @@ export const LineStyleEditor = ({ value, onChange }: Props) => {
       animate: false,
     };
   }
+
+  const options = useMemo<Array<SelectableValue<LineStyle>>>(
+    () => [
+      { value: LineStyle.Solid, label: t('canvas.line-style-options.label-solid', 'Solid') },
+      { value: LineStyle.Dashed, label: t('canvas.line-style-options.label-dashed', 'Dashed') },
+      { value: LineStyle.Dotted, label: t('canvas.line-style-options.label-dotted', 'Dotted') },
+      { value: LineStyle.Double, label: t('canvas.line-style-options.label-double', 'Double') },
+    ],
+    []
+  );
 
   const onLineStyleChange = useCallback(
     (lineStyle: LineStyle) => {
