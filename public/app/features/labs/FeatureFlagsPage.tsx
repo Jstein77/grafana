@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { type ChangeEvent, useMemo, useState } from 'react';
+import { type ChangeEvent, useMemo, useRef, useState } from 'react';
 
 import { type GrafanaTheme2 } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
@@ -18,10 +18,15 @@ const applyRuntimeToggle = (name: string, enabled: boolean) => {
   Object.assign(config.featureToggles, { [name]: enabled });
 };
 
+const getInitialFeatureToggles = () => {
+  return Object.fromEntries(Object.entries(config.featureToggles).map(([name, enabled]) => [name, enabled === true]));
+};
+
 export default function FeatureFlagsPage() {
   const styles = useStyles2(getStyles);
   const [query, setQuery] = useState('');
   const [overrides, setOverrides] = useState<FeatureToggleOverrides>(() => getStoredFeatureToggleOverrides());
+  const initialFeatureToggles = useRef(getInitialFeatureToggles());
   const featureToggles = config.featureToggles;
   const rows = useMemo(() => getFeatureToggleRows(featureToggles, overrides), [featureToggles, overrides]);
   const filteredRows = useMemo(() => {
@@ -56,7 +61,10 @@ export default function FeatureFlagsPage() {
   const clearOverrides = () => {
     setStoredFeatureToggleOverrides({});
     setOverrides({});
-    window.location.reload();
+    setQuery('');
+    for (const row of rows) {
+      applyRuntimeToggle(row.name, Boolean(initialFeatureToggles.current[row.name]));
+    }
   };
 
   return (
