@@ -6,7 +6,7 @@ import { createMemoryHistory, type MemoryHistoryBuildOptions } from 'history';
 import { Fragment, type PropsWithChildren } from 'react';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
 import { type FeatureToggles } from '@grafana/data';

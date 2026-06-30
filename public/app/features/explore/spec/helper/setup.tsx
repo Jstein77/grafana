@@ -7,7 +7,7 @@ import { fromPairs } from 'lodash';
 import { stringify } from 'querystring';
 import { type ComponentType, type ReactNode } from 'react';
 import { Provider } from 'react-redux';
-import { Route, Routes, unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
+import { Route, Routes, unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 

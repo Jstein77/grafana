@@ -1,5 +1,5 @@
 import { type ComponentType, type ReactNode, type JSX } from 'react';
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
 import { locationService, LocationServiceProvider } from '@grafana/runtime';
 import { ModalRoot, Stack } from '@grafana/ui';
