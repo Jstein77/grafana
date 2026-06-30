@@ -6,9 +6,7 @@ import { createMemoryHistory, type MemoryHistoryBuildOptions } from 'history';
 import { Fragment, type PropsWithChildren } from 'react';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-// eslint-disable-next-line no-restricted-imports
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
 import { type FeatureToggles } from '@grafana/data';
@@ -68,13 +66,18 @@ const getWrapper = ({
   setLocationService(locationService);
 
   /**
-   * Conditional router - either a MemoryRouter or just a Fragment
+   * Conditional router - either a HistoryRouter or just a Fragment
    */
   const PotentialRouter = renderWithRouter
-    ? ({ children }: PropsWithChildren) => <Router history={history}>{children}</Router>
+    ? ({ children }: PropsWithChildren) => (
+        <HistoryRouter
+          history={locationService.getRouterHistory()}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          {children}
+        </HistoryRouter>
+      )
     : ({ children }: PropsWithChildren) => <Fragment>{children}</Fragment>;
-
-  const PotentialCompatRouter = renderWithRouter ? CompatRouter : Fragment;
 
   const context = {
     ...getGrafanaContextMock(),
@@ -92,9 +95,7 @@ const getWrapper = ({
           <GrafanaContext.Provider value={context}>
             <PotentialRouter>
               <LocationServiceProvider service={locationService}>
-                <PotentialCompatRouter>
-                  <ModalsContextProvider>{children}</ModalsContextProvider>
-                </PotentialCompatRouter>
+                <ModalsContextProvider>{children}</ModalsContextProvider>
               </LocationServiceProvider>
             </PotentialRouter>
           </GrafanaContext.Provider>
