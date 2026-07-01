@@ -167,7 +167,9 @@ function LabsFeatureCard({ feature }: { feature: LabsFeatureWithState }) {
           )}
           {feature.defaultEnabled && <Badge color="green" text={t('labs.default-on-badge', 'On by default')} />}
           {feature.hiddenFromDocs && <Badge color="darkgrey" text={t('labs.internal-badge', 'Internal')} />}
-          {feature.requiresRestart && <Badge color="orange" text={t('labs.restart-required-badge', 'Restart required')} />}
+          {feature.requiresRestart && (
+            <Badge color="orange" text={t('labs.restart-required-badge', 'Restart required')} />
+          )}
         </Stack>
 
         <div className={styles.cardFooter}>
@@ -244,12 +246,14 @@ function resetLabsFeatureOverride(key: string) {
 }
 
 function resetAllLabsOverrides() {
-  getLocalStorageProvider().setFlags(
-    Object.fromEntries(labsFeatures.map((feature) => [feature.key, undefined]))
-  );
+  getLocalStorageProvider().setFlags(Object.fromEntries(labsFeatures.map((feature) => [feature.key, undefined])));
 }
 
-function filterFeatures(features: LabsFeatureWithState[], query: string, filter: LabsFeatureFilter): LabsFeatureWithState[] {
+function filterFeatures(
+  features: LabsFeatureWithState[],
+  query: string,
+  filter: LabsFeatureFilter
+): LabsFeatureWithState[] {
   const normalizedQuery = query.trim().toLowerCase();
 
   return features.filter((feature) => {
