@@ -1,6 +1,7 @@
 import { store } from '@grafana/data';
 
 const FEATURE_TOGGLE_STORAGE_KEY = 'grafana.featureToggles';
+const compare = new Intl.Collator('en', { sensitivity: 'base', numeric: true }).compare;
 
 export type FeatureToggleOverrides = Record<string, boolean>;
 
@@ -41,7 +42,7 @@ export function removeFeatureToggleOverride(key: string): FeatureToggleOverrides
 }
 
 function writeFeatureToggleOverrides(overrides: FeatureToggleOverrides) {
-  const entries = Object.entries(overrides).sort(([a], [b]) => a.localeCompare(b));
+  const entries = Object.entries(overrides).sort(([a], [b]) => compare(a, b));
 
   if (entries.length === 0) {
     store.delete(FEATURE_TOGGLE_STORAGE_KEY);

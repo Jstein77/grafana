@@ -11,12 +11,12 @@ jest.mock('app/core/services/context_srv', () => ({
 
 describe('Labs routes', () => {
   it('registers the Labs route behind settings read access', () => {
-    jest.mocked(contextSrv.evaluatePermission).mockReturnValue(true);
+    jest.mocked(contextSrv.evaluatePermission).mockReturnValue([]);
 
     const [route] = getRoutes();
 
     expect(route.path).toBe('/labs/*');
-    expect(route.roles?.()).toBe(true);
+    expect(route.roles?.()).toEqual([]);
     expect(contextSrv.evaluatePermission).toHaveBeenCalledWith([AccessControlAction.SettingsRead]);
   });
 });

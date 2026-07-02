@@ -107,11 +107,19 @@ export default function FeatureFlagsPage() {
             <Stack gap={1} wrap>
               <Badge
                 color="green"
-                text={t('labs.feature-flags.enabled-count', '{{count}} enabled', { count: enabledCount })}
+                text={t('labs.feature-flags.enabled-count', '', {
+                  count: enabledCount,
+                  defaultValue_one: '{{count}} enabled',
+                  defaultValue_other: '{{count}} enabled',
+                })}
               />
               <Badge
                 color={overrideCount > 0 ? 'orange' : 'darkgrey'}
-                text={t('labs.feature-flags.override-count', '{{count}} local overrides', { count: overrideCount })}
+                text={t('labs.feature-flags.override-count', '', {
+                  count: overrideCount,
+                  defaultValue_one: '{{count}} local override',
+                  defaultValue_other: '{{count}} local overrides',
+                })}
               />
             </Stack>
           </Card>

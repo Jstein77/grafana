@@ -153,7 +153,7 @@ func TestBuildLabsNavLink(t *testing.T) {
 	require.Equal(t, "Labs", link.Text)
 	require.Equal(t, "flask", link.Icon)
 	require.Equal(t, "/grafana/labs", link.Url)
-	require.Equal(t, navtree.WeightLabs, link.SortWeight)
+	require.Equal(t, int64(navtree.WeightLabs), link.SortWeight)
 	require.True(t, link.IsNew)
 	require.Len(t, link.Children, 1)
 	require.Equal(t, navtree.NavIDLabsFeatureFlags, link.Children[0].Id)
