@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { render } from 'test/test-utils';
 
 import { reportInteraction } from '@grafana/runtime';
-
 import { toggleTheme } from 'app/core/services/theme';
 
 import { ThemeToggleButton } from './ThemeToggleButton';
