@@ -2,6 +2,7 @@ import { css } from '@emotion/css';
 import { memo } from 'react';
 
 import { type GrafanaTheme2 } from '@grafana/data';
+import { Components } from '@grafana/e2e-selectors';
 import { ToolbarButton, useStyles2 } from '@grafana/ui';
 
 import { useThemeToggle } from './useThemeToggle';
@@ -16,17 +17,21 @@ interface Props {
  */
 export const ThemeToggleFloatingButton = memo(function ThemeToggleFloatingButton({ className }: Props) {
   const styles = useStyles2(getStyles);
-  const { icon, ariaLabel, tooltip, toggle } = useThemeToggle();
+  const { isDark, icon, ariaLabel, tooltip, toggle } = useThemeToggle();
 
   return (
-    <div className={css(styles.wrapper, className)} data-testid="theme-toggle-floating">
+    <div
+      className={css(styles.wrapper, className)}
+      data-testid={Components.NavToolbar.themeToggleFloating}
+    >
       <ToolbarButton
         iconOnly
         icon={icon}
         aria-label={ariaLabel}
+        aria-pressed={isDark}
         tooltip={tooltip}
         onClick={toggle}
-        data-testid="theme-toggle"
+        data-testid={Components.NavToolbar.themeToggle}
       />
     </div>
   );

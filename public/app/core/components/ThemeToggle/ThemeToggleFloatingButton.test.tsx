@@ -6,7 +6,7 @@ import { Components } from '@grafana/e2e-selectors';
 import { reportInteraction } from '@grafana/runtime';
 import { toggleTheme } from 'app/core/services/theme';
 
-import { ThemeToggleButton } from './ThemeToggleButton';
+import { ThemeToggleFloatingButton } from './ThemeToggleFloatingButton';
 
 jest.mock('app/core/services/theme', () => ({
   toggleTheme: jest.fn().mockResolvedValue(undefined),
@@ -17,22 +17,22 @@ jest.mock('@grafana/runtime', () => ({
   reportInteraction: jest.fn(),
 }));
 
-describe('ThemeToggleButton', () => {
+describe('ThemeToggleFloatingButton', () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders an accessible theme toggle button', () => {
-    render(<ThemeToggleButton />);
+  it('renders a fixed-position wrapper with the theme toggle button', () => {
+    render(<ThemeToggleFloatingButton />);
 
+    expect(screen.getByTestId(Components.NavToolbar.themeToggleFloating)).toBeInTheDocument();
     expect(screen.getByTestId(Components.NavToolbar.themeToggle)).toBeInTheDocument();
-    expect(screen.getByRole('button')).toHaveAccessibleName(/theme/i);
   });
 
   it('toggles theme and reports interaction on click', async () => {
-    render(<ThemeToggleButton />);
+    render(<ThemeToggleFloatingButton />);
 
     await user.click(screen.getByRole('button'));
 

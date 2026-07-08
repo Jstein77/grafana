@@ -1,5 +1,6 @@
 import { memo } from 'react';
 
+import { Components } from '@grafana/e2e-selectors';
 import { ToolbarButton } from '@grafana/ui';
 
 import { useThemeToggle } from './useThemeToggle';
@@ -12,16 +13,17 @@ import { useThemeToggle } from './useThemeToggle';
  * `HelpTopBarButton` and `TopSearchBarCommandPaletteTrigger`.
  */
 export const ThemeToggleButton = memo(function ThemeToggleButton() {
-  const { icon, ariaLabel, tooltip, toggle } = useThemeToggle();
+  const { isDark, icon, ariaLabel, tooltip, toggle } = useThemeToggle();
 
   return (
     <ToolbarButton
       iconOnly
       icon={icon}
       aria-label={ariaLabel}
+      aria-pressed={isDark}
       tooltip={tooltip}
       onClick={toggle}
-      data-testid="theme-toggle"
+      data-testid={Components.NavToolbar.themeToggle}
     />
   );
 });
