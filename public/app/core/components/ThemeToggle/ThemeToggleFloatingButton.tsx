@@ -20,10 +20,7 @@ export const ThemeToggleFloatingButton = memo(function ThemeToggleFloatingButton
   const { isDark, icon, ariaLabel, tooltip, toggle } = useThemeToggle();
 
   return (
-    <div
-      className={css(styles.wrapper, className)}
-      data-testid={Components.NavToolbar.themeToggleFloating}
-    >
+    <div className={css(styles.wrapper, className)} data-testid={Components.NavToolbar.themeToggleFloating}>
       <ToolbarButton
         iconOnly
         icon={icon}
