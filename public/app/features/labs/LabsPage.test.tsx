@@ -75,7 +75,7 @@ describe('LabsPage', () => {
   it('filters feature flags by name', async () => {
     renderPage();
 
-    await userEvent.type(screen.getByRole('textbox', { name: 'Search feature flags' }), 'loki');
+    await userEvent.type(screen.getByRole('textbox', { name: /Search feature flags/ }), 'loki');
 
     expect(screen.getByText('lokiQuerySplitting')).toBeInTheDocument();
     expect(screen.queryByText('featureHighlights')).not.toBeInTheDocument();
