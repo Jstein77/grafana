@@ -83,6 +83,6 @@ func TestBuildLabsNavLink(t *testing.T) {
 	require.Equal(t, "View and control enabled feature flags", section.SubTitle)
 	require.Equal(t, "flask", section.Icon)
 	require.Equal(t, "/labs", section.Url)
-	require.Equal(t, navtree.WeightLabs, section.SortWeight)
+	require.Equal(t, int64(navtree.WeightLabs), section.SortWeight)
 	require.True(t, section.IsNew)
 }

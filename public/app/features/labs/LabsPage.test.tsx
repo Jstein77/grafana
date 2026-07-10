@@ -65,7 +65,7 @@ describe('LabsPage', () => {
 
     renderPage();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Reset' })[0]);
 
     await waitFor(() => {
       expect(window.localStorage.getItem(getStorageKey('featureHighlights'))).toBeNull();

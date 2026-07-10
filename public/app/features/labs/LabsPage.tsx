@@ -125,9 +125,11 @@ export default function LabsPage() {
               <Field
                 label={t('labs.feature-flags.search-label', 'Search feature flags')}
                 description={t('labs.feature-flags.search-description', 'Filter by feature flag name.')}
+                htmlFor="labs-feature-flags-search"
                 noMargin
               >
                 <Input
+                  id="labs-feature-flags-search"
                   value={query}
                   placeholder={t('labs.feature-flags.search-placeholder', 'Search flags')}
                   onChange={(event) => setQuery(event.currentTarget.value)}
