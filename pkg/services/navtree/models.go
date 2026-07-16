@@ -60,7 +60,7 @@ const (
 )
 
 // WeightLabs is placed between Connections and Administration in the nav tree.
-const WeightLabs int64 = -1950
+const WeightLabs int64 = -2050
 
 type NavLink struct {
 	Id             string     `json:"id,omitempty"`
