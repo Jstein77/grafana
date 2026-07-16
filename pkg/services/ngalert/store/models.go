@@ -87,7 +87,7 @@ func (a alertRuleVersion) EqualSpec(b alertRuleVersion) bool {
 		a.Condition == b.Condition &&
 		a.Data == b.Data &&
 		a.IntervalSeconds == b.IntervalSeconds &&
-		compareStringPointer(a.Record, b.Record) &&
+		compareRecordStringPointer(a.Record, b.Record) &&
 		a.NoDataState == b.NoDataState &&
 		a.ExecErrState == b.ExecErrState &&
 		a.For == b.For &&
@@ -107,6 +107,18 @@ func compareInt64Pointer(a, b *int64) bool {
 
 func compareStringPointer(a, b *string) bool {
 	return (a == nil && b == nil) || (a != nil && b != nil && *a == *b)
+}
+
+func compareRecordStringPointer(a, b *string) bool {
+	aVal := ""
+	if a != nil {
+		aVal = *a
+	}
+	bVal := ""
+	if b != nil {
+		bVal = *b
+	}
+	return aVal == bVal
 }
 
 func (a alertRuleVersion) TableName() string {

@@ -95,6 +95,20 @@ func TestAlertRuleVersion_EqualSpec(t *testing.T) {
 			expect: false,
 		},
 		{
+			name: "nil and empty record are equal",
+			a: func() alertRuleVersion {
+				v := baseVersion
+				v.Record = nil
+				return v
+			}(),
+			b: func() alertRuleVersion {
+				v := baseVersion
+				v.Record = new("")
+				return v
+			}(),
+			expect: true,
+		},
+		{
 			name:   "different NotificationSettings",
 			a:      baseVersion,
 			b:      func() alertRuleVersion { v := baseVersion; v.NotificationSettings = "notify2"; return v }(),
