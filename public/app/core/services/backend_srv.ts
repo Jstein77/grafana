@@ -30,6 +30,7 @@ import {
   type BackendSrv as BackendService,
   type BackendSrvRequest,
   config,
+  createMonitoringLogger,
   type FetchError,
   type FetchResponse,
 } from '@grafana/runtime';
@@ -53,6 +54,8 @@ import { ResponseQueue } from './ResponseQueue';
 import { type ContextSrv, contextSrv } from './context_srv';
 
 const CANCEL_ALL_REQUESTS_REQUEST_ID = 'cancel_all_requests_request_id';
+
+const logger = createMonitoringLogger('core.backendSrv', undefined, process.env.NODE_ENV === 'development');
 
 export interface BackendSrvDependencies {
   fromFetch: (input: string | Request, init?: RequestInit) => Observable<Response>;
@@ -115,7 +118,7 @@ export class BackendSrv implements BackendService {
       const result = await fp.get();
       this.deviceID = result.visitorId;
     } catch (error) {
-      console.error(error);
+      logger.logError(new Error('Failed to initialize Grafana device ID', { cause: error }));
     }
   }
 
@@ -240,7 +243,7 @@ export class BackendSrv implements BackendService {
             observer.complete();
           }) // runs in background
           .catch((e) => {
-            console.log(requestId, 'catch', e);
+            logger.logDebug('Request stream aborted', { requestId });
             observer.error(e);
           }); // from abort
       },

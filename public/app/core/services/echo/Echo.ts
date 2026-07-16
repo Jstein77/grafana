@@ -7,11 +7,14 @@ import {
   EchoEventType,
   MAX_PAGE_URL_LENGTH,
   TRUNCATION_MARKER,
+  createMonitoringLogger,
 } from '@grafana/runtime';
 
 import { contextSrv } from '../context_srv';
 
 import { echoLog } from './utils';
+
+const logger = createMonitoringLogger('core.echo', undefined, process.env.NODE_ENV === 'development');
 
 interface EchoConfig {
   // How often should metrics be reported
@@ -76,7 +79,9 @@ export class Echo implements EchoSrv {
             try {
               cb(payload.properties ?? {});
             } catch (err) {
-              console.error(`[Echo] onInteraction subscriber error for "${payload.interactionName}":`, err);
+              logger.logError(
+                new Error(`onInteraction subscriber error for "${payload.interactionName}"`, { cause: err })
+              );
             }
           }
         }

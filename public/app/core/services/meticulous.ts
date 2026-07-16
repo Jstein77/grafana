@@ -1,3 +1,7 @@
+import { createMonitoringLogger } from '@grafana/runtime';
+
+const logger = createMonitoringLogger('core.meticulous', undefined, process.env.NODE_ENV === 'development');
+
 const AUTH_PATH_PREFIXES = ['/login', '/signup', '/invite/', '/verify', '/user/password/', '/profile/password'];
 
 function isAuthPath(pathname: string): boolean {
@@ -18,6 +22,6 @@ export async function updateMeticulousRecording(pathname: string): Promise<void>
   try {
     window.__meticulous.stopRecording();
   } catch (error) {
-    console.error('Error stopping Meticulous recording:', error);
+    logger.logError(new Error('Error stopping Meticulous recording', { cause: error }));
   }
 }
