@@ -1,14 +1,15 @@
-import { config, createMonitoringLogger, registerEchoBackend, setEchoSrv } from '@grafana/runtime';
+import { config, registerEchoBackend, setEchoSrv } from '@grafana/runtime';
+import { getLogger } from '@grafana/runtime/unstable';
 import { reportMetricPerformanceMark } from 'app/core/utils/metrics';
 
 import { contextSrv } from '../context_srv';
 
 import { Echo } from './Echo';
 
-const logger = createMonitoringLogger('core.echo.init', undefined, process.env.NODE_ENV === 'development');
-
 // Initialise EchoSrv backends, calls during frontend app startup
 export async function initEchoSrv() {
+  const logger = getLogger('core.echo');
+
   setEchoSrv(new Echo({ debug: process.env.NODE_ENV === 'development' }));
 
   window.addEventListener('load', (e) => {
