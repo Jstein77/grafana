@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { type FeatureToggles } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { Alert, type Column, FilterInput, InteractiveTable, Stack, Text } from '@grafana/ui';
@@ -10,13 +11,13 @@ interface FeatureFlagRow {
   enabled: boolean;
 }
 
-export function getEnabledFeatureFlags(
-  featureToggles: Record<string, boolean | undefined> = config.featureToggles
-): FeatureFlagRow[] {
+const featureFlagNameCollator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
+
+export function getEnabledFeatureFlags(featureToggles: FeatureToggles = config.featureToggles): FeatureFlagRow[] {
   return Object.entries(featureToggles)
     .filter(([, enabled]) => Boolean(enabled))
     .map(([name]) => ({ name, enabled: true }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => featureFlagNameCollator.compare(a.name, b.name));
 }
 
 export default function LabsPage() {

@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { render } from 'test/test-utils';
 
+import { type FeatureToggles } from '@grafana/data';
 import config from 'app/core/config';
 
 import LabsPage, { getEnabledFeatureFlags } from './LabsPage';
@@ -14,21 +15,20 @@ describe('LabsPage', () => {
 
   it('lists only enabled feature flags sorted alphabetically', () => {
     const flags = getEnabledFeatureFlags({
-      zebraFlag: true,
-      alphaFlag: true,
-      disabledFlag: false,
-      unsetFlag: undefined,
+      dashboardNewLayouts: true,
+      alertingListViewV2: true,
+      featureHighlights: false,
     });
 
-    expect(flags.map((flag) => flag.name)).toEqual(['alphaFlag', 'zebraFlag']);
+    expect(flags.map((flag) => flag.name)).toEqual(['alertingListViewV2', 'dashboardNewLayouts']);
   });
 
   it('renders enabled feature flags on the page', async () => {
     config.featureToggles = {
-      publicDashboards: true,
-      nestedFolders: true,
-      someDisabledFlag: false,
-    };
+      dashboardNewLayouts: true,
+      alertingListViewV2: true,
+      featureHighlights: false,
+    } satisfies FeatureToggles;
 
     render(<LabsPage />, {
       preloadedState: {
@@ -44,16 +44,16 @@ describe('LabsPage', () => {
     });
 
     expect(await screen.findByText('Feature flags')).toBeInTheDocument();
-    expect(screen.getByText('nestedFolders')).toBeInTheDocument();
-    expect(screen.getByText('publicDashboards')).toBeInTheDocument();
-    expect(screen.queryByText('someDisabledFlag')).not.toBeInTheDocument();
+    expect(screen.getByText('alertingListViewV2')).toBeInTheDocument();
+    expect(screen.getByText('dashboardNewLayouts')).toBeInTheDocument();
+    expect(screen.queryByText('featureHighlights')).not.toBeInTheDocument();
   });
 
   it('filters feature flags by search query', async () => {
     config.featureToggles = {
-      publicDashboards: true,
-      nestedFolders: true,
-    };
+      dashboardNewLayouts: true,
+      alertingListViewV2: true,
+    } satisfies FeatureToggles;
 
     const { user } = render(<LabsPage />, {
       preloadedState: {
@@ -68,9 +68,9 @@ describe('LabsPage', () => {
       },
     });
 
-    await user.type(await screen.findByPlaceholderText(/search feature flags/i), 'nested');
+    await user.type(await screen.findByPlaceholderText(/search feature flags/i), 'dashboard');
 
-    expect(screen.getByText('nestedFolders')).toBeInTheDocument();
-    expect(screen.queryByText('publicDashboards')).not.toBeInTheDocument();
+    expect(screen.getByText('dashboardNewLayouts')).toBeInTheDocument();
+    expect(screen.queryByText('alertingListViewV2')).not.toBeInTheDocument();
   });
 });
