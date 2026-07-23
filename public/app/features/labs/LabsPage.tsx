@@ -56,8 +56,8 @@ export default function LabsPage() {
         <Stack direction="column" gap={2}>
           <Alert severity="info" title={t('labs.feature-flags.info-title', 'Feature flags')}>
             <Trans i18nKey="labs.feature-flags.info-description">
-              These are the feature flags currently enabled in this Grafana instance. Flags are configured in grafana.ini
-              or via environment variables.
+              These are the feature flags currently enabled in this Grafana instance. Flags are configured in
+              grafana.ini or via environment variables.
             </Trans>
           </Alert>
 
