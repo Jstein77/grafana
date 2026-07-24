@@ -39,9 +39,14 @@ import (
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/services/user/userimpl"
 	"github.com/grafana/grafana/pkg/setting"
+	"github.com/grafana/grafana/pkg/storage/legacysql"
 	"github.com/grafana/grafana/pkg/storage/unified/resource"
 	"github.com/grafana/grafana/pkg/storage/unified/sql"
 	"github.com/grafana/grafana/pkg/util/testutil"
+
+	// Registers the OSS dependency-injection entrypoints (server.InitializeForTest etc.)
+	// via bootstrap/wire's init(); without this side-effect import they are nil.
+	_ "github.com/grafana/grafana/pkg/server/bootstrap/wire"
 )
 
 // findTestLicense returns the absolute path to the enterprise test license
@@ -1023,6 +1028,12 @@ func createGrafDir(t *testing.T, tmpDir string, opts GrafanaOpts) (string, strin
 		maxConns = 5
 	}
 
+	// Adding default provisioning allowlist for integration tests
+	provisioningSect, err := getOrCreateSection("provisioning")
+	require.NoError(t, err)
+	_, err = provisioningSect.NewKey("allowed_git_urls", "localhost, 127.0.0.1, github.enterprise.example.com, ghes.example.com")
+	require.NoError(t, err)
+
 	_, err = dbSection.NewKey("max_open_conn", fmt.Sprintf("%d", maxConns))
 	require.NoError(t, err)
 	_, err = dbSection.NewKey("max_idle_conn", fmt.Sprintf("%d", maxConns))
@@ -1182,7 +1193,7 @@ func CreateUser(t *testing.T, store db.DB, cfg *setting.Cfg, cmd user.CreateUser
 
 	cfgProvider, err := configprovider.ProvideService(cfg)
 	require.NoError(t, err)
-	quotaService := quotaimpl.ProvideService(context.Background(), store, cfgProvider)
+	quotaService := quotaimpl.ProvideService(context.Background(), legacysql.NewDatabaseProvider(store), cfgProvider)
 	orgService, err := orgimpl.ProvideService(store, cfg, quotaService)
 	require.NoError(t, err)
 	usrSvc, err := userimpl.ProvideService(
