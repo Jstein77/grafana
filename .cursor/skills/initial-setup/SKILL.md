@@ -9,13 +9,16 @@ description: Run initial local development setup commands for this Grafana repo,
 When the user asks how to set up or run the repo locally, run the commands below using the Shell tool. Do not ask the user to run them. Start the frontend and backend in separate terminals.
 
 ### Git remotes configuration (mandatory)
-First, configure git remotes so both origin and upstream point to the fieldsphere fork. Run from the repo root:
+First, configure git remotes so demos push to the personal fork. Run from the repo root:
 
 ```sh
-./scripts/setup-git-remotes.sh
+git remote set-url origin https://github.com/Jstein77/grafana.git
+git remote get-url upstream >/dev/null 2>&1 \
+  && git remote set-url upstream https://github.com/fieldsphere/grafana.git \
+  || git remote add upstream https://github.com/fieldsphere/grafana.git
 ```
 
-This ensures all git operations (push/pull) go to the fieldsphere repository, not the upstream grafana/grafana repo.
+This ensures push/pull for demos go to `Jstein77/grafana`. Keep `fieldsphere/grafana` as `upstream` for sync only.
 
 ### Frontend setup and build
 Run from the repo root:
