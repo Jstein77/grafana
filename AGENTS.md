@@ -150,17 +150,24 @@ Build a specific plugin: `yarn workspace @grafana-plugins/<name> dev`
 
 ### Prerequisites
 
-- **Node.js** — version pinned in `.nvmrc` (check that file for the exact version). Installed via nvm and set as the nvm default. **PATH gotcha:** the infra injects `/exec-daemon/node` ahead of nvm, so the plain non-login shell may resolve `node` to an older version — check it satisfies the `engines` range in `package.json` (it does today, so builds/tests work), but it is not the pinned version. Login shells (tmux sessions, `bash -lc '...'`) get the pinned version because `~/.bashrc` prepends the nvm bin. Run `yarn` / `yarn start` / `jest` / webpack via a login shell (tmux or `bash -lc`) to use the pinned Node.
+- **Node.js** — pinned to the `.nvmrc` version (currently `v24.11.0`), installed via nvm and set as the nvm default. **Use the pinned Node: the frontend does NOT build on Node 22.** On Node 22, `yarn start` fails while loading plugin `webpack.config.ts` files with `TypeError: Unknown file extension ".ts"` (`ERR_UNKNOWN_FILE_EXTENSION`). **PATH gotcha:** the infra injects `/exec-daemon/node` (Node 22) ahead of the nvm bin, so by default both plain and login shells resolve `node` to Node 22. This environment's `~/.bashrc` has a block appended after the nvm init that prepends the nvm default bin, so login shells (tmux sessions, `bash -lc '...'`) get the pinned Node — always run `yarn` / `yarn start` / `jest` / webpack from a login shell, and verify `node --version` prints the `.nvmrc` version. After switching Node versions run `corepack enable` (the `yarn` shim is per-Node), and run `yarn nx reset` before restarting `yarn start` (the nx daemon caches the old PATH/Node).
 - **Go** — version pinned in `go.mod` (check that file for the exact version), installed at `/usr/local/go` and symlinked to `/usr/local/bin/go`. The distro `/usr/bin/go` is older; `/usr/local/bin` wins in PATH so `go` resolves correctly. If `go.mod` bumps Go, reinstall a matching toolchain into `/usr/local/go`.
 - **Yarn** via corepack — version pinned by `package.json` `packageManager` (check that field for the exact version). Run `corepack enable` if `yarn` is not found. `.yarnrc.yml` sets `enableScripts: false`, so dependency build/lifecycle scripts are disabled by default.
 - **GCC** required for CGo/SQLite compilation of the backend.
-- Repos in this environment live under `/agent/repos/<repo>` (e.g. `/agent/repos/grafana`); this is a multi-repo workspace, not the single `~/grafana` layout described in `grafana-enterprise/AGENTS.md`.
+- The repo checkout is at `/workspace` (run all commands from there), not the single `~/grafana` layout described in `grafana-enterprise/AGENTS.md`.
 
 ### Running services
 
 - **Backend**: `make run` — builds and starts Grafana backend with hot-reload (air) on `localhost:3000`. Default login: `admin`/`admin`. First build takes ~3 minutes due to debug symbols (`-gcflags all=-N -l`); subsequent hot-reload rebuilds are faster.
-- **Frontend**: `yarn start` — starts webpack dev server that watches for changes. The backend proxies to it. First compile takes ~45s.
+- **Frontend**: `yarn start` — starts webpack dev server that watches for changes. The backend proxies to it. First compile takes ~45s (run from a login shell on the pinned Node — see the Node.js note).
 - No external databases required — Grafana uses embedded SQLite by default.
+
+### Docker (docker-in-docker)
+
+- Docker Engine (with the Compose plugin) is installed and configured for docker-in-docker: `fuse-overlayfs` storage driver via `/etc/docker/daemon.json` and `iptables-legacy`. The binaries persist in the environment snapshot; they are intentionally NOT reinstalled by the install/update script.
+- There is no systemd, so start the daemon per session with `sudo service docker start` (SysV init script at `/etc/init.d/docker`). This is service startup, so it belongs in the environment `start` command (in `.cursor/environment.json` or the dashboard) — never in the install/update script.
+- The `ubuntu` user is in the `docker` group, but that only applies in a fresh login shell; until then use `sudo docker ...`.
+- Grafana's `make devenv sources=...` uses `docker compose` to run optional backing services (Postgres/MySQL/etc.), so the daemon must be started first. Core Grafana needs no Docker (embedded SQLite).
 
 ### Testing gotchas
 
