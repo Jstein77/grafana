@@ -1,5 +1,5 @@
 /* eslint-disable @grafana/i18n/no-untranslated-strings */
-import { type ComponentType, lazy, Suspense } from 'react';
+import { createElement, type ComponentType, lazy, Suspense } from 'react';
 
 import { type AppPluginConfig, PluginExtensionExposedComponents } from '@grafana/data';
 import { getAppPluginMetas, getCachedPromise } from '@grafana/runtime/internal';
@@ -26,11 +26,7 @@ function lazyExposedComponent<P extends object>(
   });
 
   return function LazyExposedComponent(props: P) {
-    return (
-      <Suspense fallback={null}>
-        <LazyComponent {...props} />
-      </Suspense>
-    );
+    return createElement(Suspense, { fallback: null }, createElement(LazyComponent, props));
   };
 }
 
