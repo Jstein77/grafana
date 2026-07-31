@@ -25,6 +25,7 @@ Explore lets users run ad hoc queries against datasources and inspect metrics, l
 - `public/app/features/explore/state/main.ts`
 - `public/app/features/explore/state/query.ts`
 - `public/app/features/explore/hooks/useStateSync`
+- `public/app/features/explore/extensions/AddToDashboard`
 - `public/app/features/query/state/runRequest.ts`
 - `public/app/core/journeys/exploreToDashboard.ts`
 - `packages/grafana-e2e-selectors/src/selectors/pages.ts`
@@ -38,6 +39,7 @@ Explore lets users run ad hoc queries against datasources and inspect metrics, l
 - Query execution leaves Explore through the shared query runner and reaches the generic datasource query API. Explore has no dedicated query backend.
 - Datasource plugins own query editors and result behavior after the plugin boundary.
 - The Add to dashboard extension crosses into Dashboards. Treat that flow as a two-area change.
+- The current handoff opens dashboard editing. Persisting the dashboard is a separate dashboard action, so requirements must distinguish handoff from save.
 - Access depends on Explore configuration, datasource exploration permission, and datasource-level query permission.
 
 ## Verification anchors
