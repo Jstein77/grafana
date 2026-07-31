@@ -15,12 +15,14 @@ jest.mock('@grafana/runtime', () => ({
 
 describe('Prompt component with React Router', () => {
   let mockHistory: History & { block: jest.Mock };
+  let unblock: jest.Mock;
 
   beforeEach(() => {
     const historyInstance = createMemoryHistory({ initialEntries: ['/current'] });
+    unblock = jest.fn();
     mockHistory = {
       ...historyInstance,
-      block: jest.fn(() => jest.fn()),
+      block: jest.fn(() => unblock),
     };
 
     (locationService.getLocation as jest.Mock).mockReturnValue({ pathname: '/current' } as Location);
@@ -32,10 +34,9 @@ describe('Prompt component with React Router', () => {
   });
 
   it('should call the block function when `when` is true', () => {
-    const { unmount } = render(<Prompt when={true} message="Are you sure you want to leave?" />);
+    render(<Prompt when={true} message="Are you sure you want to leave?" />);
 
-    unmount();
-    expect(mockHistory.block).toHaveBeenCalled();
+    expect(mockHistory.block).toHaveBeenCalledWith('Are you sure you want to leave?');
   });
 
   it('should not call the block function when `when` is false', () => {
@@ -53,5 +54,32 @@ describe('Prompt component with React Router', () => {
     callback({ pathname: '/new-path' } as Location);
 
     expect(messageFn).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/new-path' }));
+  });
+
+  it('should remove the blocker when unmounted', () => {
+    const { unmount } = render(<Prompt message="Are you sure you want to leave?" />);
+
+    unmount();
+
+    expect(unblock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should remove the blocker when `when` changes to false', () => {
+    const { rerender } = render(<Prompt when message="Are you sure you want to leave?" />);
+
+    rerender(<Prompt when={false} message="Are you sure you want to leave?" />);
+
+    expect(unblock).toHaveBeenCalledTimes(1);
+    expect(mockHistory.block).toHaveBeenCalledTimes(1);
+  });
+
+  it('should replace the blocker when the message changes', () => {
+    const { rerender } = render(<Prompt message="First message" />);
+
+    rerender(<Prompt message="Second message" />);
+
+    expect(unblock).toHaveBeenCalledTimes(1);
+    expect(mockHistory.block).toHaveBeenNthCalledWith(1, 'First message');
+    expect(mockHistory.block).toHaveBeenNthCalledWith(2, 'Second message');
   });
 });
