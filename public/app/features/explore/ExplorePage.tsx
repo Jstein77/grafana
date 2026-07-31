@@ -17,7 +17,10 @@ import { CorrelationEditorModeBar } from './CorrelationEditorModeBar';
 import { ExploreActions } from './ExploreActions';
 import { ExploreDrawer } from './ExploreDrawer';
 import { ExplorePaneContainer } from './ExplorePaneContainer';
-import { useQueriesDrawerContext } from './QueriesDrawer/QueriesDrawerContext';
+import {
+  QueriesDrawerContextProvider,
+  useQueriesDrawerContext,
+} from './QueriesDrawer/QueriesDrawerContext';
 import RichHistoryContainer from './RichHistory/RichHistoryContainer';
 import { useExplorePageContext } from './hooks/useExplorePageContext';
 import { useExplorePageTitle } from './hooks/useExplorePageTitle';
@@ -30,7 +33,11 @@ import { isSplit, selectCorrelationDetails, selectPanesEntries } from './state/s
 const MIN_PANE_WIDTH = 200;
 
 export default function ExplorePage(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {
-  return <ExplorePageContent {...props} />;
+  return (
+    <QueriesDrawerContextProvider>
+      <ExplorePageContent {...props} />
+    </QueriesDrawerContextProvider>
+  );
 }
 
 function ExplorePageContent(props: GrafanaRouteComponentProps<{}, ExploreQueryParams>) {

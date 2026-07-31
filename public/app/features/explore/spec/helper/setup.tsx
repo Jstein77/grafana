@@ -48,7 +48,6 @@ import { type LokiDatasource } from '../../../../plugins/datasource/loki/datasou
 import { type LokiQuery } from '../../../../plugins/datasource/loki/types';
 import { initialUserState } from '../../../profile/state/reducers';
 import ExplorePage from '../../ExplorePage';
-import { QueriesDrawerContextProvider } from '../../QueriesDrawer/QueriesDrawerContext';
 
 import { mockData } from './mocks';
 
@@ -204,29 +203,27 @@ export function setupExplore(options?: SetupOptions): {
       <Provider store={storeState}>
         <GrafanaContext.Provider value={contextMock}>
           <Router history={history}>
-            <QueriesDrawerContextProvider>
-              <FinalProvider>
-                {options?.withAppChrome ? (
-                  <KBarProvider>
-                    <AppChrome>
-                      <Route
-                        path="/explore"
-                        exact
-                        render={(props) => (
-                          <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />
-                        )}
-                      />
-                    </AppChrome>
-                  </KBarProvider>
-                ) : (
-                  <Route
-                    path="/explore"
-                    exact
-                    render={(props) => <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />}
-                  />
-                )}
-              </FinalProvider>
-            </QueriesDrawerContextProvider>
+            <FinalProvider>
+              {options?.withAppChrome ? (
+                <KBarProvider>
+                  <AppChrome>
+                    <Route
+                      path="/explore"
+                      exact
+                      render={(props) => (
+                        <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />
+                      )}
+                    />
+                  </AppChrome>
+                </KBarProvider>
+              ) : (
+                <Route
+                  path="/explore"
+                  exact
+                  render={(props) => <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />}
+                />
+              )}
+            </FinalProvider>
           </Router>
         </GrafanaContext.Provider>
       </Provider>

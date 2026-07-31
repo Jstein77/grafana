@@ -1,11 +1,11 @@
 /* eslint-disable @grafana/i18n/no-untranslated-strings */
+import { type ComponentType, lazy, Suspense } from 'react';
+
 import { type AppPluginConfig, PluginExtensionExposedComponents } from '@grafana/data';
 import { getAppPluginMetas, getCachedPromise } from '@grafana/runtime/internal';
 import CentralAlertHistorySceneExposedComponent from 'app/features/alerting/unified/components/rules/central-state-history/CentralAlertHistorySceneExposedComponent';
 import { CreateAlertFromPanelExposedComponent } from 'app/features/alerting/unified/extensions/CreateAlertFromPanelExposedComponent';
 import { AddToDashboardFormExposedComponent } from 'app/features/dashboard-scene/addToDashboard/AddToDashboardFormExposedComponent';
-import { OpenQueryLibraryExposedComponent } from 'app/features/explore/QueryLibrary/OpenQueryLibraryExposedComponent';
-import { PrometheusQueryResultsContainer } from 'app/features/explore/RawPrometheus/PrometheusQueryResultsContainer';
 
 import { getCoreExtensionConfigurations } from '../getCoreExtensionConfigurations';
 
@@ -15,6 +15,41 @@ import { AddedLinksRegistry } from './AddedLinksRegistry';
 import { ExposedComponentsRegistry } from './ExposedComponentsRegistry';
 import { type PluginExtensionRegistries } from './types';
 
+/** Wraps a named explore export so the module is not on the cold-start app entry. */
+function lazyExposedComponent<P extends object>(
+  loader: () => Promise<Record<string, ComponentType<P>>>,
+  exportName: string
+): ComponentType<P> {
+  const LazyComponent = lazy(async () => {
+    const mod = await loader();
+    return { default: mod[exportName] };
+  });
+
+  return function LazyExposedComponent(props: P) {
+    return (
+      <Suspense fallback={null}>
+        <LazyComponent {...props} />
+      </Suspense>
+    );
+  };
+}
+
+const PrometheusQueryResultsContainer = lazyExposedComponent(
+  () =>
+    import(
+      /* webpackChunkName: "prometheus-query-results" */ 'app/features/explore/RawPrometheus/PrometheusQueryResultsContainer'
+    ),
+  'PrometheusQueryResultsContainer'
+);
+
+const OpenQueryLibraryExposedComponent = lazyExposedComponent(
+  () =>
+    import(
+      /* webpackChunkName: "open-query-library" */ 'app/features/explore/QueryLibrary/OpenQueryLibraryExposedComponent'
+    ),
+  'OpenQueryLibraryExposedComponent'
+);
+
 function initRegistries(apps: AppPluginConfig[]): PluginExtensionRegistries {
   const addedComponentsRegistry = new AddedComponentsRegistry(apps);
   const exposedComponentsRegistry = new ExposedComponentsRegistry(apps);
@@ -23,11 +58,11 @@ function initRegistries(apps: AppPluginConfig[]): PluginExtensionRegistries {
   return { addedComponentsRegistry, addedFunctionsRegistry, addedLinksRegistry, exposedComponentsRegistry };
 }
 
-function registerCoreExtensions({ addedLinksRegistry, exposedComponentsRegistry }: PluginExtensionRegistries) {
-  // Registering core extension links
+async function registerCoreExtensions({ addedLinksRegistry, exposedComponentsRegistry }: PluginExtensionRegistries) {
+  // Registering core extension links (Explore toolbar configs load asynchronously)
   addedLinksRegistry.register({
     pluginId: 'grafana',
-    configs: getCoreExtensionConfigurations(),
+    configs: await getCoreExtensionConfigurations(),
   });
 
   // Registering core exposed components
@@ -71,7 +106,7 @@ function registerCoreExtensions({ addedLinksRegistry, exposedComponentsRegistry 
 async function initPluginExtensionRegistries(): Promise<PluginExtensionRegistries> {
   const apps = await getAppPluginMetas();
   const registries = initRegistries(apps);
-  registerCoreExtensions(registries);
+  await registerCoreExtensions(registries);
 
   return registries;
 }
