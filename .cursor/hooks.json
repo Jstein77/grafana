@@ -3,7 +3,7 @@
   "hooks": {
     "beforeShellExecution": [
       {
-        "command": ".cursor/hooks/enforce-fieldsphere-gh.sh",
+        "command": ".cursor/hooks/enforce-jstein77-gh.sh",
         "matcher": "(^|\\s)gh(\\s|$)"
       }
     ]

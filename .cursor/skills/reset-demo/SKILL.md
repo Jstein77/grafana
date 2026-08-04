@@ -7,18 +7,18 @@ description: Reset the Grafana demo environment by closing the active demo PR, c
 
 Tear down the current demo branch/PR and return to a clean `main`.
 
-Also follow [github-fieldsphere-fork](../github-fieldsphere-fork/SKILL.md) for all `gh` mutations (`--repo fieldsphere/grafana`).
+Also follow [github-fieldsphere-fork](../github-fieldsphere-fork/SKILL.md) for all `gh` mutations (`--repo Jstein77/grafana`).
 
 ## Steps
 
 1. **Identify the demo PR and branch**
    - Prefer the PR/branch from the current conversation.
-   - If unclear: `git branch --show-current`, `git status -sb`, and `gh pr list --repo fieldsphere/grafana --head <user>:<branch>` (or view by PR number).
+   - If unclear: `git branch --show-current`, `git status -sb`, and `gh pr list --repo Jstein77/grafana --head <branch>` (or view by PR number).
 
 2. **Close the PR** (if open)
 
 ```bash
-gh pr close <PR_NUMBER> --repo fieldsphere/grafana --comment "Closing to reset demo environment."
+gh pr close <PR_NUMBER> --repo Jstein77/grafana --comment "Closing to reset demo environment."
 ```
 
 3. **Return to main and sync**
