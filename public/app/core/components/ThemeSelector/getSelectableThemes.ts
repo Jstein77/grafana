@@ -11,6 +11,7 @@ export function getSelectableThemes() {
     'sapphiredusk',
     'tron',
     'gloom',
+    'cursorgreen',
   ];
 
   return getBuiltInThemes(allowedExtraThemes);
