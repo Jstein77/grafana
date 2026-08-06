@@ -12118,7 +12118,7 @@
       "title": "Collector"
     },
     "config": {
-      "title": "Administration"
+      "title": "admin"
     },
     "config-access": {
       "subtitle": "Configure access for individual users, teams, and service accounts",

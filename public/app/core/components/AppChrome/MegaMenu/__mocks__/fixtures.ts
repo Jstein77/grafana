@@ -42,7 +42,7 @@ export const customisableNavTree: NavModelItem[] = [
     ],
   },
   {
-    text: 'Administration',
+    text: 'admin',
     id: 'cfg',
     url: '/admin',
     children: [{ text: 'Settings', id: 'cfg/settings', url: '/admin/settings' }],

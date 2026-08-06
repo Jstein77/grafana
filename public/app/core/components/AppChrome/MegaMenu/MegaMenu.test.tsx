@@ -192,10 +192,10 @@ describe('MegaMenu', () => {
         renderMegaMenu({ sectionOrder: ['cfg', 'explore'] });
 
         // Wait for the real list (past the loading skeleton), then read the section order
-        await screen.findByRole('link', { name: 'Administration' });
+        await screen.findByRole('link', { name: 'admin' });
         const nav = within(screen.getByRole('list', { name: 'Navigation' }));
         const names = nav.getAllByRole('link').map((el) => el.textContent);
-        expect(names.indexOf('Administration')).toBeLessThan(names.indexOf('Explore'));
+        expect(names.indexOf('admin')).toBeLessThan(names.indexOf('Explore'));
       });
 
       it('offers a drag handle on each top-level section while editing', async () => {
@@ -343,7 +343,7 @@ describe('MegaMenu', () => {
         const labels = screen.getAllByRole('button', { hidden: true }).map((b) => b.getAttribute('aria-label'));
         // Parent sections are pinnable as a quick-link (as well as their children being pinnable).
         expect(labels).toContain('Pin Dashboards');
-        expect(labels).toContain('Pin Administration');
+        expect(labels).toContain('Pin admin');
         // Childless top-level sections (Explore) are pinnable too.
         expect(labels).toContain('Pin Explore');
       });

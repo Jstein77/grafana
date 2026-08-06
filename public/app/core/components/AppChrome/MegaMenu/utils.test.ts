@@ -279,7 +279,7 @@ describe('pinning helpers', () => {
       ],
     },
     {
-      text: 'Administration',
+      text: 'admin',
       id: 'cfg',
       url: '/admin',
       children: [{ text: 'Settings', id: 'cfg/settings', url: '/admin/settings' }],
@@ -421,7 +421,7 @@ describe('hiding helpers', () => {
       ],
     },
     {
-      text: 'Administration',
+      text: 'admin',
       id: 'cfg',
       url: '/admin',
       children: [

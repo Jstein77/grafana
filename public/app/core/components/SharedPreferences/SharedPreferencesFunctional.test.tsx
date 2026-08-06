@@ -3,7 +3,7 @@ import { getSelectParent, selectOptionInTest } from 'test/helpers/selectOptionIn
 import { act, render, screen, userEvent, waitFor, within } from 'test/test-utils';
 
 import { setBackendSrv } from '@grafana/runtime';
-import { mockComboboxRect } from '@grafana/test-utils';
+import { mockBoundingClientRect, mockComboboxRect } from '@grafana/test-utils';
 import { preferencesHandlers } from '@grafana/test-utils/handlers';
 import server, { setupMockServer } from '@grafana/test-utils/server';
 import { getFolderFixtures, setTestFlags } from '@grafana/test-utils/unstable';
@@ -166,6 +166,30 @@ describe('SharedPreferencesFunctional', () => {
     expect(newPreferences).toMatchObject({
       spec: { theme: 'gildedgrove' },
     });
+  });
+
+  it('saves the Matrix green theme preference', async () => {
+    // Matrix sits lower in the virtualised list than themes like Gilded grove; enlarge the
+    // mock viewport so the option is mounted in the DOM for selection.
+    mockBoundingClientRect({ width: 120, height: 2000 });
+
+    try {
+      const capture = captureRequests();
+      const { user } = await setup();
+
+      await selectComboboxOptionInTest(await screen.findByRole('combobox', { name: /Interface theme/ }), 'Matrix');
+
+      await user.click(screen.getByText('Save preferences'));
+
+      const requests = await capture;
+      const newPreferences = await getPrefsUpdateRequest(requests);
+
+      expect(newPreferences).toMatchObject({
+        spec: { theme: 'matrix' },
+      });
+    } finally {
+      mockComboboxRect();
+    }
   });
 
   it('saves the users default preferences', async () => {
