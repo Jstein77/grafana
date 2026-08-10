@@ -183,6 +183,83 @@ describe('Explore reducer', () => {
             syncedTimes: false,
           } as unknown as ExploreState);
       });
+
+      it('should preserve the surviving pane relative time range when the right pane is closed', () => {
+        const leftRange = {
+          from: dateTime('2026-08-10T10:00:00Z'),
+          to: dateTime('2026-08-10T12:00:00Z'),
+          raw: { from: 'now-2h', to: 'now-1h' },
+        };
+        const leftAbsoluteRange = { from: 1786356000000, to: 1786363200000 };
+        const leftItemMock = {
+          containerWidth: 100,
+          range: leftRange,
+          absoluteRange: leftAbsoluteRange,
+        } as unknown as ExploreItemState;
+        const rightItemMock = {
+          containerWidth: 200,
+          range: {
+            from: dateTime(),
+            to: dateTime(),
+            raw: { from: 'now-6h', to: 'now' },
+          },
+          absoluteRange: { from: 1, to: 2 },
+        } as unknown as ExploreItemState;
+
+        const initialState = {
+          panes: {
+            left: leftItemMock,
+            right: rightItemMock,
+          },
+          syncedTimes: true,
+        } as unknown as ExploreState;
+
+        const nextState = exploreReducer(initialState, splitClose('right'));
+
+        expect(Object.keys(nextState.panes)).toEqual(['left']);
+        expect(nextState.panes.left?.range).toEqual(leftRange);
+        expect(nextState.panes.left?.absoluteRange).toEqual(leftAbsoluteRange);
+        expect(nextState.syncedTimes).toBe(false);
+      });
+
+      it('should preserve the surviving pane absolute time range when the left pane is closed', () => {
+        const rightRange = {
+          from: dateTime('2026-08-10T10:00:00Z'),
+          to: dateTime('2026-08-10T12:00:00Z'),
+          raw: {
+            from: dateTime('2026-08-10T10:00:00Z'),
+            to: dateTime('2026-08-10T12:00:00Z'),
+          },
+        };
+        const rightAbsoluteRange = { from: 1786356000000, to: 1786363200000 };
+        const leftItemMock = {
+          containerWidth: 100,
+          range: {
+            from: dateTime(),
+            to: dateTime(),
+            raw: { from: 'now-6h', to: 'now' },
+          },
+          absoluteRange: { from: 1, to: 2 },
+        } as unknown as ExploreItemState;
+        const rightItemMock = {
+          containerWidth: 200,
+          range: rightRange,
+          absoluteRange: rightAbsoluteRange,
+        } as unknown as ExploreItemState;
+
+        const initialState = {
+          panes: {
+            left: leftItemMock,
+            right: rightItemMock,
+          },
+        } as unknown as ExploreState;
+
+        const nextState = exploreReducer(initialState, splitClose('left'));
+
+        expect(Object.keys(nextState.panes)).toEqual(['right']);
+        expect(nextState.panes.right?.range).toEqual(rightRange);
+        expect(nextState.panes.right?.absoluteRange).toEqual(rightAbsoluteRange);
+      });
     });
   });
 });

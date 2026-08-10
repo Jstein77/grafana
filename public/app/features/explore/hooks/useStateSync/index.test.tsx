@@ -564,6 +564,57 @@ describe('useStateSync', () => {
     });
   });
 
+  it.each([
+    { from: 'now-2h', to: 'now-30m' },
+    { from: 'now-12h', to: 'now' },
+  ])('preserves the surviving pane time range %j in state and URL after splitClose', async (customRange) => {
+    const { store, location } = setup({
+      queryParams: {
+        panes: JSON.stringify({
+          one: {
+            datasource: 'loki-uid',
+            queries: [{ expr: 'a', datasource: { uid: 'loki-uid', type: 'logs' }, refId: 'A' }],
+            range: customRange,
+          },
+        }),
+        schemaVersion: 1,
+      },
+    });
+
+    await waitFor(() => {
+      expect(store.getState().explore.panes['one']?.datasourceInstance?.uid).toBe('loki-uid');
+      expect(store.getState().explore.panes['one']?.range.raw).toMatchObject(customRange);
+    });
+
+    act(() => {
+      store.dispatch(splitOpen());
+    });
+
+    let rightPaneId = '';
+    await waitFor(() => {
+      const paneIds = Object.keys(store.getState().explore.panes);
+      expect(paneIds).toHaveLength(2);
+      rightPaneId = paneIds.find((id) => id !== 'one')!;
+      expect(rightPaneId).toBeTruthy();
+    });
+
+    act(() => {
+      store.dispatch(splitClose(rightPaneId));
+    });
+
+    await waitFor(() => {
+      const paneIds = Object.keys(store.getState().explore.panes);
+      expect(paneIds).toEqual(['one']);
+      expect(store.getState().explore.panes['one']?.range.raw).toMatchObject(customRange);
+
+      const panesParam = location.getSearchObject().panes;
+      expect(typeof panesParam).toBe('string');
+      const urlPanes = JSON.parse(panesParam as string);
+      expect(Object.keys(urlPanes)).toEqual(['one']);
+      expect(urlPanes.one.range).toMatchObject(customRange);
+    });
+  });
+
   it('filters out queries from the URL that do not have a datasource', async () => {
     const { store } = setup({
       queryParams: {
