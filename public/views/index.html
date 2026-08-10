@@ -18,6 +18,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="[[.AppleTouchIcon]]" />
     <link rel="mask-icon" href="[[.Assets.ContentDeliveryURL]]public/img/grafana_mask_icon.svg" color="#F05A28" />
 
+    <!-- Preload the primary UI fonts. Their @font-face rules are injected by GlobalStyles only
+         after the app bundle executes, so without these hints the browser cannot start fetching
+         them until late in the load. Preloading lets them download in parallel with the JS. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="[[.Assets.ContentDeliveryURL]]public/fonts/inter/Inter-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="[[.Assets.ContentDeliveryURL]]public/fonts/inter/Inter-Medium.woff2" />
+
     [[range $asset := .Assets.CSSFiles]]
       <link rel="stylesheet" href="[[$asset.FilePath]]" />
     [[end]]
