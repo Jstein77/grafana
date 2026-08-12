@@ -539,6 +539,48 @@ describe('transformSceneToSaveModel', () => {
       expect(result.options).toBeUndefined();
     });
 
+    it('unlink then save model omits libraryPanel', () => {
+      const libVizPanel = new VizPanel({
+        key: 'panel-4',
+        title: 'Panel blahh blah',
+        pluginId: 'timeseries',
+        $behaviors: [
+          new LibraryPanelBehavior({
+            name: 'Some lib panel panel',
+            uid: 'lib-panel-uid',
+            isLoaded: true,
+          }),
+        ],
+        fieldConfig: { defaults: {}, overrides: [] },
+        options: {},
+      });
+
+      const scene = transformSaveModelToScene({
+        dashboard: {
+          ...dashboard_to_load1,
+          panels: [],
+        } as DashboardDataDTO,
+        meta: {},
+      });
+
+      scene.setState({
+        body: DefaultGridLayoutManager.fromVizPanels([libVizPanel]),
+      });
+
+      expect(gridItemToPanel(libVizPanel.parent as DashboardGridItem).libraryPanel).toEqual({
+        name: 'Some lib panel panel',
+        uid: 'lib-panel-uid',
+      });
+
+      scene.unlinkLibraryPanel(libVizPanel);
+
+      const saveModel = transformSceneToSaveModel(scene);
+      expect(saveModel.panels).toHaveLength(1);
+      expect(saveModel.panels![0].libraryPanel).toBeUndefined();
+      expect(saveModel.panels![0].type).toBe('timeseries');
+      expect(saveModel.panels![0].title).toBe('Panel blahh blah');
+    });
+
     it('given a library panel widget', () => {
       const panel = buildGridItemFromPanelSchema({
         id: 4,

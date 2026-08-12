@@ -28,7 +28,7 @@ import {
   type SceneVariable,
   type SceneVariableDependencyConfigLike,
   MultiValueVariable,
-  type VizPanel,
+  VizPanel,
 } from '@grafana/scenes';
 import { type Dashboard, type DashboardLink, type LibraryPanel } from '@grafana/schema';
 import { type Spec as DashboardV2Spec, type VariableKind } from '@grafana/schema/apis/dashboard.grafana.app/v2';
@@ -98,6 +98,7 @@ import {
   getDefaultVizPanel,
   getLayoutForObject,
   getLayoutManagerFor,
+  getLibraryPanelBehavior,
   getPanelIdForVizPanel,
   hasActualSaveChanges,
 } from '../utils/utils';
@@ -116,6 +117,7 @@ import { addNewRowTo } from './layouts-shared/addNew';
 import { clearClipboard } from './layouts-shared/paste';
 import { getUpdatedHoverHeader } from './panel-timerange/utils';
 import { type DashboardLayoutManager } from './types/DashboardLayoutManager';
+import { isDashboardLayoutItem } from './types/DashboardLayoutItem';
 import { type DashboardSceneLike, type DashboardSceneState } from './types/dashboard';
 
 export const PERSISTED_PROPS = ['title', 'description', 'tags', 'editable', 'graphTooltip', 'links', 'meta', 'preload'];
@@ -1022,24 +1024,25 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
   }
 
   public unlinkLibraryPanel(panel: VizPanel) {
-    if (!panel.parent) {
-      return;
-    }
+    // Save serialization emits libraryPanel only while LibraryPanelBehavior is present; remove it
+    // via unlink() so other $behaviors are preserved (unlike clearing the whole array).
+    getLibraryPanelBehavior(panel)?.unlink();
 
     const parent = panel.parent;
-
-    if (parent instanceof DashboardGridItem) {
-      parent.state.body.setState({ $behaviors: undefined });
+    if (!parent || !isDashboardLayoutItem(parent)) {
       return;
     }
 
-    if (parent instanceof AutoGridItem) {
-      parent.state.body.setState({ $behaviors: undefined });
+    // Repeat clones share a layout item with the source body; unlink the source too so getSaveModel
+    // does not keep writing libraryPanel from body after a clone was unlinked in the UI.
+    const body = 'body' in parent.state ? (parent.state as { body?: unknown }).body : undefined;
+    if (body instanceof VizPanel && body !== panel) {
+      getLibraryPanelBehavior(body)?.unlink();
+    }
+
+    if (parent instanceof DashboardGridItem || parent instanceof AutoGridItem) {
       parent.handleEditChange();
-      return;
     }
-
-    console.error('Trying to unlink a lib panel in a layout that is not DashboardGridItem or AutoGridItem');
   }
 
   public showModal(modal: SceneObject) {

@@ -56,6 +56,8 @@ import { AutoGridLayoutManager } from './layout-auto-grid/AutoGridLayoutManager'
 import { DashboardGridItem } from './layout-default/DashboardGridItem';
 import { DefaultGridLayoutManager } from './layout-default/DefaultGridLayoutManager';
 import { RowActions } from './layout-default/row-actions/RowActions';
+import { NotebookCellItem } from './layout-notebook/NotebookCellItem';
+import { NotebookLayoutManager } from './layout-notebook/NotebookLayoutManager';
 import { PanelTimeRange } from './panel-timerange/PanelTimeRange';
 import { type DashboardSceneState } from './types/dashboard';
 
@@ -1590,10 +1592,11 @@ describe('DashboardScene', () => {
       });
 
       it('Should unlink a library panel', () => {
+        const otherBehavior = jest.fn();
         const libPanel = new VizPanel({
           title: 'Panel B',
           pluginId: 'table',
-          $behaviors: [new LibraryPanelBehavior({ name: 'lib panel', uid: 'abc', isLoaded: true })],
+          $behaviors: [new LibraryPanelBehavior({ name: 'lib panel', uid: 'abc', isLoaded: true }), otherBehavior],
         });
 
         const scene = buildTestScene({
@@ -1605,6 +1608,7 @@ describe('DashboardScene', () => {
         scene.unlinkLibraryPanel(libPanel);
 
         expect(isLibraryPanel(libPanel)).toBe(false);
+        expect(libPanel.state.$behaviors).toEqual([otherBehavior]);
       });
 
       it('Should unlink a library panel for auto grid panels', () => {
@@ -1622,6 +1626,26 @@ describe('DashboardScene', () => {
         const scene = buildTestScene({
           body: new AutoGridLayoutManager({
             layout: new AutoGridLayout({ children: [autoGridItem] }),
+          }),
+        });
+
+        expect(isLibraryPanel(libPanel)).toBe(true);
+
+        scene.unlinkLibraryPanel(libPanel);
+
+        expect(isLibraryPanel(libPanel)).toBe(false);
+      });
+
+      it('Should unlink a library panel in a notebook cell', () => {
+        const libPanel = new VizPanel({
+          title: 'Panel B',
+          pluginId: 'table',
+          $behaviors: [new LibraryPanelBehavior({ name: 'lib panel', uid: 'abc', isLoaded: true })],
+        });
+
+        const scene = buildTestScene({
+          body: new NotebookLayoutManager({
+            cells: [new NotebookCellItem({ key: 'cell-1', elementName: 'panel-1', source: 'user', body: libPanel })],
           }),
         });
 

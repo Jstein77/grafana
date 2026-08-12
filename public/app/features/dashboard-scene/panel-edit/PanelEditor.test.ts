@@ -305,9 +305,20 @@ describe('PanelEditor', () => {
       // Just adding an extra stateless behavior to verify unlinking does not remvoe it
       const otherBehavior = jest.fn();
       const panel = new VizPanel({ key: 'panel-1', pluginId: 'text', $behaviors: [libPanelBehavior, otherBehavior] });
-      new DashboardGridItem({ body: panel });
+      const gridItem = new DashboardGridItem({ body: panel });
 
       const editScene = buildPanelEditScene(panel);
+      new DashboardScene({
+        editPanel: editScene,
+        isEditing: true,
+        $timeRange: new SceneTimeRange({ from: 'now-6h', to: 'now' }),
+        body: new DefaultGridLayoutManager({
+          grid: new SceneGridLayout({
+            children: [gridItem],
+          }),
+        }),
+      });
+
       editScene.onConfirmUnlinkLibraryPanel();
 
       expect(panel.state.$behaviors?.length).toBe(1);
