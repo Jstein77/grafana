@@ -1,0 +1,180 @@
+{
+  "name": "SpaceX AI",
+  "id": "spacexai",
+  "colors": {
+    "mode": "dark",
+    "background": {
+      "canvas": "#02050A",
+      "page": "#050A11",
+      "primary": "#080E17",
+      "secondary": "#0D1722",
+      "elevated": "#121F2C"
+    },
+    "text": {
+      "primary": "#F4F8FC",
+      "secondary": "#A5B4C3",
+      "disabled": "#667687",
+      "link": "#73BCFF",
+      "maxContrast": "#FFFFFF"
+    },
+    "border": {
+      "weak": "#152536",
+      "medium": "#263B50",
+      "strong": "#4D6B88"
+    },
+    "primary": {
+      "main": "#4DA8FF",
+      "shade": "#80C1FF",
+      "text": "#73BCFF",
+      "border": "#4DA8FF",
+      "transparent": "rgba(77, 168, 255, 0.16)",
+      "borderTransparent": "rgba(77, 168, 255, 0.4)",
+      "contrastText": "#02050A"
+    },
+    "secondary": {
+      "main": "#152536",
+      "shade": "#20364A",
+      "text": "#D6E2EE",
+      "border": "#2C4359",
+      "transparent": "rgba(165, 180, 195, 0.1)",
+      "borderTransparent": "rgba(165, 180, 195, 0.24)",
+      "contrastText": "#F4F8FC"
+    },
+    "tertiary": {
+      "main": "#8E7CFF",
+      "text": "#B9AEFF",
+      "border": "#8E7CFF",
+      "contrastText": "#02050A"
+    },
+    "accent": {
+      "main": "#F4F8FC",
+      "shade": "#FFFFFF",
+      "text": "#F4F8FC",
+      "border": "#A5B4C3",
+      "transparent": "rgba(244, 248, 252, 0.12)",
+      "borderTransparent": "rgba(244, 248, 252, 0.28)",
+      "contrastText": "#02050A"
+    },
+    "info": {
+      "main": "#4DA8FF",
+      "text": "#91CCFF",
+      "border": "#327FC7"
+    },
+    "success": {
+      "main": "#48D597",
+      "text": "#7BE3B4",
+      "border": "#2DAA74"
+    },
+    "warning": {
+      "main": "#FFC857",
+      "text": "#FFD985",
+      "border": "#D39B2C"
+    },
+    "error": {
+      "main": "#FF5C72",
+      "text": "#FF8E9D",
+      "border": "#D53C52"
+    },
+    "action": {
+      "hover": "rgba(77, 168, 255, 0.12)",
+      "selected": "rgba(77, 168, 255, 0.2)",
+      "selectedBorder": "#4DA8FF",
+      "focus": "rgba(77, 168, 255, 0.18)",
+      "hoverOpacity": 0.1,
+      "disabledText": "#667687",
+      "disabledBackground": "rgba(102, 118, 135, 0.12)",
+      "disabledOpacity": 0.42
+    },
+    "gradients": {
+      "brandHorizontal": "linear-gradient(90deg, #F4F8FC 0%, #4DA8FF 52%, #8E7CFF 100%)",
+      "brandVertical": "linear-gradient(0deg, #8E7CFF 0%, #4DA8FF 48%, #F4F8FC 100%)"
+    },
+    "scrollbar": "#3A526A",
+    "contrastThreshold": 4.5,
+    "hoverFactor": 0.05,
+    "tonalOffset": 0.18
+  },
+  "typography": {
+    "fontFamily": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "fontFamilyMonospace": "\"Roboto Mono\", \"SFMono-Regular\", Consolas, \"Liberation Mono\", monospace",
+    "fontSize": 14,
+    "fontWeightLight": 300,
+    "fontWeightRegular": 400,
+    "fontWeightMedium": 600,
+    "fontWeightBold": 700
+  },
+  "shape": {
+    "borderRadiusSm": 2,
+    "borderRadius": 4,
+    "borderRadiusLg": 8
+  },
+  "shadows": {
+    "z1": "0 1px 3px rgba(0, 0, 0, 0.7)",
+    "z2": "0 8px 24px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(77, 168, 255, 0.08)",
+    "z3": "0 18px 48px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(77, 168, 255, 0.14)"
+  },
+  "components": {
+    "input": {
+      "background": "#050A11",
+      "borderColor": "#263B50",
+      "borderHover": "#4DA8FF",
+      "text": "#F4F8FC"
+    },
+    "tooltip": {
+      "background": "#121F2C",
+      "text": "#F4F8FC"
+    },
+    "panel": {
+      "background": "#080E17",
+      "borderColor": "#152536",
+      "boxShadow": "0 8px 28px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(77, 168, 255, 0.04)"
+    },
+    "dropdown": {
+      "background": "#0D1722"
+    },
+    "overlay": {
+      "background": "rgba(2, 5, 10, 0.82)"
+    },
+    "dashboard": {
+      "background": "#02050A"
+    },
+    "textHighlight": {
+      "background": "#214F7A",
+      "text": "#FFFFFF"
+    },
+    "table": {
+      "rowHoverBackground": "rgba(77, 168, 255, 0.1)",
+      "rowSelected": "rgba(77, 168, 255, 0.18)"
+    },
+    "menu": {
+      "borderRadius": "sm",
+      "padding": 0.5
+    },
+    "tag": {
+      "colors": [
+        { "background": "#173A59", "text": "#91CCFF" },
+        { "background": "#302C68", "text": "#C4BCFF" },
+        { "background": "#124936", "text": "#7BE3B4" },
+        { "background": "#574117", "text": "#FFD985" },
+        { "background": "#57212C", "text": "#FF9EAA" },
+        { "background": "#24404D", "text": "#8DE1F2" }
+      ]
+    }
+  },
+  "visualization": {
+    "palette": [
+      "#4DA8FF",
+      "#8E7CFF",
+      "#42D3E5",
+      "#48D597",
+      "#FFC857",
+      "#FF8A5B",
+      "#FF5C72",
+      "#C78BFF",
+      "#7BC8A4",
+      "#A5B4C3",
+      "#D6E2EE",
+      "#327FC7"
+    ]
+  }
+}
