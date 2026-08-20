@@ -1,0 +1,74 @@
+{
+  "name": "SpaceX AI",
+  "id": "spacexai",
+  "colors": {
+    "mode": "dark",
+    "border": {
+      "weak": "rgba(167, 169, 172, 0.14)",
+      "medium": "rgba(167, 169, 172, 0.28)",
+      "strong": "rgba(242, 242, 242, 0.45)"
+    },
+    "text": {
+      "primary": "#F2F2F2",
+      "secondary": "#A7A9AC",
+      "disabled": "rgba(167, 169, 172, 0.48)",
+      "link": "#5EB1FF",
+      "maxContrast": "#FFFFFF"
+    },
+    "primary": {
+      "main": "#FFFFFF",
+      "text": "#FFFFFF",
+      "border": "#FFFFFF",
+      "name": "primary"
+    },
+    "accent": {
+      "main": "#5EB1FF",
+      "text": "#5EB1FF",
+      "border": "#5EB1FF",
+      "name": "accent"
+    },
+    "secondary": {
+      "main": "rgba(167, 169, 172, 0.12)",
+      "shade": "rgba(167, 169, 172, 0.18)",
+      "transparent": "rgba(167, 169, 172, 0.08)",
+      "text": "#A7A9AC",
+      "contrastText": "#F2F2F2",
+      "border": "rgba(167, 169, 172, 0.2)"
+    },
+    "background": {
+      "canvas": "#000000",
+      "page": "#050505",
+      "primary": "#0A0A0A",
+      "secondary": "#141414",
+      "elevated": "#1A1A1A"
+    },
+    "action": {
+      "hover": "rgba(94, 177, 255, 0.12)",
+      "selected": "rgba(94, 177, 255, 0.18)",
+      "selectedBorder": "#5EB1FF",
+      "focus": "rgba(94, 177, 255, 0.2)",
+      "hoverOpacity": 0.06,
+      "disabledText": "rgba(167, 169, 172, 0.48)",
+      "disabledBackground": "rgba(167, 169, 172, 0.06)",
+      "disabledOpacity": 0.38
+    },
+    "gradients": {
+      "brandHorizontal": "linear-gradient(270deg, #FFFFFF 0%, #5EB1FF 100%)",
+      "brandVertical": "linear-gradient(0.01deg, #FFFFFF 0.01%, #5EB1FF 99.99%)"
+    },
+    "contrastThreshold": 3,
+    "hoverFactor": 0.04,
+    "tonalOffset": 0.15
+  },
+  "typography": {
+    "fontFamily": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+    "fontFamilyMonospace": "\"Roboto Mono\", \"SFMono-Regular\", Menlo, monospace",
+    "fontWeightMedium": 600,
+    "fontWeightBold": 700
+  },
+  "shape": {
+    "borderRadius": 2,
+    "borderRadiusSm": 1,
+    "borderRadiusLg": 4
+  }
+}
