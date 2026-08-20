@@ -34,6 +34,13 @@ func TestAzureLogAnalyticsMacros(t *testing.T) {
 			Err:      require.NoError,
 		},
 		{
+			name:     "$__contains without required args should return an error",
+			query:    backend.DataQuery{},
+			kql:      "$__contains()",
+			expected: "",
+			Err:      require.Error,
+		},
+		{
 			name:     "Kusto variables should be ignored",
 			query:    backend.DataQuery{},
 			kql:      ") on $left.b == $right.y",

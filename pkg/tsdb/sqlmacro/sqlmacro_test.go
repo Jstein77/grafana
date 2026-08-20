@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestRegExpMatchesMacroCalls(t *testing.T) {
+	matches := RegExp.FindAllStringSubmatch("SELECT $__timeFilter(created_at), $__timeGroup(created_at,'5m')", -1)
+	require.Len(t, matches, 2)
+	require.Equal(t, "__timeFilter", matches[0][1])
+	require.Equal(t, "created_at", matches[0][2])
+	require.Equal(t, "__timeGroup", matches[1][1])
+	require.Equal(t, "created_at,'5m'", matches[1][2])
+}
+
 func TestSplitTrailingSQLCommenter(t *testing.T) {
 	tests := []struct {
 		name     string

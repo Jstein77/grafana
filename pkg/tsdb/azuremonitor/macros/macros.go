@@ -18,6 +18,11 @@ const rsIdentifier = `__(timeFilter|timeFrom|timeTo|interval|contains|escapeMult
 const sExpr = `\$` + rsIdentifier + `(?:\(([^\)]*)\))?`
 const escapeMultiExpr = `\$__escapeMulti\(('.*')\)`
 
+var (
+	macroRegexp       = regexp.MustCompile(sExpr)
+	escapeMultiRegexp = regexp.MustCompile(escapeMultiExpr)
+)
+
 type kqlMacroEngine struct {
 	timeRange backend.TimeRange
 	query     backend.DataQuery
@@ -46,13 +51,11 @@ func KqlInterpolate(query backend.DataQuery, dsInfo types.DatasourceInfo, kql st
 func (m *kqlMacroEngine) Interpolate(query backend.DataQuery, dsInfo types.DatasourceInfo, kql string, defaultTimeField string) (string, error) {
 	m.timeRange = query.TimeRange
 	m.query = query
-	rExp, _ := regexp.Compile(sExpr)
-	escapeMultiRegex, _ := regexp.Compile(escapeMultiExpr)
 
 	var macroError error
 
 	// First pass for the escapeMulti macro
-	kql = m.ReplaceAllStringSubmatchFunc(escapeMultiRegex, kql, func(groups []string) string {
+	kql = m.ReplaceAllStringSubmatchFunc(escapeMultiRegexp, kql, func(groups []string) string {
 		args := []string{}
 
 		if len(groups) > 1 {
@@ -64,7 +67,7 @@ func (m *kqlMacroEngine) Interpolate(query backend.DataQuery, dsInfo types.Datas
 	})
 
 	// second pass for all the other macros
-	kql = m.ReplaceAllStringSubmatchFunc(rExp, kql, func(groups []string) string {
+	kql = m.ReplaceAllStringSubmatchFunc(macroRegexp, kql, func(groups []string) string {
 		args := []string{}
 		if len(groups) > 2 {
 			args = strings.Split(groups[2], ",")

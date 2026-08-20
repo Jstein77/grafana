@@ -222,6 +222,36 @@ func TestMacroEngineConcurrency(t *testing.T) {
 	wg.Wait()
 }
 
+func TestMacroEngineErrors(t *testing.T) {
+	engine := &mySQLMacroEngine{
+		logger:    backend.NewLoggerWith("logger", "test"),
+		userError: "inspect Grafana server log for details",
+	}
+	from := time.Date(2018, 4, 12, 18, 0, 0, 0, time.UTC)
+	to := from.Add(5 * time.Minute)
+	timeRange := backend.TimeRange{From: from, To: to}
+
+	t.Run("unknown macro returns an error", func(t *testing.T) {
+		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "SELECT $__notARealMacro(col)")
+		require.EqualError(t, err, `unknown macro __notARealMacro`)
+	})
+
+	t.Run("missing time column for __timeFilter returns an error", func(t *testing.T) {
+		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "WHERE $__timeFilter()")
+		require.EqualError(t, err, "missing time column argument for macro __timeFilter")
+	})
+
+	t.Run("invalid interval for __timeGroup returns an error", func(t *testing.T) {
+		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "GROUP BY $__timeGroup(time_column,'not-an-interval')")
+		require.EqualError(t, err, "error parsing interval 'not-an-interval'")
+	})
+
+	t.Run("non-positive interval for __timeGroup returns an error", func(t *testing.T) {
+		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "GROUP BY $__timeGroup(time_column,'0s')")
+		require.EqualError(t, err, "interval must be positive, got '0s'")
+	})
+}
+
 func TestStripSQLComments(t *testing.T) {
 	t.Run("strips block comments", func(t *testing.T) {
 		result := stripSQLComments("SELECT /* comment */ 1")
