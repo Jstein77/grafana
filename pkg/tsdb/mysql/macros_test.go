@@ -241,6 +241,11 @@ func TestMacroEngineErrors(t *testing.T) {
 		require.EqualError(t, err, "missing time column argument for macro __timeFilter")
 	})
 
+	t.Run("missing time column for __time returns an error", func(t *testing.T) {
+		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "SELECT $__time()")
+		require.EqualError(t, err, "missing time column argument for macro __time")
+	})
+
 	t.Run("invalid interval for __timeGroup returns an error", func(t *testing.T) {
 		_, err := engine.Interpolate(&backend.DataQuery{}, timeRange, "GROUP BY $__timeGroup(time_column,'not-an-interval')")
 		require.EqualError(t, err, "error parsing interval 'not-an-interval'")
