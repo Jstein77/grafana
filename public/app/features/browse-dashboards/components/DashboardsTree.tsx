@@ -25,6 +25,7 @@ import { makeRowID } from '../utils/dashboards';
 import CheckboxCell from './CheckboxCell';
 import CheckboxHeaderCell from './CheckboxHeaderCell';
 import { NameCell } from './NameCell';
+import { StarCell } from './StarCell';
 import { TagsCell } from './TagsCell';
 import { useCustomFlexLayout } from './customFlexTableLayout';
 
@@ -126,6 +127,15 @@ export function DashboardsTree({
       Cell: (props: DashboardsTreeCellProps) => <NameCell {...props} onFolderClick={onFolderClick} />,
     };
 
+    const starColumn: DashboardsTreeColumn = {
+      id: 'star',
+      width: 0,
+      Header: (
+        <span className="sr-only">{t('browse-dashboards.dashboards-tree.star-column', 'Favorite')}</span>
+      ),
+      Cell: StarCell,
+    };
+
     const tagsColumns: DashboardsTreeColumn = {
       id: 'tags',
       width: 2,
@@ -133,7 +143,7 @@ export function DashboardsTree({
       Cell: (props: DashboardsTreeCellProps) => <TagsCell {...props} onTagClick={onTagClick} />,
     };
     const canSelect = canSelectItems(permissions);
-    const columns = [canSelect && checkboxColumn, nameColumn, tagsColumns].filter(isTruthy);
+    const columns = [canSelect && checkboxColumn, nameColumn, starColumn, tagsColumns].filter(isTruthy);
 
     return columns;
   }, [onFolderClick, onTagClick, permissions]);
