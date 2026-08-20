@@ -59,8 +59,19 @@ On the **Dashboards** page, you can browse and manage folders and dashboards. Th
 - Delete multiple dashboards and folders.
 - Navigate to a folder.
 - Manage folder permissions. For more information, refer to [Dashboard permissions](ref:dashboard-permissions).
+- Mark a dashboard as a favorite so it appears under **Starred** in the main menu.
 
 The page lists all the dashboards to which you have access, grouped into folders. Dashboards without a folder are displayed at the top level alongside folders.
+
+### Mark a dashboard as a favorite
+
+You can mark a dashboard as a favorite from the **Dashboards** page without opening it first.
+
+1. Click **Dashboards** in the primary menu.
+1. On a dashboard row, click the star to mark the dashboard as a favorite.
+1. Confirm the dashboard appears under **Starred** in the main menu.
+
+Folder rows don't include a star control.
 
 ### Shared with me
 

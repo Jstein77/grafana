@@ -43,7 +43,7 @@ image_maps:
         content: |
           **Mark as favorite**
 
-          Mark the dashboard as one of your favorites to include it in your list of **Starred** dashboards in the main menu.
+          Mark the dashboard as one of your favorites to include it in your list of **Starred** dashboards in the main menu. You can also mark a dashboard as a favorite from a dashboard row on the **Dashboards** page.
       - x_coord: 27
         y_coord: 4
         content: |
