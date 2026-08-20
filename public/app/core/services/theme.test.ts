@@ -50,6 +50,11 @@ describe('changeTheme', () => {
       expect(backendSrv.patch).toHaveBeenCalledWith('/api/user/preferences', { theme: 'light' });
       expect(preferencesAPI.endpoints.updatePreferences.initiate).not.toHaveBeenCalled();
     });
+
+    it('persists the SpaceX AI theme', async () => {
+      await changeTheme('spacexai', false);
+      expect(backendSrv.patch).toHaveBeenCalledWith('/api/user/preferences', { theme: 'spacexai' });
+    });
   });
 
   describe('when the newPreferencesPage flag is on', () => {
