@@ -370,12 +370,13 @@ export class PanelEditor extends SceneObjectBase<PanelEditorState> {
   };
 
   public onConfirmUnlinkLibraryPanel = () => {
-    const libPanelBehavior = getLibraryPanelBehavior(this.getPanel());
+    const panel = this.getPanel();
+    const libPanelBehavior = getLibraryPanelBehavior(panel);
     if (!libPanelBehavior) {
       return;
     }
 
-    libPanelBehavior.unlink();
+    getDashboardSceneFor(this).unlinkLibraryPanel(panel);
 
     this.setState({ showLibraryPanelUnlinkModal: false });
   };

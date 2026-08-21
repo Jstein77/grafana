@@ -1,3 +1,4 @@
+import { fireEvent, render } from '@testing-library/react';
 import { of } from 'rxjs';
 import { testWithFeatureToggles } from 'test/test-utils';
 
@@ -16,6 +17,7 @@ import { config, locationService } from '@grafana/runtime';
 import { setGetObservablePluginLinks } from '@grafana/runtime/internal';
 import {
   LocalValueVariable,
+  SceneGridLayout,
   SceneQueryRunner,
   SceneTimeRange,
   SceneVariableSet,
@@ -32,11 +34,15 @@ import { AccessControlAction } from 'app/types/accessControl';
 
 import { buildPanelEditScene } from '../panel-edit/PanelEditor';
 import { DashboardInteractions } from '../utils/interactions';
+import { getLibraryPanelBehavior } from '../utils/utils';
 
 import { DashboardScene } from './DashboardScene';
+import { LibraryPanelBehavior } from './LibraryPanelBehavior';
 import { NewAlertRuleDrawer } from './NewAlertRuleDrawer';
 import { VizPanelLinks, VizPanelLinksMenu } from './PanelLinks';
 import { panelMenuBehavior } from './PanelMenuBehavior';
+import { UnlinkLibraryPanelModal } from './UnlinkLibraryPanelModal';
+import { DashboardGridItem } from './layout-default/DashboardGridItem';
 import { DefaultGridLayoutManager } from './layout-default/DefaultGridLayoutManager';
 
 const mocks = {
@@ -622,6 +628,57 @@ describe('panelMenuBehavior', () => {
       const moreMenu = menu.state.items?.find((i) => i.text === 'More...')?.subMenu;
       expect(moreMenu?.find((i) => i.text === 'Duplicate')).toBeDefined();
       expect(moreMenu?.find((i) => i.text === 'New library panel')).toBeDefined();
+    });
+
+    it('unlinks repeated library panels from the panel menu', async () => {
+      const otherBehavior = jest.fn();
+      const menu = new VizPanelMenu({ $behaviors: [panelMenuBehavior] });
+      const sourcePanel = new VizPanel({
+        key: 'panel-1',
+        pluginId: 'table',
+        menu,
+        $behaviors: [new LibraryPanelBehavior({ name: 'Library panel', uid: 'uid' }), otherBehavior],
+      });
+      const repeatedPanel = sourcePanel.clone({
+        key: 'panel-1-clone-1',
+        repeatSourceKey: sourcePanel.state.key,
+      });
+      const gridItem = new DashboardGridItem({
+        body: sourcePanel,
+        repeatedPanels: [repeatedPanel],
+        variableName: 'server',
+      });
+      const scene = new DashboardScene({
+        title: 'My dashboard',
+        isEditing: true,
+        $timeRange: new SceneTimeRange({ from: 'now-5m', to: 'now' }),
+        meta: { canEdit: true },
+        body: new DefaultGridLayoutManager({
+          grid: new SceneGridLayout({ children: [gridItem] }),
+        }),
+      });
+
+      menu.activate();
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
+      const unlinkItem = menu.state.items
+        ?.find((item) => item.text === 'More...')
+        ?.subMenu?.find((item) => item.text === 'Unlink library panel');
+      const view = render(<button onClick={unlinkItem?.onClick}>Unlink</button>);
+      fireEvent.click(view.getByRole('button'));
+
+      const modal = scene.state.overlay;
+      expect(modal).toBeInstanceOf(UnlinkLibraryPanelModal);
+      if (!(modal instanceof UnlinkLibraryPanelModal)) {
+        throw new Error('Expected unlink library panel modal');
+      }
+
+      modal.onConfirm();
+
+      expect(getLibraryPanelBehavior(sourcePanel)).toBeUndefined();
+      expect(getLibraryPanelBehavior(repeatedPanel)).toBeUndefined();
+      expect(sourcePanel.state.$behaviors).toEqual([otherBehavior]);
+      expect(repeatedPanel.state.$behaviors).toEqual([otherBehavior]);
     });
 
     it('should only contain explore when embedded', async () => {

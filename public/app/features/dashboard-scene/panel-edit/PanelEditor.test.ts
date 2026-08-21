@@ -24,9 +24,10 @@ import { LibraryPanelBehavior } from '../scene/LibraryPanelBehavior';
 import { UNCONFIGURED_PANEL_PLUGIN_ID } from '../scene/UnconfiguredPanel';
 import { DashboardGridItem } from '../scene/layout-default/DashboardGridItem';
 import { DefaultGridLayoutManager } from '../scene/layout-default/DefaultGridLayoutManager';
-import { vizPanelToPanel } from '../serialization/transformSceneToSaveModel';
+import { transformSceneToSaveModel, vizPanelToPanel } from '../serialization/transformSceneToSaveModel';
+import { transformSceneToSaveModelSchemaV2 } from '../serialization/transformSceneToSaveModelSchemaV2';
 import { activateFullSceneTree } from '../utils/test-utils';
-import { findVizPanelByKey, getQueryRunnerFor } from '../utils/utils';
+import { findVizPanelByKey, getLibraryPanelBehavior, getQueryRunnerFor } from '../utils/utils';
 
 import { PanelDataPane } from './PanelDataPane/PanelDataPane';
 import { PanelDataPaneNext } from './PanelEditNext/PanelDataPaneNext';
@@ -302,16 +303,69 @@ describe('PanelEditor', () => {
         _loadedPanel: libraryPanelModel,
       });
 
-      // Just adding an extra stateless behavior to verify unlinking does not remvoe it
       const otherBehavior = jest.fn();
       const panel = new VizPanel({ key: 'panel-1', pluginId: 'text', $behaviors: [libPanelBehavior, otherBehavior] });
-      new DashboardGridItem({ body: panel });
-
+      const gridItem = new DashboardGridItem({ body: panel });
       const editScene = buildPanelEditScene(panel);
+      new DashboardScene({
+        editPanel: editScene,
+        $timeRange: new SceneTimeRange({ from: 'now-6h', to: 'now' }),
+        isEditing: true,
+        body: new DefaultGridLayoutManager({
+          grid: new SceneGridLayout({
+            children: [gridItem],
+          }),
+        }),
+      });
+
       editScene.onConfirmUnlinkLibraryPanel();
 
       expect(panel.state.$behaviors?.length).toBe(1);
       expect(panel.state.$behaviors![0]).toBe(otherBehavior);
+    });
+
+    it('unlinks a repeated library panel from the dashboard save model', () => {
+      const otherBehavior = jest.fn();
+      const sourcePanel = new VizPanel({
+        key: 'panel-1',
+        pluginId: 'text',
+        $behaviors: [new LibraryPanelBehavior({ isLoaded: true, uid: 'uid', name: 'libraryPanelName' }), otherBehavior],
+      });
+      const repeatedPanel = sourcePanel.clone({
+        key: 'panel-1-clone-1',
+        repeatSourceKey: 'panel-1',
+      });
+      const gridItem = new DashboardGridItem({
+        body: sourcePanel,
+        repeatedPanels: [repeatedPanel],
+        variableName: 'server',
+      });
+      const dashboard = new DashboardScene({
+        isEditing: true,
+        $timeRange: new SceneTimeRange({ from: 'now-6h', to: 'now' }),
+        body: new DefaultGridLayoutManager({
+          grid: new SceneGridLayout({
+            children: [gridItem],
+          }),
+        }),
+      });
+
+      dashboard.urlSync?.updateFromUrl({ editPanel: repeatedPanel.state.key });
+      const editPanel = dashboard.state.editPanel?.getPanel();
+
+      dashboard.state.editPanel?.onConfirmUnlinkLibraryPanel();
+
+      const saveModelV1 = transformSceneToSaveModel(dashboard);
+      const saveModelV2 = transformSceneToSaveModelSchemaV2(dashboard);
+
+      expect(editPanel).toBe(repeatedPanel);
+      expect(getLibraryPanelBehavior(repeatedPanel)).toBeUndefined();
+      expect(getLibraryPanelBehavior(sourcePanel)).toBeUndefined();
+      expect(repeatedPanel.state.$behaviors).toEqual([otherBehavior]);
+      expect(sourcePanel.state.$behaviors).toEqual([otherBehavior]);
+      expect(saveModelV1.panels?.[0]).toMatchObject({ type: 'text' });
+      expect(saveModelV1.panels?.[0].libraryPanel).toBeUndefined();
+      expect(saveModelV2.elements['panel-1'].kind).toBe('Panel');
     });
   });
 

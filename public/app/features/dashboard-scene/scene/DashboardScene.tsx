@@ -98,6 +98,7 @@ import {
   getDefaultVizPanel,
   getLayoutForObject,
   getLayoutManagerFor,
+  getLibraryPanelBehavior,
   getPanelIdForVizPanel,
   hasActualSaveChanges,
 } from '../utils/utils';
@@ -1028,14 +1029,14 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
 
     const parent = panel.parent;
 
-    if (parent instanceof DashboardGridItem) {
-      parent.state.body.setState({ $behaviors: undefined });
-      return;
-    }
+    if (parent instanceof DashboardGridItem || parent instanceof AutoGridItem) {
+      for (const vizPanel of [parent.state.body, ...(parent.state.repeatedPanels ?? [])]) {
+        getLibraryPanelBehavior(vizPanel)?.unlink();
+      }
 
-    if (parent instanceof AutoGridItem) {
-      parent.state.body.setState({ $behaviors: undefined });
-      parent.handleEditChange();
+      if (parent instanceof AutoGridItem) {
+        parent.handleEditChange();
+      }
       return;
     }
 
