@@ -1,0 +1,13 @@
+---
+description: Grafana frontend styling — Emotion useStyles2 and @grafana/ui layout
+globs: public/app/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend styling
+
+- Style with Emotion via `useStyles2`; do not use inline `style={{}}` or new CSS modules for feature UI.
+- Prefer `@grafana/ui` layout (`Stack`, `Box`) over custom flex wrappers when spacing/layout is the only concern.
+- Reuse existing `@grafana/ui` components before inventing styled primitives.
+- Put `getStyles` at the end of the file; use theme tokens (`theme.spacing`, `theme.colors`, `theme.typography`) instead of hard-coded values.
+- Match patterns in neighboring components in the same feature folder.
