@@ -1,53 +1,83 @@
 ---
 name: reset-demo
-description: Reset the Grafana demo environment by closing the active demo PR, checking out main, and deleting the feature branch locally and on origin. Use when the user asks to reset the demo, clean up after a demo, close the PR and return to main, or restore a clean main checkout.
+description: Reset the Grafana cloud-agents/automations demo — align Linear to open GitHub issues, close open PRs, return to a clean main checkout. Use when the user asks to reset the demo, clean up after a demo, close PRs and return to main, or restore a clean demo state.
 ---
 
 # Reset Demo
 
-Tear down the current demo branch/PR and return to a clean `main`.
+Restore the cloud agents / automations demo to a clean baseline:
+
+1. Linear issues match open GitHub issues (GH is source of truth), with named exceptions
+2. All open PRs closed; local checkout on `main`
+3. Anything else that still looks like mid-demo state is cleaned up
 
 Also follow [github-fieldsphere-fork](../github-fieldsphere-fork/SKILL.md) for all `gh` mutations (`--repo Jstein77/grafana`).
 
-## Steps
+## 1. Align Linear to open GitHub issues
 
-1. **Identify the demo PR and branch**
-   - Prefer the PR/branch from the current conversation.
-   - If unclear: `git branch --show-current`, `git status -sb`, and `gh pr list --repo Jstein77/grafana --head <branch>` (or view by PR number).
-
-2. **Close the PR** (if open)
+**Source of truth:** open issues on `Jstein77/grafana`.
 
 ```bash
-gh pr close <PR_NUMBER> --repo Jstein77/grafana --comment "Closing to reset demo environment."
+gh issue list --repo Jstein77/grafana --state open --limit 100
 ```
 
-3. **Return to main and sync**
+**Linear project:** `Granfana [JS]` (team: Cursor Solutions / `CS-*`).
+
+For every open GH issue, ensure a matching open Linear issue exists in that project (same title / clear 1:1 mapping). Create any missing Linear issues (Backlog) with the GH body and a link to the GH issue.
+
+Cancel (or otherwise close) Linear issues in `Granfana [JS]` that do **not** correspond to an open GH issue, **except**:
+
+| Keep open | Why |
+| --------- | --- |
+| **CS-858** | SpaceX AI theme — Linear-only demo seed |
+| **CS-868** | Star Dashboards — drives the docs PR automation demo |
+
+Do not cancel issues in other Linear projects (Changi, canvas, Armin Grafana, etc.).
+
+Leave kept issues in **Backlog** (not In Progress / In Review) unless the user says otherwise.
+
+## 2. Close open PRs and return to main
+
+Close **all** open PRs on `Jstein77/grafana` (including drafts and the SpaceX / Star Dashboards demo PRs — those demos restart from the Linear issues above).
+
+```bash
+gh pr list --repo Jstein77/grafana --state open
+# for each PR:
+gh pr close <PR_NUMBER> --repo Jstein77/grafana \
+  --comment "Closing to reset demo environment." \
+  --delete-branch
+```
+
+Then:
 
 ```bash
 git checkout main
 git pull origin main
+git branch -D <feature-branch>   # if still present locally
 ```
 
-4. **Delete the feature branch** (local + origin)
+Skip remote branch delete if already removed by `--delete-branch`. Do not delete `main`.
 
-```bash
-git branch -D <feature-branch>
-git push origin --delete <feature-branch>
-```
+Call `SetActiveBranch` for `main`.
 
-Skip remote delete if the branch was never pushed. Do not delete `main`.
+## 3. Sweep other demo drift
 
-5. **Confirm clean state**
+Check and fix anything else that is not clean demo state:
+
+- Working tree: should be clean on `main` tracking `origin/main`
+- No open PRs left on `Jstein77/grafana`
+- Linear `Granfana [JS]` open set = open GH issues + CS-858 + CS-868 only
+- Optional: mention leftover local demo branches (e.g. old `cursor/*`) — delete only if the user asks
 
 ```bash
 git status -sb
 git branch --show-current
+gh pr list --repo Jstein77/grafana --state open
 ```
-
-Expect `main` tracking `origin/main` with a clean working tree. Call `SetActiveBranch` for `main`.
 
 ## Rules
 
 - Do **not** force-push or hard-reset `main` unless the user explicitly asks.
 - Do **not** discard unrelated uncommitted work without asking; stash or leave it and warn.
-- Summarize: closed PR URL, current branch, deleted branch names.
+- Do **not** close or cancel CS-858 or CS-868 during reset.
+- Summarize: Linear creates/cancels, closed PR numbers/URLs, current branch, deleted branches.
