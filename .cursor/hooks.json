@@ -5,6 +5,11 @@
       {
         "command": ".cursor/hooks/enforce-jstein77-gh.sh",
         "matcher": "(^|\\s)gh(\\s|$)"
+      },
+      {
+        "command": ".cursor/hooks/confirm-git-push.sh",
+        "matcher": "(^|\\s)git\\s+push(\\s|$)",
+        "failClosed": true
       }
     ]
   }
