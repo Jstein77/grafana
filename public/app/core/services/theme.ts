@@ -10,6 +10,7 @@ import { contextSrv } from '../services/context_srv';
 import { PreferencesService } from './PreferencesService';
 
 export async function changeTheme(themeId: string, runtimeOnly?: boolean) {
+  // hook-demo: no-op comment so a push can trigger confirm-git-push
   const oldTheme = config.theme2;
 
   const newTheme = getThemeById(themeId);
