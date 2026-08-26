@@ -1,0 +1,38 @@
+---
+description: Demo Linear issues are net-new — implement from the ticket and current main, never from leftover branches or prior attempts
+alwaysApply: true
+---
+
+# Demo Linear issues are net-new
+
+When implementing a **demo Linear issue** (Granfana [JS], including CS-858, CS-868, or any other demo ticket), treat it as a first-time engineering ask. The live agent turn must look like a real first pass, not a resume of last week's demo.
+
+This does **not** apply to reset-demo, infra, skills, or non-demo work.
+
+## Do
+
+- Start from a clean checkout of current `main` (or a new branch off it).
+- Use only the Linear issue text plus the code on that checkout.
+- Discover current APIs, files, and patterns by searching **this** tree.
+- Implement, test, and verify as if nobody has done this before.
+
+## Do not
+
+- Checkout, cherry-pick, or diff old feature branches (`jordanstein/cs-*`, leftover `cursor/*` demo branches, worktrees).
+- Restore stashes, copy files from prior attempts, or reuse uncommitted demo WIP.
+- Search prior agent transcripts, old PRs, or issue comments for "how we did it last time."
+- Skip exploration because you remember a previous demo implementation.
+
+```text
+# ❌ BAD — resumes last demo
+git checkout jordanstein/cs-858-spacexai-theme
+git stash pop
+# copy spacexai.json / theme wiring from the old branch
+
+# ✅ GOOD — net-new from the issue + current main
+git checkout main && git pull
+git checkout -b jordanstein/cs-858-...
+# read the Linear issue, find today's theme registry on this tree, implement
+```
+
+If leftover demo artifacts exist locally, ignore them. Fresh implementation on current `main` is the demo.
