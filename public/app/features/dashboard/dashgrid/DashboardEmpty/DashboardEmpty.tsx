@@ -170,7 +170,7 @@ const OldLayoutEmpty = ({ onAddVisualization, onAddLibraryPanel, onImportDashboa
             Start your new dashboard by adding a visualization
           </Trans>
         </Text>
-        <Box marginBottom={2} paddingX={4}>
+        <Box marginBottom={4} paddingX={4}>
           <Text element="p" textAlignment="center" color="secondary">
             <Trans i18nKey="dashboard.empty.add-visualization-body">
               Select a data source and then query and visualize your data with charts, stats and tables or create lists,
@@ -196,7 +196,7 @@ const OldLayoutEmpty = ({ onAddVisualization, onAddLibraryPanel, onImportDashboa
           <Text element="h3" textAlignment="center" weight="medium">
             <Trans i18nKey="dashboard.empty.add-library-panel-header">Import panel</Trans>
           </Text>
-          <Box marginBottom={2}>
+          <Box marginBottom={4}>
             <Text element="p" textAlignment="center" color="secondary">
               <Trans i18nKey="dashboard.empty.add-library-panel-body">
                 Add visualizations that are shared with other dashboards.
@@ -219,7 +219,7 @@ const OldLayoutEmpty = ({ onAddVisualization, onAddLibraryPanel, onImportDashboa
           <Text element="h3" textAlignment="center" weight="medium">
             <Trans i18nKey="dashboard.empty.import-a-dashboard-header">Import a dashboard</Trans>
           </Text>
-          <Box marginBottom={2}>
+          <Box marginBottom={4}>
             <Text element="p" textAlignment="center" color="secondary">
               <Trans i18nKey="dashboard.empty.import-a-dashboard-body">
                 Import dashboards from files or{' '}
