@@ -8,7 +8,7 @@
       },
       {
         "command": ".cursor/hooks/confirm-git-push.sh",
-        "matcher": "(^|\\s)git\\s+push(\\s|$)",
+        "matcher": "push",
         "failClosed": true
       }
     ]
