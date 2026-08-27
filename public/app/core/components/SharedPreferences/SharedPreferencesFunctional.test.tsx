@@ -156,7 +156,7 @@ describe('SharedPreferencesFunctional', () => {
     const capture = captureRequests();
     const { user } = await setup();
 
-    await selectComboboxOptionInTest(await screen.findByRole('combobox', { name: /Interface theme/ }), 'Gilded grove');
+    await selectComboboxOptionInTest(await screen.findByRole('combobox', { name: /Interface theme/ }), 'SpaceX AI');
 
     await user.click(screen.getByText('Save preferences'));
 
@@ -164,7 +164,7 @@ describe('SharedPreferencesFunctional', () => {
     const newPreferences = await getPrefsUpdateRequest(requests);
 
     expect(newPreferences).toMatchObject({
-      spec: { theme: 'gildedgrove' },
+      spec: { theme: 'spacexai' },
     });
   });
 
