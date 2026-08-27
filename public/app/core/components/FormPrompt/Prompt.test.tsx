@@ -9,6 +9,8 @@ jest.mock('@grafana/runtime', () => ({
   locationService: {
     getLocation: jest.fn(),
     block: jest.fn(),
+    getHistory: jest.fn(() => ({ listen: jest.fn(() => jest.fn()) })),
+    subscribe: jest.fn(() => jest.fn()),
   },
 }));
 
