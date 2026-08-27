@@ -16,7 +16,7 @@ import { AutoGridItem } from './AutoGridItem';
 import { AutoGridLayout } from './AutoGridLayout';
 import { AutoGridLayoutManager } from './AutoGridLayoutManager';
 
-const panelPlugin = getPanelPlugin({});
+const panelPlugin = getPanelPlugin({ id: 'text' }, () => <div>panel-body</div>);
 
 setPluginImportUtils({
   importPanelPlugin: () => Promise.resolve(panelPlugin),
@@ -89,7 +89,7 @@ describe('AutoGridItemRenderer', () => {
 
     render(<gridItem.Component model={gridItem} />);
 
-    expect(screen.queryByText('Hidden by rule')).not.toBeInTheDocument();
+    expect(screen.queryByText('panel-body')).not.toBeInTheDocument();
   });
 
   it('shows the panel in the dashboard layout when the show/hide rule does not match', async () => {
@@ -98,7 +98,7 @@ describe('AutoGridItemRenderer', () => {
 
     render(<gridItem.Component model={gridItem} />);
 
-    expect(await screen.findByText('Hidden by rule')).toBeInTheDocument();
+    expect(await screen.findByText('panel-body')).toBeInTheDocument();
   });
 
   it('omits a hidden panel from solo / PDF-simple capture while still counting it as found', () => {
@@ -112,7 +112,7 @@ describe('AutoGridItemRenderer', () => {
     );
 
     expect(soloPanelContext.matchFound).toBe(true);
-    expect(screen.queryByText('Hidden by rule')).not.toBeInTheDocument();
+    expect(screen.queryByText('panel-body')).not.toBeInTheDocument();
   });
 
   it('renders a visible panel in solo / PDF-simple capture', async () => {
@@ -126,7 +126,7 @@ describe('AutoGridItemRenderer', () => {
     );
 
     expect(soloPanelContext.matchFound).toBe(true);
-    expect(await screen.findByText('Hidden by rule')).toBeInTheDocument();
+    expect(await screen.findByText('panel-body')).toBeInTheDocument();
   });
 
   it('still renders a hidden panel in edit mode during solo capture', async () => {
@@ -140,7 +140,7 @@ describe('AutoGridItemRenderer', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Hidden by rule')).toBeInTheDocument();
+      expect(screen.getByText('panel-body')).toBeInTheDocument();
     });
   });
 });
