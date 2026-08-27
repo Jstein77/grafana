@@ -155,8 +155,11 @@ describe('SharedPreferencesFunctional', () => {
   it('saves an experimental theme preference', async () => {
     const capture = captureRequests();
     const { user } = await setup();
+    const themeSelect = await screen.findByRole('combobox', { name: /Interface theme/ });
 
-    await selectComboboxOptionInTest(await screen.findByRole('combobox', { name: /Interface theme/ }), 'SpaceX AI');
+    await user.clear(themeSelect);
+    await user.type(themeSelect, 'SpaceX AI', { skipClick: true });
+    await user.click(await screen.findByRole('option', { name: 'SpaceX AI' }));
 
     await user.click(screen.getByText('Save preferences'));
 
