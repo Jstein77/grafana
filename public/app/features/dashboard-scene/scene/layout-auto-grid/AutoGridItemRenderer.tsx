@@ -7,7 +7,8 @@ import { useElementSelection, useStyles2 } from '@grafana/ui';
 
 import { type ConditionalRenderingGroup } from '../../conditional-rendering/group/ConditionalRenderingGroup';
 import { useIsConditionallyHidden } from '../../conditional-rendering/hooks/useIsConditionallyHidden';
-import { useSoloPanelContext, renderMatchingSoloPanels } from '../../solo/SoloPanelContext';
+import { useSoloPanelContext } from '../../solo/SoloPanelContext';
+import { ViewPanelWrapper } from '../../solo/ViewPanelWrapper';
 import { useDashboardState } from '../../utils/utils';
 import { SoloPanelContextValueWithSearchStringFilter } from '../PanelSearchLayout';
 import { getIsLazy } from '../layouts-shared/utils';
@@ -107,7 +108,23 @@ export function AutoGridItemRenderer({ model }: SceneComponentProps<AutoGridItem
     // as it renders multiple panels in a grid. Skip lazy loading for viewPanel URL param
     // (SoloPanelContextWithPathIdFilter) since single panels should render immediately.
     const useLazyForSoloPanel = isLazy && soloPanelContext instanceof SoloPanelContextValueWithSearchStringFilter;
-    return renderMatchingSoloPanels(soloPanelContext, [body, ...repeatedPanels], useLazyForSoloPanel);
+    return (
+      <>
+        <SoloPanelWithConditionalRendering
+          panel={body}
+          conditionalRendering={model.state.conditionalRendering}
+          isLazy={useLazyForSoloPanel}
+        />
+        {repeatedPanels.map((item, idx) => (
+          <SoloPanelWithConditionalRendering
+            key={item.state.key!}
+            panel={item}
+            conditionalRendering={model.state.repeatedConditionalRendering?.[idx]}
+            isLazy={useLazyForSoloPanel}
+          />
+        ))}
+      </>
+    );
   }
 
   const isDragging = !!draggingKey;
@@ -139,6 +156,40 @@ export function AutoGridItemRenderer({ model }: SceneComponentProps<AutoGridItem
       ))}
     </>
   );
+}
+
+function SoloPanelWithConditionalRendering({
+  panel,
+  conditionalRendering,
+  isLazy,
+}: {
+  panel: VizPanel;
+  conditionalRendering?: ConditionalRenderingGroup;
+  isLazy?: boolean;
+}) {
+  const soloPanelContext = useSoloPanelContext()!;
+  const { isEditing } = useDashboardState(panel);
+  const [isConditionallyHidden, , , renderHidden] = useIsConditionallyHidden(conditionalRendering);
+
+  if (!soloPanelContext.matches(panel)) {
+    return null;
+  }
+
+  // Same omit rule as the Auto Grid layout path. d-solo / PDF-simple / viewPanel
+  // used to skip show/hide rules, so hidden panels still appeared in PDF exports.
+  if (isConditionallyHidden && !isEditing && !renderHidden) {
+    return null;
+  }
+
+  if (isLazy) {
+    return (
+      <LazyLoader key={panel.state.key!}>
+        <panel.Component model={panel} />
+      </LazyLoader>
+    );
+  }
+
+  return <ViewPanelWrapper panel={panel} showControlsPane={soloPanelContext.showControlsPane} />;
 }
 
 const getStyles = (theme: GrafanaTheme2) => ({
