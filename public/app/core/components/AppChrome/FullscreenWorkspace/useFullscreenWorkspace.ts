@@ -1,6 +1,6 @@
-import { type Location } from 'history';
 import { useEffect } from 'react';
 
+import { type GrafanaLocation } from '@grafana/data';
 import { locationSearchToObject, locationService } from '@grafana/runtime';
 import { useFlagAssistantFullscreenWorkspace } from '@grafana/runtime/internal';
 import { useGrafana } from 'app/core/context/GrafanaContext';
@@ -22,7 +22,7 @@ export function useFullscreenWorkspace(): FullscreenWorkspaceState {
     if (!fullscreenWorkspaceFeatureFlagEnabled) {
       return;
     }
-    const consume = (location: Location) => {
+    const consume = (location: GrafanaLocation) => {
       const queryParams = locationSearchToObject(location.search);
       if (queryParams.fullscreenWorkspace === '1' || queryParams.fullscreenWorkspace === true) {
         chrome.setFullscreenWorkspace(true);

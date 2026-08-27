@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
-import type * as H from 'history';
 import { memo, useContext, useEffect, useMemo } from 'react';
 
+import { type GrafanaLocation } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
 import { locationService } from '@grafana/runtime';
 import { type Dashboard } from '@grafana/schema';
@@ -46,7 +46,7 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
     return () => window.removeEventListener('beforeunload', handleUnload);
   }, [dashboard]);
 
-  const onHistoryBlock = (location: H.Location) => {
+  const onHistoryBlock = (location: GrafanaLocation) => {
     const panelEditor = dashboard.state.editPanel;
     const vizPanel = panelEditor?.getPanel();
     const search = new URLSearchParams(location.search);
@@ -118,7 +118,7 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
 
 DashboardPrompt.displayName = 'DashboardPrompt';
 
-function moveToBlockedLocationAfterReactStateUpdate(location?: H.Location | null, replace = false) {
+function moveToBlockedLocationAfterReactStateUpdate(location?: GrafanaLocation | null, replace = false) {
   if (location) {
     setTimeout(() => (replace ? locationService.replace(location) : locationService.push(location)), 10);
   }

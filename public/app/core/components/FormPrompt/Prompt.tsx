@@ -1,27 +1,22 @@
-import type * as H from 'history';
 import { useEffect } from 'react';
 
+import { type GrafanaLocation } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 
 interface PromptProps {
   when?: boolean;
-  message: string | ((location: H.Location) => string | boolean);
+  message: string | ((location: GrafanaLocation) => string | boolean);
 }
 
 export const Prompt = ({ message, when = true }: PromptProps) => {
-  const history = locationService.getHistory();
-
   useEffect(() => {
     if (!when) {
       return undefined;
     }
-    //@ts-expect-error TODO Update the history package to fix types
-    const unblock = history.block(message);
 
-    return () => {
-      unblock();
-    };
-  }, [when, message, history]);
+    const prompt = typeof message === 'string' ? message : (location: GrafanaLocation) => message(location);
+    return locationService.block(prompt);
+  }, [when, message]);
 
   return null;
 };

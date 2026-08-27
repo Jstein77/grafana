@@ -83,7 +83,7 @@ export function setupFaroPageMeta(faro: Faro): () => void {
   //   count as navigations: redirects (post-login, post-save) are real transitions.
   // - same-pathname events, i.e. query-only churn (time range, variables).
   // Every event still re-emits so `page.url` tracks the full URL.
-  locationService.getHistory().listen((location, action) => {
+  locationService.subscribe((location, action) => {
     const isRewrite = action === 'REPLACE' && isUrlRewrite(location.state);
     if (!isRewrite && location.pathname !== currentPath) {
       previousPath = currentPath;

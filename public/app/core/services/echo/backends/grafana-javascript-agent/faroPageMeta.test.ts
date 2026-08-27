@@ -8,7 +8,7 @@ jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   locationService: {
     getLocation: jest.fn(),
-    getHistory: jest.fn(),
+    subscribe: jest.fn(),
   },
 }));
 
@@ -18,7 +18,7 @@ jest.mock('@grafana/faro-web-sdk', () => ({
 }));
 
 const getLocationMock = jest.mocked(locationService.getLocation);
-const getHistoryMock = jest.mocked(locationService.getHistory);
+const subscribeMock = jest.mocked(locationService.subscribe);
 const persistentFetchMock = jest.mocked(PersistentSessionsManager.fetchUserSession);
 const volatileFetchMock = jest.mocked(VolatileSessionsManager.fetchUserSession);
 
@@ -49,12 +49,10 @@ describe('setupFaroPageMeta', () => {
     faro = { api: { setPage, getSession } } as unknown as Faro;
 
     getLocationMock.mockReturnValue({ pathname: '/search' } as ReturnType<typeof locationService.getLocation>);
-    getHistoryMock.mockReturnValue({
-      listen: (listener: (location: { pathname: string; state?: unknown }, action: string) => void) => {
-        navigate = (location, action = 'PUSH') => listener(location, action);
-        return () => {};
-      },
-    } as unknown as ReturnType<typeof locationService.getHistory>);
+    subscribeMock.mockImplementation((listener) => {
+      navigate = (location, action = 'PUSH') => listener(location as never, action);
+      return () => {};
+    });
 
     mockStoredSessions({ sessionId: 'session-1', started: SESSION_START });
   });
