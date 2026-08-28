@@ -43,10 +43,10 @@
       "elevated": "#1C222B"
     },
     "action": {
-      "hover": "rgba(255, 78, 26, 0.10)",
-      "selected": "rgba(255, 78, 26, 0.16)",
+      "hover": "rgba(255, 160, 120, 0.20)",
+      "selected": "rgba(255, 78, 26, 0.20)",
       "selectedBorder": "#FF4E1A",
-      "focus": "rgba(255, 78, 26, 0.16)",
+      "focus": "rgba(255, 160, 120, 0.20)",
       "hoverOpacity": 0.08,
       "disabledText": "rgba(232, 236, 241, 0.55)",
       "disabledBackground": "rgba(173, 186, 199, 0.05)",
