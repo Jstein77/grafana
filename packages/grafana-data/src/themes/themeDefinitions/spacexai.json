@@ -6,7 +6,7 @@
     "border": {
       "weak": "rgba(173, 186, 199, 0.12)",
       "medium": "rgba(173, 186, 199, 0.20)",
-      "strong": "rgba(173, 186, 199, 0.30)"
+      "strong": "rgba(173, 186, 199, 0.38)"
     },
     "text": {
       "primary": "#E8ECF1",
@@ -56,7 +56,7 @@
       "brandHorizontal": "linear-gradient(270deg, #D93A0F 0%, #FF7A50 100%)",
       "brandVertical": "linear-gradient(0.01deg, #D93A0F 0.01%, #FF7A50 99.99%)"
     },
-    "scrollbar": "rgba(232, 236, 241, 0.25)",
+    "scrollbar": "rgba(232, 236, 241, 0.30)",
     "contrastThreshold": 3,
     "hoverFactor": 0.05,
     "tonalOffset": 0.15
