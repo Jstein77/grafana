@@ -548,6 +548,63 @@ describe('v1 dashboard API', () => {
       // Verify continue token is not set on the final result
       expect(result.metadata.continue).toBeUndefined();
     });
+
+    it('should return a single server page when fillToLimit is false', async () => {
+      const page1 = {
+        metadata: { resourceVersion: '1', continue: 'token-page2' },
+        items: [
+          { ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 5 } },
+          { ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 4 } },
+        ],
+      };
+      mockGet.mockResolvedValueOnce(page1);
+
+      const api = new K8sDashboardAPI();
+      const result = await api.listDashboardHistory('dash-uid', { fillToLimit: false });
+
+      expect(result.items).toHaveLength(2);
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(result.metadata.continue).toBe('token-page2');
+    });
+  });
+
+  describe('getDashboardHistoryVersions', () => {
+    it('should stop after the first page when the version is found without filling later pages', async () => {
+      const page1 = {
+        metadata: { resourceVersion: '1', continue: 'token-page2' },
+        items: [
+          { ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 5 } },
+          { ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 3 } },
+        ],
+      };
+      mockGet.mockResolvedValueOnce(page1);
+
+      const api = new K8sDashboardAPI();
+      const result = await api.getDashboardHistoryVersions('dash-uid', [3]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].metadata.generation).toBe(3);
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+
+    it('should follow continue tokens when the version is not on the first page', async () => {
+      const page1 = {
+        metadata: { resourceVersion: '1', continue: 'token-page2' },
+        items: [{ ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 5 } }],
+      };
+      const page2 = {
+        metadata: { resourceVersion: '1' },
+        items: [{ ...mockDashboardDto, metadata: { ...mockDashboardDto.metadata, generation: 3 } }],
+      };
+      mockGet.mockResolvedValueOnce(page1).mockResolvedValueOnce(page2);
+
+      const api = new K8sDashboardAPI();
+      const result = await api.getDashboardHistoryVersions('dash-uid', [3]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].metadata.generation).toBe(3);
+      expect(mockGet).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('listDeletedDashboards', () => {

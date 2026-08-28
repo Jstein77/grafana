@@ -244,6 +244,7 @@ export class K8sDashboardAPI implements DashboardAPI<DashboardDTO, Dashboard> {
     options?: ListDashboardHistoryOptions
   ): Promise<ResourceList<DashboardDataDTO>> {
     const limit = options?.limit ?? VERSIONS_FETCH_LIMIT;
+    const fillToLimit = options?.fillToLimit ?? true;
     let continueToken = options?.continueToken;
     const items: Array<Resource<DashboardDataDTO>> = [];
 
@@ -258,7 +259,7 @@ export class K8sDashboardAPI implements DashboardAPI<DashboardDTO, Dashboard> {
       });
       items.push(...lastPage.items);
       continueToken = lastPage.metadata.continue;
-    } while (items.length < limit && continueToken);
+    } while (fillToLimit && items.length < limit && continueToken);
 
     return { ...lastPage!, metadata: { ...lastPage!.metadata, continue: continueToken }, items };
   }
@@ -269,9 +270,9 @@ export class K8sDashboardAPI implements DashboardAPI<DashboardDTO, Dashboard> {
     let continueToken: string | undefined;
 
     do {
-      // using high limit to attempt finding the versions in one request
-      // if not found, pagination will kick in
-      const history = await this.listDashboardHistory(uid, { limit: 1000, continueToken });
+      // High limit tries to find the versions in one request; fillToLimit is off so
+      // a byte-capped page can return early instead of draining toward 1000 first.
+      const history = await this.listDashboardHistory(uid, { limit: 1000, continueToken, fillToLimit: false });
       for (const item of history.items) {
         if (versionsToFind.has(item.metadata.generation ?? 0)) {
           results.push(item);

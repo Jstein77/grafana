@@ -91,15 +91,31 @@ export class UnifiedDashboardAPI
     const limit = options?.limit ?? VERSIONS_FETCH_LIMIT;
     const { v1: v1Token, v2: v2Token } = decodeCompositeToken(options?.continueToken);
 
+    // A leftover v2 cursor with no v1 cursor means v1 is already exhausted. Calling v1
+    // without a continue token restarts it from page 1 and appends duplicate rows.
+    if (!v1Token && v2Token) {
+      const v2Response = await this.v2Client.listDashboardHistory(uid, { limit, continueToken: v2Token });
+      return {
+        ...v2Response,
+        metadata: {
+          ...v2Response.metadata,
+          continue: encodeCompositeToken(undefined, v2Response.metadata.continue),
+        },
+      };
+    }
+
     const v1Response = await this.v1Client.listDashboardHistory(uid, { limit, continueToken: v1Token });
     const v1Valid = v1Response.items.filter((item) => !failedFromVersion(item, ['v2']));
+    const v1Continue = v1Response.metadata.continue;
 
-    if (v1Valid.length === v1Response.items.length && v1Response.items.length > 0) {
+    // Skip v2 only while v1 still has pages, or when there is no leftover v2 cursor.
+    // If v1 is exhausted but v2Token remains, fall through and actually fetch v2.
+    if (v1Valid.length === v1Response.items.length && v1Response.items.length > 0 && (v1Continue || !v2Token)) {
       return {
         ...v1Response,
         metadata: {
           ...v1Response.metadata,
-          continue: encodeCompositeToken(v1Response.metadata.continue, v2Token),
+          continue: encodeCompositeToken(v1Continue, v2Token),
         },
       };
     }
@@ -112,7 +128,7 @@ export class UnifiedDashboardAPI
         ...v2Response,
         metadata: {
           ...v2Response.metadata,
-          continue: encodeCompositeToken(v1Response.metadata.continue, v2Response.metadata.continue),
+          continue: encodeCompositeToken(v1Continue, v2Response.metadata.continue),
         },
       };
     }
@@ -126,7 +142,7 @@ export class UnifiedDashboardAPI
       items: merged,
       metadata: {
         ...v1Response.metadata,
-        continue: encodeCompositeToken(v1Response.metadata.continue, v2Response.metadata.continue),
+        continue: encodeCompositeToken(v1Continue, v2Response.metadata.continue),
       },
     };
   }
