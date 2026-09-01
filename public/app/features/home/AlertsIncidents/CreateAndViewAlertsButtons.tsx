@@ -1,18 +1,18 @@
-import { Trans } from '@grafana/i18n';
-import { LinkButton, Stack } from '@grafana/ui';
+import { Trans } from "@grafana/i18n";
+import { HorizontalGroup, LinkButton } from "@grafana/ui";
 
-import { ctaClicked } from '../analytics/main';
+import { ctaClicked } from "../analytics/main";
 
 interface Props {
-  hasAlerts: boolean;
-  canCreate: boolean;
-  newRuleHref: string;
-  viewAllHref: string;
+  hasAlerts: boolean
+  canCreate: boolean
+  newRuleHref: string
+  viewAllHref: string
 }
 
 export const CreateAndViewAlertsButtons = ({ hasAlerts, canCreate, newRuleHref, viewAllHref }: Props) => {
   return (
-    <Stack justifyContent="flex-end" wrap="wrap">
+    <HorizontalGroup justify="flex-end" wrap >
       {hasAlerts && canCreate && (
         <LinkButton
           variant="secondary"
@@ -45,6 +45,6 @@ export const CreateAndViewAlertsButtons = ({ hasAlerts, canCreate, newRuleHref, 
           <Trans i18nKey="home.firing-alerts-card.view-rules">View all alert rules</Trans>
         )}
       </LinkButton>
-    </Stack>
+    </HorizontalGroup>
   );
 };
