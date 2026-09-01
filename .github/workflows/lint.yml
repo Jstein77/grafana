@@ -35,7 +35,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
@@ -50,10 +49,11 @@ jobs:
             gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
               --jq '.[].filename' > all-changed.txt
           else
-            # Whole-branch diff, not just this push, so a commit that touches
-            # nothing still re-reports outstanding formatting problems.
-            git fetch --no-tags origin main:refs/remotes/origin/main
-            git diff --name-only origin/main...HEAD > all-changed.txt
+            # Whole-branch comparison, not just this push, so a commit that
+            # touches nothing still re-reports outstanding formatting problems.
+            # Asking the API avoids fetching history for a shallow checkout.
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/compare/main...${GITHUB_SHA}" \
+              --jq '.files[].filename' > all-changed.txt
           fi
           grep -E "${PRETTIER_EXTENSIONS}" all-changed.txt > changed.txt || true
       - name: Prettier check (changed files)
