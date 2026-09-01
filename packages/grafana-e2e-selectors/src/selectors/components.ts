@@ -969,6 +969,14 @@ export const versionedComponents = {
       [MIN_GRAFANA_VERSION]: (severity: string) => `data-testid Alert ${severity}`,
     },
   },
+  EnvironmentBanner: {
+    container: {
+      '13.2.0': 'data-testid EnvironmentBanner container',
+    },
+    dismissButton: {
+      '13.2.0': 'data-testid EnvironmentBanner dismiss-button',
+    },
+  },
   TransformTab: {
     content: {
       '10.1.0': 'data-testid Transform editor tab content',
