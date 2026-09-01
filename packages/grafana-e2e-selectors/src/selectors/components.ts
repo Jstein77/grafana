@@ -94,6 +94,14 @@ export const versionedComponents = {
       '13.1.0': 'data-testid edit pane add new variable button',
     },
   },
+  EnvironmentBanner: {
+    container: {
+      '13.2.0': 'data-testid EnvironmentBanner container',
+    },
+    dismissButton: {
+      '13.2.0': 'data-testid EnvironmentBanner dismiss-button',
+    },
+  },
   EditPaneHeader: {
     deleteButton: {
       '12.1.0': 'data-testid EditPaneHeader delete panel',

@@ -18,7 +18,7 @@ import { ScopesDashboards } from 'app/features/scopes/dashboards/ScopesDashboard
 
 import { AppChromeMenu } from './AppChromeMenu';
 import { type AppChromeService, DOCKED_LOCAL_STORAGE_KEY } from './AppChromeService';
-import { EnvironmentBanner } from './EnvironmentBanner/EnvironmentBanner';
+import { ENVIRONMENT_BANNER_HEIGHT_VAR, EnvironmentBanner } from './EnvironmentBanner/EnvironmentBanner';
 import {
   ExtensionSidebar,
   MAX_EXTENSION_SIDEBAR_WIDTH,
@@ -273,13 +273,15 @@ function useResponsiveDockedMegaMenu(chrome: AppChromeService) {
   }, [isLargeScreen, chrome, dockedMenuLocalStorageState]);
 }
 
+const bannerOffset = `var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px)`;
+
 const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: number, visualRefreshEnabled: boolean) => {
   return {
     content: css({
       label: 'page-content',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: headerLevels * headerHeight,
+      paddingTop: `calc(${headerLevels * headerHeight}px + ${bannerOffset})`,
       flexGrow: 1,
       height: 'auto',
     }),
@@ -294,9 +296,9 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       background: visualRefreshEnabled ? theme.colors.background.canvas : theme.colors.background.primary,
       borderRight: visualRefreshEnabled ? undefined : `1px solid ${theme.colors.border.weak}`,
       display: 'none',
-      height: '100%',
+      height: `calc(100% - ${bannerOffset})`,
       position: 'fixed',
-      top: 0,
+      top: bannerOffset,
       width: MENU_WIDTH,
       zIndex: 2,
 
@@ -317,6 +319,7 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       display: 'flex',
       position: 'fixed',
       zIndex: theme.zIndex.navbarFixed,
+      top: bannerOffset,
       left: 0,
       right: 0,
       background: visualRefreshEnabled ? theme.colors.background.canvas : theme.colors.background.primary,
@@ -367,14 +370,14 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       // the `Resizeable` component overrides the needed `position` and `height`
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       position: 'fixed !important' as 'fixed',
-      top: headerHeight,
+      top: `calc(${headerHeight}px + ${bannerOffset})`,
       bottom: 0,
       zIndex: theme.zIndex.navbarFixed + 1,
       right: 0,
     }),
     sidebarContainerFloating: css({
       position: 'fixed',
-      top: headerLevels * headerHeight,
+      top: `calc(${headerLevels * headerHeight}px + ${bannerOffset})`,
       bottom: 0,
       left: 0,
       right: 0,
