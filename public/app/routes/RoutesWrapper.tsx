@@ -1,4 +1,4 @@
-import { type ComponentType, type ReactNode, type JSX } from 'react';
+import { type ComponentType, type ComponentProps, type ReactNode, type JSX } from 'react';
 import { Router } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 
@@ -24,8 +24,9 @@ type RouterWrapperProps = {
   providers: Array<ComponentType<{ children: ReactNode }>>;
 };
 export function RouterWrapper(props: RouterWrapperProps) {
+  // React Router v5 still needs a history-shaped object; getHistory() is the compatibility bridge.
   return (
-    <Router history={locationService.getHistory()}>
+    <Router history={locationService.getHistory() as ComponentProps<typeof Router>['history']}>
       <LocationServiceProvider service={locationService}>
         <CompatRouter>
           <QueriesDrawerContextProvider>

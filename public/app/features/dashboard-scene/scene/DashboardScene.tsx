@@ -1,5 +1,3 @@
-import type * as H from 'history';
-
 import {
   CoreApp,
   type DataQueryRequest,
@@ -7,6 +5,7 @@ import {
   type FieldConfigSource,
   filterFieldConfigOverrides,
   isStandardFieldProp,
+  type GrafanaLocation,
   locationUtil,
   type NavIndex,
   type NavModelItem,
@@ -173,7 +172,7 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
   /**
    * Url state before editing started
    */
-  private _initialUrlState?: H.Location;
+  private _initialUrlState?: GrafanaLocation;
   /**
    * Dashboard changes tracker
    */
@@ -661,7 +660,7 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
     });
   }
 
-  public getPageNav(location: H.Location, navIndex: NavIndex) {
+  public getPageNav(location: GrafanaLocation, navIndex: NavIndex) {
     const { meta, viewPanel, editPanel, title, uid } = this.state;
     const isNew = !Boolean(uid);
     // Trailing slash enforces a path-segment match so unrelated prefixes (e.g. `/dashboard/provisioning-foo/...`) don't match.
