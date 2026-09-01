@@ -3,47 +3,68 @@
 name: Lint
 
 on:
+  push:
+    branches-ignore:
+      - main
+      - 'release-*.*.*'
   pull_request:
     branches:
       - main
       - 'release-*.*.*'
 
 concurrency:
-  group: lint-${{ github.workflow }}-${{ github.ref }}
+  group: lint-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: read
 
+env:
+  PRETTIER_EXTENSIONS: '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$'
+
 jobs:
   prettier:
     name: Prettier
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Same-repo branches are covered by the push event; only fork PRs, which
+    # never emit push here, need the pull_request run.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
-      - name: Prettier check (PR files)
+      - name: Collect changed files
+        id: changed
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          mapfile -t files < <(
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
-              --jq '.[].filename' \
-            | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$' || true
-          )
+          if [ -n "${PR_NUMBER}" ]; then
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename' > all-changed.txt
+          else
+            # Whole-branch diff, not just this push, so a commit that touches
+            # nothing still re-reports outstanding formatting problems.
+            git fetch --no-tags origin main:refs/remotes/origin/main
+            git diff --name-only origin/main...HEAD > all-changed.txt
+          fi
+          grep -E "${PRETTIER_EXTENSIONS}" all-changed.txt > changed.txt || true
+      - name: Prettier check (changed files)
+        run: |
+          set -euo pipefail
           existing=()
-          for f in "${files[@]+"${files[@]}"}"; do
+          while IFS= read -r f; do
             if [ -f "$f" ]; then
               existing+=("$f")
             fi
-          done
+          done < changed.txt
           if [ ${#existing[@]} -eq 0 ]; then
             echo "No Prettier-eligible files changed"
             exit 0
