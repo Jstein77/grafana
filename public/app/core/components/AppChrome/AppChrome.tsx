@@ -18,6 +18,7 @@ import { ScopesDashboards } from 'app/features/scopes/dashboards/ScopesDashboard
 
 import { AppChromeMenu } from './AppChromeMenu';
 import { type AppChromeService, DOCKED_LOCAL_STORAGE_KEY } from './AppChromeService';
+import { EnvironmentBanner } from './EnvironmentBanner/EnvironmentBanner';
 import {
   ExtensionSidebar,
   MAX_EXTENSION_SIDEBAR_WIDTH,
@@ -146,6 +147,7 @@ export function AppChrome({ children }: Props) {
     >
       {!state.chromeless && (
         <>
+          <EnvironmentBanner />
           <LinkButton
             className={styles.skipLink}
             href="#pageContent"
