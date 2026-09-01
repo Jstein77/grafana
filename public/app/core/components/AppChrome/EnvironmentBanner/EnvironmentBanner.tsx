@@ -67,15 +67,7 @@ export function EnvironmentBanner() {
       title={t('environment-banner.title', 'Non-production environment')}
       data-testid={selectors.components.EnvironmentBanner.container}
       action={
-        <Button
-          aria-label={t('grafana-ui.alert.close-button', 'Close alert')}
-          data-testid={selectors.components.EnvironmentBanner.dismissButton}
-          fill="text"
-          icon="times"
-          onClick={handleDismiss}
-          type="button"
-          variant="secondary"
-        />
+          <Button aria-label={t('grafana-ui.alert.close-button', 'Close alert')} data-testid={selectors.components.EnvironmentBanner.dismissButton} fill="text" icon="times" onClick={handleDismiss} type="button" variant="secondary" />
       }
     >
       {t('environment-banner.body', 'Do not use this instance for production changes.')}
