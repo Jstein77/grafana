@@ -1321,7 +1321,6 @@ embed.go @grafana/grafana-as-code
 /.github/workflows/issue-opened.yml @grafana/grafana-community-support
 /.github/workflows/lint-build-docs.yml @grafana/docs-tooling
 /.github/workflows/pr-checks.yml @tolzhabayev
-/.github/workflows/pr-endpoint-feature-toggle.yml @grafana/alerting-frontend
 /.github/workflows/pr-mt-service-compatibility.yml @evictorero
 /.github/workflows/pr-unified-storage-compatibility.yml @grafana/grafana-search-and-storage
 /.github/workflows/pr-commands.yml @tolzhabayev
@@ -1372,7 +1371,6 @@ embed.go @grafana/grafana-as-code
 /.github/workflows/release-npm.yml @grafana/grafana-frontend-platform
 /.github/workflows/scripts/determine-npm-tag.sh @grafana/grafana-frontend-platform
 /.github/workflows/scripts/validate-commit-in-head.sh @grafana/grafana-frontend-platform
-/.github/workflows/scripts/test-endpoint-migration-check.sh @grafana/alerting-frontend
 /.github/zizmor.yml @grafana/grafana-backend-services-squad
 /.github/license_finder.yaml @bergquist
 /.github/actionlint.yaml @grafana/grafana-backend-services-squad
