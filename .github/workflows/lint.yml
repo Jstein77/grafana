@@ -13,7 +13,9 @@ on:
       - 'release-*.*.*'
 
 concurrency:
-  group: lint-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  # Keyed by event as well as branch: a push and its pull_request twin must not
+  # cancel each other, or the surviving check reports cancelled instead of red.
+  group: lint-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
