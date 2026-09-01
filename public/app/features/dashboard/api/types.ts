@@ -23,6 +23,8 @@ export type ListDeletedDashboardsOptions = Omit<ListOptions, 'labelSelector'>;
 export interface ListDashboardHistoryOptions {
   limit?: number;
   continueToken?: string;
+  /** When false, return a single server page instead of looping until `limit` items. Defaults to true. */
+  fillToLimit?: boolean;
 }
 
 export interface DashboardAPI<G, T> {

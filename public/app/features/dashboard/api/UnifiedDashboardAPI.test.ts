@@ -413,6 +413,134 @@ describe('UnifiedDashboardAPI', () => {
 
       expect(result.metadata.continue).toBeUndefined();
     });
+
+    it('should not fetch v2 when the last all-valid v1 page is exhausted and there is no v2 cursor', async () => {
+      const mockV1Response = {
+        apiVersion: 'dashboard.grafana.app/v1beta1',
+        kind: 'DashboardList',
+        metadata: { resourceVersion: '1' },
+        items: [
+          {
+            kind: 'Dashboard',
+            apiVersion: 'dashboard.grafana.app/v1beta1',
+            metadata: {
+              name: 'dash-1',
+              resourceVersion: '1',
+              creationTimestamp: '2023-01-01T00:00:00Z',
+              generation: 1,
+            },
+            spec: { title: 'v1', schemaVersion: 30 },
+            status: {},
+          },
+        ],
+      };
+
+      v1Client.listDashboardHistory.mockResolvedValue(mockV1Response as ResourceList<DashboardDataDTO>);
+
+      const result = await api.listDashboardHistory('dash-1');
+
+      expect(result.items).toEqual(mockV1Response.items);
+      expect(v2Client.listDashboardHistory).not.toHaveBeenCalled();
+      expect(result.metadata.continue).toBeUndefined();
+    });
+
+    it('should fetch v2 when an all-valid v1 page is exhausted with a leftover v2 cursor', async () => {
+      const leftoverV2Token = 'v2-page2';
+      const compositeToken = btoa(JSON.stringify({ v1: 'v1-last', v2: leftoverV2Token }));
+
+      const mockV1Response = {
+        apiVersion: 'dashboard.grafana.app/v1beta1',
+        kind: 'DashboardList',
+        metadata: { resourceVersion: '1' },
+        items: [
+          {
+            kind: 'Dashboard',
+            apiVersion: 'dashboard.grafana.app/v1beta1',
+            metadata: {
+              name: 'dash-1',
+              resourceVersion: '3',
+              creationTimestamp: '2023-01-01T00:00:00Z',
+              generation: 3,
+            },
+            spec: { title: 'v1', schemaVersion: 30 },
+            status: {},
+          },
+        ],
+      };
+      const mockV2Response = {
+        apiVersion: 'dashboard.grafana.app/v2beta1',
+        kind: 'DashboardList',
+        metadata: { resourceVersion: '2', continue: 'v2-page3' },
+        items: [
+          {
+            kind: 'Dashboard',
+            apiVersion: 'dashboard.grafana.app/v2beta1',
+            metadata: {
+              name: 'dash-1',
+              resourceVersion: '2',
+              creationTimestamp: '2023-01-01T00:00:00Z',
+              generation: 2,
+            },
+            spec: { title: 'v2', elements: {} },
+            status: {},
+          },
+        ],
+      };
+
+      v1Client.listDashboardHistory.mockResolvedValue(mockV1Response as ResourceList<DashboardDataDTO>);
+      v2Client.listDashboardHistory.mockResolvedValue(mockV2Response as ResourceList<DashboardV2Spec>);
+
+      const result = await api.listDashboardHistory('dash-1', { limit: 10, continueToken: compositeToken });
+
+      expect(v1Client.listDashboardHistory).toHaveBeenCalledWith('dash-1', { limit: 10, continueToken: 'v1-last' });
+      expect(v2Client.listDashboardHistory).toHaveBeenCalledWith('dash-1', {
+        limit: 10,
+        continueToken: leftoverV2Token,
+      });
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0].metadata.generation).toBe(3);
+      expect(result.items[1].metadata.generation).toBe(2);
+
+      const decoded = JSON.parse(atob(result.metadata.continue!));
+      expect(decoded).toEqual({ v2: 'v2-page3' });
+    });
+
+    it('should not restart v1 when the continue token has only a leftover v2 cursor', async () => {
+      const leftoverV2Token = 'v2-page2';
+      const compositeToken = btoa(JSON.stringify({ v2: leftoverV2Token }));
+
+      const mockV2Response = {
+        apiVersion: 'dashboard.grafana.app/v2beta1',
+        kind: 'DashboardList',
+        metadata: { resourceVersion: '2' },
+        items: [
+          {
+            kind: 'Dashboard',
+            apiVersion: 'dashboard.grafana.app/v2beta1',
+            metadata: {
+              name: 'dash-1',
+              resourceVersion: '2',
+              creationTimestamp: '2023-01-01T00:00:00Z',
+              generation: 2,
+            },
+            spec: { title: 'v2', elements: {} },
+            status: {},
+          },
+        ],
+      };
+
+      v2Client.listDashboardHistory.mockResolvedValue(mockV2Response as ResourceList<DashboardV2Spec>);
+
+      const result = await api.listDashboardHistory('dash-1', { limit: 10, continueToken: compositeToken });
+
+      expect(v1Client.listDashboardHistory).not.toHaveBeenCalled();
+      expect(v2Client.listDashboardHistory).toHaveBeenCalledWith('dash-1', {
+        limit: 10,
+        continueToken: leftoverV2Token,
+      });
+      expect(result.items).toEqual(mockV2Response.items);
+      expect(result.metadata.continue).toBeUndefined();
+    });
   });
 
   describe('deleteDashboard', () => {
