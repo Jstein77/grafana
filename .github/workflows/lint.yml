@@ -1,5 +1,8 @@
 # Fast Prettier check on files changed in a PR. No yarn install — meant for
 # self-healing CI demos. Fieldsphere CI stays a separate banner-contract job.
+#
+# Also run on push. Cursor Workflow run completed automations only enroll
+# Actions runs whose original event was push, not pull_request.
 name: Lint
 
 on:
@@ -7,6 +10,7 @@ on:
     branches:
       - main
       - 'release-*.*.*'
+  push:
 
 concurrency:
   group: lint-${{ github.workflow }}-${{ github.ref }}
@@ -25,19 +29,41 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
-      - name: Prettier check (PR files)
+      - name: Prettier check (changed files)
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          mapfile -t files < <(
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
-              --jq '.[].filename' \
-            | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$' || true
-          )
+          prettier_files() {
+            grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$' || true
+          }
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            mapfile -t files < <(
+              gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+                --jq '.[].filename' \
+              | prettier_files
+            )
+          elif [ "${GITHUB_REF_NAME}" = "$DEFAULT_BRANCH" ]; then
+            if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+              mapfile -t files < <(git diff --name-only "$GITHUB_SHA" | prettier_files)
+            else
+              mapfile -t files < <(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" | prettier_files)
+            fi
+          else
+            git fetch --no-tags origin "$DEFAULT_BRANCH"
+            mapfile -t files < <(
+              git diff --name-only "origin/${DEFAULT_BRANCH}...${GITHUB_SHA}" \
+              | prettier_files
+            )
+          fi
           existing=()
           for f in "${files[@]+"${files[@]}"}"; do
             if [ -f "$f" ]; then
