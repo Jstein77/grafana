@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2, store } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
@@ -22,9 +22,7 @@ export function shouldShowEnvironmentBanner(env: string, dismissed: boolean): bo
 export function EnvironmentBanner() {
   const styles = useStyles2(getStyles);
   const bannerRef = useRef<HTMLDivElement>(null);
-  const [dismissed, setDismissed] = useState(
-    () => window.localStorage.getItem(ENVIRONMENT_BANNER_DISMISSED_KEY) === 'true'
-  );
+  const [dismissed, setDismissed] = useState(() => store.getBool(ENVIRONMENT_BANNER_DISMISSED_KEY, false));
 
   useLayoutEffect(() => {
     const node = bannerRef.current;
@@ -54,7 +52,7 @@ export function EnvironmentBanner() {
   }
 
   const handleDismiss = () => {
-    window.localStorage.setItem(ENVIRONMENT_BANNER_DISMISSED_KEY, 'true');
+    store.set(ENVIRONMENT_BANNER_DISMISSED_KEY, true);
     setDismissed(true);
   };
 
@@ -94,7 +92,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     zIndex: theme.zIndex.navbarFixed + 1,
     margin: 0,
     flexGrow: 0,
-    borderRadius: 0,
+    borderRadius: 'unset',
     borderLeft: 'none',
     borderRight: 'none',
     borderTop: 'none',
