@@ -1,0 +1,53 @@
+# Fast Prettier check on files changed in a PR. No yarn install — meant for
+# self-healing CI demos. Fieldsphere CI stays a separate banner-contract job.
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'release-*.*.*'
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Prettier check (PR files)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
+              --jq '.[].filename' \
+            | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$' || true
+          )
+          existing=()
+          for f in "${files[@]+"${files[@]}"}"; do
+            if [ -f "$f" ]; then
+              existing+=("$f")
+            fi
+          done
+          if [ ${#existing[@]} -eq 0 ]; then
+            echo "No Prettier-eligible files changed"
+            exit 0
+          fi
+          echo "Checking ${#existing[@]} file(s):"
+          printf '  %s\n' "${existing[@]}"
+          npx --yes prettier@3.6.2 --check -- "${existing[@]}"
