@@ -78,3 +78,14 @@ jobs:
         env:
           # Root tsc + Nx package graphs are memory-heavy; default heap can OOM on ubuntu-latest.
           NODE_OPTIONS: --max-old-space-size=6144
+
+  environment-banner:
+    name: Environment banner contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Check environment banner contract
+        run: python3 scripts/ci/check-environment-banner.py
