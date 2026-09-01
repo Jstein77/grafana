@@ -1,5 +1,5 @@
-# Fast Prettier check on files changed in a PR. No yarn install — suitable for
-# self-healing CI demos. Full-repo prettier/eslint/typecheck stay in fieldsphere-ci.
+# Fast Prettier check on files changed in a PR. No yarn install — meant for
+# self-healing CI demos. Fieldsphere CI stays a separate banner-contract job.
 name: Lint
 
 on:
