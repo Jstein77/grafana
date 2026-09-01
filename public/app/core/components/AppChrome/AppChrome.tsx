@@ -18,7 +18,7 @@ import { ScopesDashboards } from 'app/features/scopes/dashboards/ScopesDashboard
 
 import { AppChromeMenu } from './AppChromeMenu';
 import { type AppChromeService, DOCKED_LOCAL_STORAGE_KEY } from './AppChromeService';
-import { EnvironmentBanner } from './EnvironmentBanner/EnvironmentBanner';
+import { ENVIRONMENT_BANNER_HEIGHT_VAR, EnvironmentBanner } from './EnvironmentBanner/EnvironmentBanner';
 import {
   ExtensionSidebar,
   MAX_EXTENSION_SIDEBAR_WIDTH,
@@ -279,7 +279,7 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       label: 'page-content',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: headerLevels * headerHeight,
+      paddingTop: `calc(${headerLevels * headerHeight}px + var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px))`,
       flexGrow: 1,
       height: 'auto',
     }),
@@ -294,9 +294,9 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       background: visualRefreshEnabled ? theme.colors.background.canvas : theme.colors.background.primary,
       borderRight: visualRefreshEnabled ? undefined : `1px solid ${theme.colors.border.weak}`,
       display: 'none',
-      height: '100%',
+      height: `calc(100% - var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px))`,
       position: 'fixed',
-      top: 0,
+      top: `var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px)`,
       width: MENU_WIDTH,
       zIndex: 2,
 
@@ -307,7 +307,7 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
     }),
     scopesDashboardsContainer: css({
       position: 'fixed',
-      height: `calc(100% - ${headerHeight}px)`,
+      height: `calc(100% - ${headerHeight}px - var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px))`,
       zIndex: 1,
     }),
     scopesDashboardsContainerDocked: css({
@@ -317,6 +317,7 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       display: 'flex',
       position: 'fixed',
       zIndex: theme.zIndex.navbarFixed,
+      top: `var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px)`,
       left: 0,
       right: 0,
       background: visualRefreshEnabled ? theme.colors.background.canvas : theme.colors.background.primary,
@@ -367,14 +368,14 @@ const getStyles = (theme: GrafanaTheme2, headerLevels: number, headerHeight: num
       // the `Resizeable` component overrides the needed `position` and `height`
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       position: 'fixed !important' as 'fixed',
-      top: headerHeight,
+      top: `calc(${headerHeight}px + var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px))`,
       bottom: 0,
       zIndex: theme.zIndex.navbarFixed + 1,
       right: 0,
     }),
     sidebarContainerFloating: css({
       position: 'fixed',
-      top: headerLevels * headerHeight,
+      top: `calc(${headerLevels * headerHeight}px + var(${ENVIRONMENT_BANNER_HEIGHT_VAR}, 0px))`,
       bottom: 0,
       left: 0,
       right: 0,
