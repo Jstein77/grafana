@@ -7,8 +7,7 @@ import { fromPairs } from 'lodash';
 import { stringify } from 'querystring';
 import { type ComponentType, type ReactNode } from 'react';
 import { Provider } from 'react-redux';
-// eslint-disable-next-line no-restricted-imports
-import { Route, Router } from 'react-router-dom';
+import { Route, Routes, unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
 import { of } from 'rxjs';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
@@ -29,6 +28,7 @@ import {
   getBackendSrv,
   getDataSourceSrv,
   getEchoSrv,
+  LocationServiceProvider,
   setLocationService,
   setPluginLinksHook,
 } from '@grafana/runtime';
@@ -36,7 +36,8 @@ import { type DataSourceRef } from '@grafana/schema';
 import { getTestFeatureFlagClient, setTestFlags } from '@grafana/test-utils/unstable';
 import { AppChrome } from 'app/core/components/AppChrome/AppChrome';
 import { GrafanaContext } from 'app/core/context/GrafanaContext';
-import { GrafanaRoute } from 'app/core/navigation/GrafanaRoute';
+import { GrafanaRouteWrapper } from 'app/core/navigation/GrafanaRoute';
+import { createHistoryRouterAdapter } from 'app/core/navigation/historyRouterAdapter';
 import { Echo } from 'app/core/services/echo/Echo';
 import { setLastUsedDatasourceUID } from 'app/core/utils/explore';
 import { MIXED_DATASOURCE_NAME } from 'app/plugins/datasource/mixed/MixedDataSource';
@@ -189,6 +190,7 @@ export function setupExplore(options?: SetupOptions): {
   });
 
   const location = new HistoryWrapper(history);
+  const routerHistory = createHistoryRouterAdapter(history);
   setLocationService(location);
 
   const contextMock = getGrafanaContextMock({ location });
@@ -203,31 +205,38 @@ export function setupExplore(options?: SetupOptions): {
     <OpenFeatureProvider client={getTestFeatureFlagClient()}>
       <Provider store={storeState}>
         <GrafanaContext.Provider value={contextMock}>
-          <Router history={history}>
-            <QueriesDrawerContextProvider>
-              <FinalProvider>
-                {options?.withAppChrome ? (
-                  <KBarProvider>
-                    <AppChrome>
+          <HistoryRouter
+            history={routerHistory}
+            future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+          >
+            <LocationServiceProvider service={location}>
+              <QueriesDrawerContextProvider>
+                <FinalProvider>
+                  {options?.withAppChrome ? (
+                    <KBarProvider>
+                      <AppChrome>
+                        <Routes>
+                          <Route
+                            path="/explore"
+                            element={
+                              <GrafanaRouteWrapper route={{ component: ExplorePage, path: '/explore' }} />
+                            }
+                          />
+                        </Routes>
+                      </AppChrome>
+                    </KBarProvider>
+                  ) : (
+                    <Routes>
                       <Route
                         path="/explore"
-                        exact
-                        render={(props) => (
-                          <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />
-                        )}
+                        element={<GrafanaRouteWrapper route={{ component: ExplorePage, path: '/explore' }} />}
                       />
-                    </AppChrome>
-                  </KBarProvider>
-                ) : (
-                  <Route
-                    path="/explore"
-                    exact
-                    render={(props) => <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />}
-                  />
-                )}
-              </FinalProvider>
-            </QueriesDrawerContextProvider>
-          </Router>
+                    </Routes>
+                  )}
+                </FinalProvider>
+              </QueriesDrawerContextProvider>
+            </LocationServiceProvider>
+          </HistoryRouter>
         </GrafanaContext.Provider>
       </Provider>
     </OpenFeatureProvider>
