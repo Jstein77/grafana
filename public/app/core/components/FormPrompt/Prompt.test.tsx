@@ -1,68 +1,84 @@
-import { type History, type Location, createMemoryHistory } from 'history';
+import { act, screen } from '@testing-library/react';
+import { Link, useLocation } from 'react-router-dom-v5-compat';
 import { render } from 'test/test-utils';
 
-import { locationService } from '@grafana/runtime';
-
-import { Prompt } from './Prompt';
-
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual('@grafana/runtime'),
-  locationService: {
-    getLocation: jest.fn(),
-    getHistory: jest.fn(),
-  },
-}));
+import { type NavigationBlocker, Prompt } from './Prompt';
 
 describe('Prompt component with React Router', () => {
-  let mockHistory: History & { block: jest.Mock };
-  let unblock: jest.Mock;
+  function TestPage({ children }: { children: React.ReactNode }) {
+    const location = useLocation();
+    return (
+      <>
+        {children}
+        <Link to="/next">Next</Link>
+        <span>{location.pathname}</span>
+      </>
+    );
+  }
 
-  beforeEach(() => {
-    const historyInstance = createMemoryHistory({ initialEntries: ['/current'] });
-    unblock = jest.fn();
-    mockHistory = {
-      ...historyInstance,
-      block: jest.fn(() => unblock),
-    };
+  it('blocks navigation when the message function returns false', async () => {
+    const message = jest.fn(() => false);
+    const onBlocked = jest.fn();
+    const { user } = render(
+      <TestPage>
+        <Prompt message={message} onBlocked={onBlocked} />
+      </TestPage>,
+      { historyOptions: { initialEntries: ['/current'] } }
+    );
 
-    (locationService.getLocation as jest.Mock).mockReturnValue({ pathname: '/current' } as Location);
-    (locationService.getHistory as jest.Mock).mockReturnValue(mockHistory);
+    await user.click(screen.getByRole('link', { name: 'Next' }));
+
+    expect(message).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/next' }));
+    expect(onBlocked).toHaveBeenCalledWith({
+      proceed: expect.any(Function),
+      reset: expect.any(Function),
+    });
+    expect(screen.getByText('/current')).toBeInTheDocument();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('allows navigation when blocking is disabled', async () => {
+    const message = jest.fn(() => false);
+    const { user } = render(
+      <TestPage>
+        <Prompt when={false} message={message} />
+      </TestPage>,
+      { historyOptions: { initialEntries: ['/current'] } }
+    );
+
+    await user.click(screen.getByRole('link', { name: 'Next' }));
+
+    expect(message).not.toHaveBeenCalled();
+    expect(await screen.findByText('/next')).toBeInTheDocument();
   });
 
-  it('should call the block function when `when` is true', () => {
-    const { unmount } = render(<Prompt when={true} message="Are you sure you want to leave?" />);
+  it('continues a blocked navigation when requested', async () => {
+    let blocker: NavigationBlocker | undefined;
+    const { user } = render(
+      <TestPage>
+        <Prompt message={() => false} onBlocked={(nextBlocker) => (blocker = nextBlocker)} />
+      </TestPage>,
+      { historyOptions: { initialEntries: ['/current'] } }
+    );
 
-    expect(mockHistory.block).toHaveBeenCalledWith('Are you sure you want to leave?');
-    unmount();
-    expect(unblock).toHaveBeenCalled();
+    await user.click(screen.getByRole('link', { name: 'Next' }));
+    await act(async () => blocker?.proceed());
+
+    expect(await screen.findByText('/next')).toBeInTheDocument();
   });
 
-  it('should not call the block function when `when` is false', () => {
-    const { unmount } = render(<Prompt when={false} message="Are you sure you want to leave?" />);
+  it('uses window confirmation for string messages', async () => {
+    const confirm = jest.spyOn(window, 'confirm').mockReturnValue(true);
+    const { user } = render(
+      <TestPage>
+        <Prompt message="Are you sure you want to leave?" />
+      </TestPage>,
+      { historyOptions: { initialEntries: ['/current'] } }
+    );
 
-    unmount();
-    expect(mockHistory.block).not.toHaveBeenCalled();
-  });
+    await user.click(screen.getByRole('link', { name: 'Next' }));
 
-  it('should use the message function if provided', async () => {
-    const messageFn = jest.fn().mockReturnValue('Custom message');
-    render(<Prompt when={true} message={messageFn} />);
-
-    const callback = mockHistory.block.mock.calls[0][0];
-    callback({ pathname: '/new-path' } as Location);
-
-    expect(messageFn).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/new-path' }));
-  });
-
-  it('unblocks when blocking is disabled', () => {
-    const { rerender } = render(<Prompt when={true} message="Are you sure you want to leave?" />);
-
-    rerender(<Prompt when={false} message="Are you sure you want to leave?" />);
-
-    expect(unblock).toHaveBeenCalled();
+    expect(confirm).toHaveBeenCalledWith('Are you sure you want to leave?');
+    expect(await screen.findByText('/next')).toBeInTheDocument();
+    confirm.mockRestore();
   });
 });

@@ -1,4 +1,4 @@
-import { type Location } from 'history';
+import { type Location } from 'react-router-dom-v5-compat';
 
 import { locationService, setBackendSrv, type BackendSrv } from '@grafana/runtime';
 import { playlistSrv } from 'app/features/playlist/PlaylistSrv';

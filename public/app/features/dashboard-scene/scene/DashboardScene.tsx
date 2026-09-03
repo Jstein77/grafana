@@ -1,4 +1,4 @@
-import type * as H from 'history';
+import { type Location } from 'react-router-dom-v5-compat';
 
 import {
   CoreApp,
@@ -173,7 +173,7 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
   /**
    * Url state before editing started
    */
-  private _initialUrlState?: H.Location;
+  private _initialUrlState?: Location;
   /**
    * Dashboard changes tracker
    */
@@ -661,7 +661,7 @@ export class DashboardScene extends SceneObjectBase<DashboardSceneState> impleme
     });
   }
 
-  public getPageNav(location: H.Location, navIndex: NavIndex) {
+  public getPageNav(location: Location, navIndex: NavIndex) {
     const { meta, viewPanel, editPanel, title, uid } = this.state;
     const isNew = !Boolean(uid);
     // Trailing slash enforces a path-segment match so unrelated prefixes (e.g. `/dashboard/provisioning-foo/...`) don't match.

@@ -2,11 +2,10 @@ import { OpenFeatureProvider } from '@openfeature/react-sdk';
 import { type Store } from '@reduxjs/toolkit';
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory, type MemoryHistoryBuildOptions } from 'history';
-import { Fragment, type PropsWithChildren } from 'react';
+import { createContext, Fragment, type PropsWithChildren, type ReactNode, useContext } from 'react';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom-v5-compat';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
 import { type FeatureToggles } from '@grafana/data';
@@ -20,7 +19,7 @@ import {
 import { getTestFeatureFlagClient } from '@grafana/test-utils/unstable';
 import { GrafanaContext, type GrafanaContextType } from 'app/core/context/GrafanaContext';
 import { ModalsContextProvider } from 'app/core/context/ModalsContextProvider';
-import { createHistoryRouterAdapter } from 'app/core/navigation/historyRouterAdapter';
+import { createDataRouter } from 'app/core/navigation/createDataRouter';
 import { configureStore } from 'app/store/configureStore';
 import { type StoreState } from 'app/types/store';
 
@@ -43,7 +42,15 @@ interface ExtendedRenderOptions extends RenderOptions {
   /**
    * Props to pass to `createMemoryHistory`, if being used
    */
-  historyOptions?: MemoryHistoryBuildOptions;
+  historyOptions?: MemoryRouterOptions;
+}
+
+type MemoryRouterOptions = NonNullable<Parameters<typeof createMemoryRouter>[1]>;
+
+const RouterChildrenContext = createContext<ReactNode>(null);
+
+function RouterChildren() {
+  return useContext(RouterChildrenContext);
 }
 
 /**
@@ -62,9 +69,9 @@ const getWrapper = ({
 
   // Create a fresh location service for each test - otherwise we run the risk
   // of it being stateful in between runs
-  const history = createMemoryHistory(historyOptions);
-  const locationService = new HistoryWrapper(history);
-  const routerHistory = createHistoryRouterAdapter(history);
+  const initialEntries = historyOptions?.initialEntries ?? ['/'];
+  const locationService = new HistoryWrapper(initialEntries);
+  const router = createDataRouter(locationService, <RouterChildren />, { ...historyOptions, initialEntries });
   setLocationService(locationService);
 
   /**
@@ -72,12 +79,9 @@ const getWrapper = ({
    */
   const PotentialRouter = renderWithRouter
     ? ({ children }: PropsWithChildren) => (
-        <HistoryRouter
-          history={routerHistory}
-          future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
-        >
-          {children}
-        </HistoryRouter>
+        <RouterChildrenContext.Provider value={children}>
+          <RouterProvider router={router} future={{ v7_startTransition: true }} />
+        </RouterChildrenContext.Provider>
       )
     : ({ children }: PropsWithChildren) => <Fragment>{children}</Fragment>;
 

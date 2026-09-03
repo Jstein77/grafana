@@ -1,4 +1,4 @@
-import type * as H from 'history';
+import { type Location } from 'react-router-dom-v5-compat';
 import { ContextSrvStub } from 'test/specs/helpers';
 
 import { dateTime, isDateTime } from '@grafana/data';
@@ -18,7 +18,7 @@ jest.mock('app/core/app_events', () => ({
 describe('timeSrv', () => {
   let timeSrv: TimeSrv;
   let _dashboard: TimeModel;
-  let locationUpdates: H.Location[] = [];
+  let locationUpdates: Location[] = [];
 
   beforeEach(() => {
     _dashboard = {

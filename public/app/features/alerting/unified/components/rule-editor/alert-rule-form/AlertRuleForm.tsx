@@ -295,7 +295,7 @@ export const AlertRuleForm = ({ existing, prefill, isManualRestore }: Props) => 
       // new Grafana-managed rule
       trackNewGrafanaAlertRuleFormCancelled();
     }
-    locationService.getHistory().goBack();
+    locationService.go(-1);
   };
 
   if (!type) {

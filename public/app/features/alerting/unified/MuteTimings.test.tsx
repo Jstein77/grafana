@@ -1,4 +1,4 @@
-import { type InitialEntry } from 'history';
+import { type InitialEntry } from 'react-router-dom-v5-compat';
 import { last } from 'lodash';
 import { Route, Routes } from 'react-router-dom-v5-compat';
 import { render, screen, userEvent, within } from 'test/test-utils';

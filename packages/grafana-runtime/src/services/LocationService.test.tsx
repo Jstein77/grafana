@@ -1,19 +1,23 @@
-import { createMemoryHistory } from 'history';
 import { renderHook } from '@testing-library/react';
 
 import { locationService, HistoryWrapper, useLocationService, LocationServiceProvider } from './LocationService';
 
 describe('LocationService', () => {
   describe('history', () => {
-    it('returns the wrapped history instance', () => {
-      const history = createMemoryHistory();
-      const service = new HistoryWrapper(history);
+    it('returns a history-compatible navigation facade', () => {
+      const service = new HistoryWrapper();
 
-      expect(service.getHistory()).toBe(history);
+      expect(service.getHistory()).toEqual(
+        expect.objectContaining({
+          push: expect.any(Function),
+          replace: expect.any(Function),
+          listen: expect.any(Function),
+        })
+      );
     });
 
     it('pushes a new location and notifies subscribers', () => {
-      const service = new HistoryWrapper(createMemoryHistory({ initialEntries: ['/first'] }));
+      const service = new HistoryWrapper(['/first']);
       const locations: string[] = [];
       const subscription = service.getLocationObservable().subscribe((location) => locations.push(location.pathname));
 
@@ -25,14 +29,13 @@ describe('LocationService', () => {
     });
 
     it('replaces the current location without adding a history entry', () => {
-      const history = createMemoryHistory({ initialEntries: ['/first'] });
-      const service = new HistoryWrapper(history);
+      const service = new HistoryWrapper(['/first']);
 
       service.replace('/second');
 
       expect(service.getLocation().pathname).toBe('/second');
-      expect(history.length).toBe(1);
-      expect(history.action).toBe('REPLACE');
+      expect(service.getHistory().length).toBe(1);
+      expect(service.getHistory().action).toBe('REPLACE');
     });
   });
 

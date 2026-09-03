@@ -1,4 +1,4 @@
-import { type Location } from 'history';
+import { type Location } from 'react-router-dom-v5-compat';
 import { useEffect } from 'react';
 
 import { locationSearchToObject, locationService } from '@grafana/runtime';

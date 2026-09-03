@@ -1,6 +1,6 @@
 import deepEqual from 'fast-deep-equal';
-import type * as H from 'history';
 import { debounce } from 'lodash';
+import { type Location } from 'react-router-dom-v5-compat';
 
 import { type NavIndex, type PanelPlugin } from '@grafana/data';
 import { t } from '@grafana/i18n';
@@ -306,7 +306,7 @@ export class PanelEditor extends SceneObjectBase<PanelEditorState> {
     return getPanelIdForVizPanel(this.state.panelRef.resolve());
   }
 
-  public getPageNav(location: H.Location, navIndex: NavIndex) {
+  public getPageNav(location: Location, navIndex: NavIndex) {
     const dashboard = getDashboardSceneFor(this);
 
     return {

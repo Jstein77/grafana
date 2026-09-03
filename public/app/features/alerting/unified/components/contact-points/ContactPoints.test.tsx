@@ -1,5 +1,5 @@
-import { type MemoryHistoryBuildOptions } from 'history';
 import { type ComponentProps, type ReactNode } from 'react';
+import { type InitialEntry } from 'react-router-dom-v5-compat';
 import { render, screen, userEvent, waitFor, waitForElementToBeRemoved, within } from 'test/test-utils';
 
 import { selectors } from '@grafana/e2e-selectors';
@@ -27,6 +27,11 @@ import setupVanillaAlertmanagerFlavoredServer, {
   VANILLA_ALERTMANAGER_DATASOURCE_UID,
 } from './mocks/vanillaAlertmanagerServer';
 import { type ContactPointWithMetadata, type ReceiverConfigWithMetadata, type RouteReference } from './utils';
+
+type MemoryHistoryBuildOptions = {
+  initialEntries?: InitialEntry[];
+  initialIndex?: number;
+};
 
 /**
  * There are lots of ways in which we test our pages and components. Here's my opinionated approach to testing them.
