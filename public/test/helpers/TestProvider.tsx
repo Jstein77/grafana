@@ -38,7 +38,7 @@ export function TestProvider(props: Props) {
   return (
     <Provider store={store}>
       <OpenFeatureProvider client={getTestFeatureFlagClient()}>
-        <HistoryRouter history={history}>
+        <HistoryRouter history={history} future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
           <LocationServiceProvider service={locationService}>
             <ModalsContextProvider>
               <GrafanaContext.Provider value={context}>{children}</GrafanaContext.Provider>

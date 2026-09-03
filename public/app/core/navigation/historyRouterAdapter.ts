@@ -1,4 +1,4 @@
-import type * as H from 'history';
+import * as H from 'history';
 import { type ComponentProps } from 'react';
 import { unstable_HistoryRouter } from 'react-router-dom-v5-compat';
 

@@ -27,7 +27,7 @@ type RouterWrapperProps = {
 };
 export function RouterWrapper(props: RouterWrapperProps) {
   return (
-    <HistoryRouter history={history}>
+    <HistoryRouter history={history} future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <LocationServiceProvider service={locationService}>
         <QueriesDrawerContextProvider>
           <ExtraProviders providers={props.providers}>

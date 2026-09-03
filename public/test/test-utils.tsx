@@ -71,7 +71,14 @@ const getWrapper = ({
    * Conditional router - either a MemoryRouter or just a Fragment
    */
   const PotentialRouter = renderWithRouter
-    ? ({ children }: PropsWithChildren) => <HistoryRouter history={routerHistory}>{children}</HistoryRouter>
+    ? ({ children }: PropsWithChildren) => (
+        <HistoryRouter
+          history={routerHistory}
+          future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+        >
+          {children}
+        </HistoryRouter>
+      )
     : ({ children }: PropsWithChildren) => <Fragment>{children}</Fragment>;
 
   const context = {
