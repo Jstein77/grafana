@@ -1,5 +1,6 @@
-import * as H from 'history';
+import { parsePath, type Location } from 'react-router-dom';
 
+import { type LocationDescriptor } from '@grafana/runtime';
 /**
  * Flags a history REPLACE as an in-place rewrite of the current page's URL - the user is not
  * leaving the page, the URL is just being corrected (dashboard slug normalization, home-route
@@ -10,8 +11,8 @@ import * as H from 'history';
  * the page. Missing the flag on a rewrite degrades to a noisy self-transition in journey metrics;
  * flagging a real navigation hides the transition - when in doubt, leave it unflagged.
  */
-export function markAsUrlRewrite(location: H.Path | H.LocationDescriptorObject): H.LocationDescriptorObject {
-  const descriptor = typeof location === 'string' ? H.parsePath(location) : location;
+export function markAsUrlRewrite(location: LocationDescriptor): Exclude<LocationDescriptor, string> {
+  const descriptor: Partial<Location> = typeof location === 'string' ? parsePath(location) : location;
   const state = typeof descriptor.state === 'object' && descriptor.state !== null ? descriptor.state : {};
   return { ...descriptor, state: { ...state, urlRewrite: true } };
 }

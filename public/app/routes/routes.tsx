@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 
 import { isTruthy } from '@grafana/data';
 import { NavLandingPage } from 'app/core/components/NavLandingPage/NavLandingPage';
@@ -30,8 +30,7 @@ export const extraRoutes: RouteDescriptor[] = [];
 
 export function getAppRoutes(): RouteDescriptor[] {
   const routes: Array<RouteDescriptor | undefined | false> = [
-    // Based on the Grafana configuration standalone plugin pages can even override and extend existing core pages, or they can register new routes under existing ones.
-    // In order to make it possible we need to register them first due to how `<Switch>` is evaluating routes. (This will be unnecessary once/when we upgrade to React Router v6 and start using `<Routes>` instead.)
+    // Standalone plugin pages may override core pages, so register them before core routes.
     ...getAppPluginRoutes(),
     {
       path: '/',

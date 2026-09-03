@@ -1,12 +1,11 @@
 import 'core-js/stable/structured-clone';
-import { type MemoryHistoryBuildOptions } from 'history';
 import { HttpResponse, delay, http } from 'msw';
 import { type ComponentProps, type ReactNode } from 'react';
 import { clickSelectOption } from 'test/helpers/selectOptionInTest';
 import { render, screen, waitFor, within } from 'test/test-utils';
 import { byLabelText, byRole, byTestId, byText } from 'testing-library-selector';
 
-import { config } from '@grafana/runtime';
+import { type LocationInitialEntry, config } from '@grafana/runtime';
 import { mockComboboxRect } from '@grafana/test-utils';
 import { AppNotificationList } from 'app/core/components/AppNotifications/AppNotificationList';
 import { disablePlugin } from 'app/features/alerting/unified/mocks/server/configure';
@@ -26,6 +25,11 @@ import { alertingFactory } from '../../../mocks/server/db';
 import { captureRequests } from '../../../mocks/server/events';
 
 import { GrafanaReceiverForm } from './GrafanaReceiverForm';
+
+type MemoryHistoryBuildOptions = {
+  initialEntries?: LocationInitialEntry[];
+  initialIndex?: number;
+};
 
 jest.mock('../../../Analytics', () => ({
   ...jest.requireActual('../../../Analytics'),

@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
-import type history from 'history';
-import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom-v5-compat';
+import { useCallback, useEffect, useState } from 'react';
+import { type Location, useLocation } from 'react-router-dom';
 
 import { Trans, t } from '@grafana/i18n';
 import { Button, Modal } from '@grafana/ui';
 
-import { Prompt } from './Prompt';
+import { type NavigationBlocker, Prompt } from './Prompt';
 
 export interface Props {
   confirmRedirect?: boolean;
@@ -14,7 +13,7 @@ export interface Props {
   /** Extra check to invoke when location changes.
    * Could be useful in multistep forms where each step has a separate URL
    */
-  onLocationChange?: (location: history.Location) => void;
+  onLocationChange?: (location: Location) => void;
 }
 
 /**
@@ -23,9 +22,9 @@ export interface Props {
  * URL navigation is handled by react-router's components since it does not trigger beforeunload event.
  */
 export const FormPrompt = ({ confirmRedirect, onDiscard, onLocationChange }: Props) => {
+  const currentLocation = useLocation();
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [blockedLocation, setBlockedLocation] = useState<history.Location | null>(null);
-  const [changesDiscarded, setChangesDiscarded] = useState(false);
+  const [blocker, setBlocker] = useState<NavigationBlocker>();
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -41,24 +40,21 @@ export const FormPrompt = ({ confirmRedirect, onDiscard, onLocationChange }: Pro
   }, [confirmRedirect]);
 
   // Returning 'false' from this function will prevent navigation to the next URL
-  const handleRedirect = (location: history.Location) => {
+  const handleRedirect = (location: Location) => {
     // Do not show the unsaved changes modal if only the URL params have changed
-    const currentPath = window.location.pathname;
-    const nextPath = location.pathname;
-    if (currentPath === nextPath) {
+    if (currentLocation.pathname === location.pathname) {
       return true;
     }
 
     const locationChangeCheck = onLocationChange?.(location);
 
-    let blockRedirect = confirmRedirect && !changesDiscarded;
+    let blockRedirect = confirmRedirect;
     if (locationChangeCheck !== undefined) {
       blockRedirect = blockRedirect && locationChangeCheck;
     }
 
     if (blockRedirect) {
       setModalIsOpen(true);
-      setBlockedLocation(location);
       return false;
     }
 
@@ -71,19 +67,22 @@ export const FormPrompt = ({ confirmRedirect, onDiscard, onLocationChange }: Pro
 
   const onBackToForm = () => {
     setModalIsOpen(false);
-    setBlockedLocation(null);
+    blocker?.reset();
+    setBlocker(undefined);
   };
 
   const onDiscardChanges = () => {
     setModalIsOpen(false);
-    setChangesDiscarded(true);
     onDiscard();
+    blocker?.proceed();
+    setBlocker(undefined);
   };
+
+  const onBlocked = useCallback((blocker: NavigationBlocker) => setBlocker(blocker), []);
 
   return (
     <>
-      <Prompt when={true} message={handleRedirect} />
-      {blockedLocation && changesDiscarded && <Navigate replace to={blockedLocation} />}
+      <Prompt when={true} message={handleRedirect} onBlocked={onBlocked} />
       <UnsavedChangesModal isOpen={modalIsOpen} onDiscard={onDiscardChanges} onBackToForm={onBackToForm} />
     </>
   );

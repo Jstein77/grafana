@@ -12,8 +12,8 @@ import { getRulesSourceByName } from './utils/datasource';
 
 jest.mock('./hooks/useCombinedRule');
 jest.mock('./utils/datasource');
-jest.mock('react-router-dom-v5-compat', () => ({
-  ...jest.requireActual('react-router-dom-v5-compat'),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   Navigate: jest.fn(({}) => `Redirected`),
 }));
 
@@ -75,7 +75,7 @@ describe('Redirect to Rule viewer', () => {
   });
 
   it('should properly decode rule name', () => {
-    // TODO: Fix console warning that happens once CompatRouter is wrapped around this component render
+    // Encoded path separators intentionally trigger a router warning in this decoding test.
     jest.spyOn(console, 'warn').mockImplementation();
 
     const rulesMatchingSpy = jest.spyOn(combinedRuleHooks, 'useCloudCombinedRulesMatching').mockReturnValue({
@@ -114,7 +114,7 @@ describe('Redirect to Rule viewer', () => {
   });
 
   it('should properly decode source name', () => {
-    // TODO: Fix console warning that happens once CompatRouter is wrapped around this component render
+    // Encoded path separators intentionally trigger a router warning in this decoding test.
     jest.spyOn(console, 'warn').mockImplementation();
 
     const rulesMatchingSpy = jest.spyOn(combinedRuleHooks, 'useCloudCombinedRulesMatching').mockReturnValue({

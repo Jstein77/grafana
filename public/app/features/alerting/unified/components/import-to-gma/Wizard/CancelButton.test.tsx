@@ -1,4 +1,3 @@
-import { createMemoryHistory } from 'history';
 import { FormProvider, useForm } from 'react-hook-form';
 import { render, screen, userEvent } from 'test/test-utils';
 
@@ -12,7 +11,6 @@ jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   locationService: {
     push: jest.fn(),
-    getHistory: jest.fn(),
   },
 }));
 
@@ -60,8 +58,6 @@ describe('CancelButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const history = createMemoryHistory();
-    (locationService.getHistory as jest.Mock).mockReturnValue(history);
   });
 
   it('should render cancel button', () => {

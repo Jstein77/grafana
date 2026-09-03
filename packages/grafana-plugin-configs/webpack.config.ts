@@ -120,6 +120,7 @@ const config = async (env: Env, pluginDir = process.cwd()): Promise<Configuratio
       'rxjs',
       'rxjs/operators',
       'react-router',
+      'react-router-dom',
       'd3',
       /^@grafana\/ui/i,
       /^@grafana\/runtime/i,

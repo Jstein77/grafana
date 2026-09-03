@@ -3,6 +3,42 @@ import { renderHook } from '@testing-library/react';
 import { locationService, HistoryWrapper, useLocationService, LocationServiceProvider } from './LocationService';
 
 describe('LocationService', () => {
+  describe('history', () => {
+    it('returns a history-compatible navigation facade', () => {
+      const service = new HistoryWrapper();
+
+      expect(service.getHistory()).toEqual(
+        expect.objectContaining({
+          push: expect.any(Function),
+          replace: expect.any(Function),
+          listen: expect.any(Function),
+        })
+      );
+    });
+
+    it('pushes a new location and notifies subscribers', () => {
+      const service = new HistoryWrapper(['/first']);
+      const locations: string[] = [];
+      const subscription = service.getLocationObservable().subscribe((location) => locations.push(location.pathname));
+
+      service.push('/second');
+
+      expect(service.getLocation().pathname).toBe('/second');
+      expect(locations).toEqual(['/first', '/second']);
+      subscription.unsubscribe();
+    });
+
+    it('replaces the current location without adding a history entry', () => {
+      const service = new HistoryWrapper(['/first']);
+
+      service.replace('/second');
+
+      expect(service.getLocation().pathname).toBe('/second');
+      expect(service.getHistory().length).toBe(1);
+      expect(service.getHistory().action).toBe('REPLACE');
+    });
+  });
+
   describe('getSearchObject', () => {
     it('returns query string as object', () => {
       locationService.push('/test?query1=false&query2=123&query3=text');

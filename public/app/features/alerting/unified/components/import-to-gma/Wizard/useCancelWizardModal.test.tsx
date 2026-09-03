@@ -1,4 +1,3 @@
-import { createMemoryHistory } from 'history';
 import { render, renderHook, screen, userEvent } from 'test/test-utils';
 
 import { locationService } from '@grafana/runtime';
@@ -9,7 +8,6 @@ jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   locationService: {
     push: jest.fn(),
-    getHistory: jest.fn(),
   },
 }));
 
@@ -18,8 +16,6 @@ describe('useCancelWizardModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const history = createMemoryHistory();
-    (locationService.getHistory as jest.Mock).mockReturnValue(history);
   });
 
   describe('when form is not dirty', () => {

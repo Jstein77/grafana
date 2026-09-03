@@ -1,5 +1,5 @@
-import { type Location } from 'history';
 import { isEqual } from 'lodash';
+import { type Location } from 'react-router-dom';
 
 import { getBackendSrv, getGrafanaLiveSrv, locationService, reportInteraction } from '@grafana/runtime';
 import { playlistSrv } from 'app/features/playlist/PlaylistSrv';

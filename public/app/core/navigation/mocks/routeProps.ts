@@ -8,6 +8,7 @@ export function getRouteComponentProps<T extends {} = {}, Q extends Record<strin
   const defaults: GrafanaRouteComponentProps<T, Q> = {
     location: {
       hash: '',
+      key: 'test',
       pathname: '',
       state: {},
       search: '',

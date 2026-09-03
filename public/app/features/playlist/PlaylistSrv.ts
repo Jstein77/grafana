@@ -1,5 +1,5 @@
-import { type Location } from 'history';
 import { pickBy } from 'lodash';
+import { type Location } from 'react-router-dom';
 
 import { locationUtil, urlUtil, rangeUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
@@ -56,7 +56,7 @@ export class PlaylistSrv extends StateManagerBase<PlaylistSrvState> {
     // history entry to support the back button
     // When starting the playlist from the playlist modal, we want to push a new history entry
     if (replaceHistoryEntry) {
-      locationService.getHistory().replace(urlWithParams);
+      locationService.replace(urlWithParams);
     } else {
       locationService.push(urlWithParams);
     }

@@ -1,4 +1,4 @@
-import { type Location } from 'history';
+import { type Location } from 'react-router-dom';
 import { Subject } from 'rxjs';
 
 import { config, locationService } from '@grafana/runtime';

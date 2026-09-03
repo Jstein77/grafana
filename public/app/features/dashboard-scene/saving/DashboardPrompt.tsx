@@ -1,13 +1,13 @@
 import { css } from '@emotion/css';
-import type * as H from 'history';
-import { memo, useContext, useEffect, useMemo } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { type Location } from 'react-router-dom';
 
 import { Trans, t } from '@grafana/i18n';
 import { locationService } from '@grafana/runtime';
 import { type Dashboard } from '@grafana/schema';
 import { type Spec as DashboardV2Spec } from '@grafana/schema/apis/dashboard.grafana.app/v2';
 import { ModalsContext, Modal, Button, useStyles2 } from '@grafana/ui';
-import { Prompt } from 'app/core/components/FormPrompt/Prompt';
+import { type NavigationBlocker, Prompt } from 'app/core/components/FormPrompt/Prompt';
 import { contextSrv } from 'app/core/services/context_srv';
 import { type ObjectMeta } from 'app/features/apiserver/types';
 import { isDashboardV2Spec } from 'app/features/dashboard/api/utils';
@@ -27,6 +27,10 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
   const originalLocation = useMemo(() => locationService.getLocation(), [dashboard]);
   const originalPath = useMemo(() => originalLocation.pathname, [originalLocation]);
   const { showModal, hideModal } = useContext(ModalsContext);
+  const blockerRef = useRef<NavigationBlocker>();
+  const onBlocked = useCallback((blocker: NavigationBlocker) => {
+    blockerRef.current = blocker;
+  }, []);
 
   useEffect(() => {
     const handleUnload = (event: BeforeUnloadEvent) => {
@@ -46,7 +50,7 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
     return () => window.removeEventListener('beforeunload', handleUnload);
   }, [dashboard]);
 
-  const onHistoryBlock = (location: H.Location) => {
+  const onHistoryBlock = (location: Location) => {
     const panelEditor = dashboard.state.editPanel;
     const vizPanel = panelEditor?.getPanel();
     const search = new URLSearchParams(location.search);
@@ -93,6 +97,7 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
         hideModal();
         dashboard.openSaveDrawer({
           onSaveSuccess: () => {
+            blockerRef.current?.reset();
             moveToBlockedLocationAfterReactStateUpdate(location);
           },
         });
@@ -101,24 +106,28 @@ export const DashboardPrompt = memo(({ dashboard }: DashboardPromptProps) => {
       onDiscard: () => {
         dashboard.exitEditMode({ skipConfirm: true });
         hideModal();
+        blockerRef.current?.reset();
         if (originalPath === DASHBOARD_LIBRARY_ROUTES.Template) {
           moveToBlockedLocationAfterReactStateUpdate(location, true);
         } else {
           moveToBlockedLocationAfterReactStateUpdate(location);
         }
       },
-      onDismiss: hideModal,
+      onDismiss: () => {
+        blockerRef.current?.reset();
+        hideModal();
+      },
     });
 
     return false;
   };
 
-  return <Prompt when={true} message={onHistoryBlock} />;
+  return <Prompt when={true} message={onHistoryBlock} onBlocked={onBlocked} />;
 });
 
 DashboardPrompt.displayName = 'DashboardPrompt';
 
-function moveToBlockedLocationAfterReactStateUpdate(location?: H.Location | null, replace = false) {
+function moveToBlockedLocationAfterReactStateUpdate(location?: Location | null, replace = false) {
   if (location) {
     setTimeout(() => (replace ? locationService.replace(location) : locationService.push(location)), 10);
   }

@@ -1,6 +1,5 @@
-import { type Location } from 'history';
 import { type ComponentType } from 'react';
-import { type Params } from 'react-router-dom-v5-compat';
+import { type Location, type Params } from 'react-router-dom';
 
 import { type UrlQueryMap } from '@grafana/data';
 

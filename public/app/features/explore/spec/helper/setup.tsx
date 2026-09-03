@@ -1,14 +1,12 @@
 import { OpenFeatureProvider } from '@openfeature/react-sdk';
 import { type ByRoleMatcher, waitFor, within } from '@testing-library/dom';
 import { render, screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { KBarProvider } from 'kbar';
 import { fromPairs } from 'lodash';
 import { stringify } from 'querystring';
 import { type ComponentType, type ReactNode } from 'react';
 import { Provider } from 'react-redux';
-// eslint-disable-next-line no-restricted-imports
-import { Route, Router } from 'react-router-dom';
+import { Route, RouterProvider, Routes } from 'react-router-dom';
 import { of } from 'rxjs';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
@@ -29,6 +27,7 @@ import {
   getBackendSrv,
   getDataSourceSrv,
   getEchoSrv,
+  LocationServiceProvider,
   setLocationService,
   setPluginLinksHook,
 } from '@grafana/runtime';
@@ -36,7 +35,8 @@ import { type DataSourceRef } from '@grafana/schema';
 import { getTestFeatureFlagClient, setTestFlags } from '@grafana/test-utils/unstable';
 import { AppChrome } from 'app/core/components/AppChrome/AppChrome';
 import { GrafanaContext } from 'app/core/context/GrafanaContext';
-import { GrafanaRoute } from 'app/core/navigation/GrafanaRoute';
+import { GrafanaRouteWrapper } from 'app/core/navigation/GrafanaRoute';
+import { createDataRouter } from 'app/core/navigation/createDataRouter';
 import { Echo } from 'app/core/services/echo/Echo';
 import { setLastUsedDatasourceUID } from 'app/core/utils/explore';
 import { MIXED_DATASOURCE_NAME } from 'app/plugins/datasource/mixed/MixedDataSource';
@@ -184,11 +184,8 @@ export function setupExplore(options?: SetupOptions): {
     },
   };
 
-  const history = createMemoryHistory({
-    initialEntries: [{ pathname: '/explore', search: stringify(options?.urlParams) }],
-  });
-
-  const location = new HistoryWrapper(history);
+  const initialEntries = [{ pathname: '/explore', search: stringify(options?.urlParams) }];
+  const location = new HistoryWrapper(initialEntries);
   setLocationService(location);
 
   const contextMock = getGrafanaContextMock({ location });
@@ -199,35 +196,41 @@ export function setupExplore(options?: SetupOptions): {
       return children;
     });
 
+  const router = createDataRouter(
+    location,
+    <LocationServiceProvider service={location}>
+      <QueriesDrawerContextProvider>
+        <FinalProvider>
+          {options?.withAppChrome ? (
+            <KBarProvider>
+              <AppChrome>
+                <Routes>
+                  <Route
+                    path="/explore"
+                    element={<GrafanaRouteWrapper route={{ component: ExplorePage, path: '/explore' }} />}
+                  />
+                </Routes>
+              </AppChrome>
+            </KBarProvider>
+          ) : (
+            <Routes>
+              <Route
+                path="/explore"
+                element={<GrafanaRouteWrapper route={{ component: ExplorePage, path: '/explore' }} />}
+              />
+            </Routes>
+          )}
+        </FinalProvider>
+      </QueriesDrawerContextProvider>
+    </LocationServiceProvider>,
+    { initialEntries }
+  );
+
   const { unmount, container } = render(
     <OpenFeatureProvider client={getTestFeatureFlagClient()}>
       <Provider store={storeState}>
         <GrafanaContext.Provider value={contextMock}>
-          <Router history={history}>
-            <QueriesDrawerContextProvider>
-              <FinalProvider>
-                {options?.withAppChrome ? (
-                  <KBarProvider>
-                    <AppChrome>
-                      <Route
-                        path="/explore"
-                        exact
-                        render={(props) => (
-                          <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />
-                        )}
-                      />
-                    </AppChrome>
-                  </KBarProvider>
-                ) : (
-                  <Route
-                    path="/explore"
-                    exact
-                    render={(props) => <GrafanaRoute {...props} route={{ component: ExplorePage, path: '/explore' }} />}
-                  />
-                )}
-              </FinalProvider>
-            </QueriesDrawerContextProvider>
-          </Router>
+          <RouterProvider router={router} future={{ v7_startTransition: true }} />
         </GrafanaContext.Provider>
       </Provider>
     </OpenFeatureProvider>

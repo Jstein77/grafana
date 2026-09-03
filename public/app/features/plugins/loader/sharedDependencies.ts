@@ -111,20 +111,9 @@ export const sharedDependenciesMap = {
   // bundling grafana-ui in plugins requires sharing react-inlinesvg for the icon cache
   'react-inlinesvg': () => import('react-inlinesvg'),
   'react-redux': () => import('react-redux'),
-  // Migration - React Router v5 -> v6
-  // =================================
-  // Plugins that still use "react-router-dom@v5" don't depend on react-router directly, so they will not use this import.
-  // (The react-router-dom@v5 that we expose for them depends on the "react-router" package internally from core.)
-  //
-  // Plugins that would like update to "react-router-dom@v6" will need to bundle "react-router-dom",
-  // however they cannot bundle "react-router" - this would mean that we have two instances of "react-router"
-  // in the app, which would casue issues. As the "react-router-dom-v5-compat" package re-exports everything from "react-router-dom@v6"
-  // which then re-exports everything from "react-router@v6", we are in the lucky state to be able to expose a compatible v6 version of the router to plugins by
-  // just exposing "react-router-dom-v5-compat".
-  //
-  // (This means that we are exposing two versions of the same package).
+  // Share a single React Router v6 instance with plugins so they do not create a duplicate router context.
   'react-router-dom': () => import('react-router-dom'),
-  'react-router': () => import('react-router-dom-v5-compat'),
+  'react-router': () => import('react-router-dom'),
   redux: () => import('redux'),
   rxjs: () => import('rxjs'),
   'rxjs/operators': () => import('rxjs/operators'),

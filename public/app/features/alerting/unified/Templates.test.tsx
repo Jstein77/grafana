@@ -1,10 +1,10 @@
-import { type InitialEntry } from 'history/createMemoryHistory';
 import * as React from 'react';
-import { Route, Routes } from 'react-router-dom-v5-compat';
+import { Route, Routes } from 'react-router-dom';
 import { type Props } from 'react-virtualized-auto-sizer';
 import { render, screen, waitFor, within } from 'test/test-utils';
 import { byLabelText, byRole } from 'testing-library-selector';
 
+import { type LocationInitialEntry } from '@grafana/runtime';
 import { type CodeEditor } from '@grafana/ui';
 import { AppNotificationList } from 'app/core/components/AppNotifications/AppNotificationList';
 import { setupMswServer } from 'app/features/alerting/unified/mockApi';
@@ -61,7 +61,7 @@ beforeEach(() => {
   grantUserPermissions([AccessControlAction.AlertingNotificationsRead, AccessControlAction.AlertingNotificationsWrite]);
 });
 
-const setup = (initialEntries: InitialEntry[]) => {
+const setup = (initialEntries: LocationInitialEntry[]) => {
   return render(
     <>
       <AppNotificationList />

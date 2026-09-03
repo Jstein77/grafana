@@ -1,4 +1,4 @@
-import { type Location } from 'history';
+import { type Location } from 'react-router-dom';
 
 import { type GrafanaConfig } from '../types/config';
 
@@ -141,6 +141,7 @@ describe('locationUtil', () => {
   describe('getUrlForPartial', () => {
     const mockLocation: Location = {
       hash: '',
+      key: 'test',
       pathname: '/',
       search: '',
       state: {},
@@ -249,6 +250,7 @@ describe('locationUtil', () => {
   describe('processRedirectUri', () => {
     const mockLocation: Location = {
       hash: '',
+      key: 'test',
       pathname: '/',
       search: '',
       state: {},

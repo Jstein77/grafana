@@ -1,5 +1,4 @@
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { stringify } from 'querystring';
 import { type ReactNode } from 'react';
 import { TestProvider } from 'test/helpers/TestProvider';
@@ -57,11 +56,7 @@ interface SetupParams {
   datasourceGetter?: (datasources: Array<ReturnType<typeof makeDatasourceSetup>>) => DataSourceSrv['get'];
 }
 function setup({ queryParams = {}, datasourceGetter = defaultDsGetter }: SetupParams) {
-  const history = createMemoryHistory({
-    initialEntries: [{ pathname: '/explore', search: stringify(queryParams) }],
-  });
-
-  const location = new HistoryWrapper(history);
+  const location = new HistoryWrapper([{ pathname: '/explore', search: stringify(queryParams) }]);
 
   const datasources = [
     makeDatasourceSetup({ name: 'loki', uid: 'loki-uid' }),

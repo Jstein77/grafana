@@ -1,11 +1,9 @@
-import * as H from 'history';
 import React, { useContext } from 'react';
+import { createMemoryRouter, createPath, parsePath, type Location, type To } from 'react-router-dom';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 import { deprecationWarning, type UrlQueryMap, urlUtil } from '@grafana/data';
 import { attachDebugger, createLogger } from '@grafana/ui';
-
-import { config } from '../config';
 
 import { type LocationUpdate } from './LocationSrv';
 
@@ -15,14 +13,18 @@ import { type LocationUpdate } from './LocationSrv';
  */
 export interface LocationService {
   partial: (query: Record<string, any>, replace?: boolean) => void;
-  push: (location: H.Path | H.LocationDescriptor<any>) => void;
-  replace: (location: H.Path | H.LocationDescriptor<any>) => void;
+  push: (location: LocationDescriptor) => void;
+  replace: (location: LocationDescriptor) => void;
+  go: (delta: number) => void;
   reload: () => void;
-  getLocation: () => H.Location;
-  getHistory: () => H.History;
+  getLocation: () => Location;
+  /** @deprecated Prefer LocationService navigation and observable methods. */
+  getHistory: () => LocationHistory;
   getSearch: () => URLSearchParams;
   getSearchObject: () => UrlQueryMap;
-  getLocationObservable: () => Observable<H.Location>;
+  getLocationObservable: () => Observable<Location>;
+  /** @internal */
+  setRouter: (router: DataRouter, initialLength?: number) => void;
 
   /**
    * This is from the old LocationSrv interface
@@ -32,26 +34,22 @@ export interface LocationService {
 
 /** @internal */
 export class HistoryWrapper implements LocationService {
-  private readonly history: H.History;
-  private locationObservable: BehaviorSubject<H.Location>;
+  private router: DataRouter;
+  private locationObservable: BehaviorSubject<Location>;
+  private unsubscribeRouter?: () => void;
+  private historyAction: NavigationAction = 'POP';
+  private historyLength: number;
 
-  constructor(history?: H.History) {
-    // If no history passed create an in memory one if being called from test
-    this.history =
-      history ||
-      (process.env.NODE_ENV === 'test'
-        ? H.createMemoryHistory({ initialEntries: ['/'] })
-        : H.createBrowserHistory({ basename: config.appSubUrl ?? '/' }));
-
-    this.locationObservable = new BehaviorSubject(this.history.location);
-
-    this.history.listen((location) => {
-      this.locationObservable.next(location);
-    });
+  constructor(initialEntries: LocationInitialEntry[] = ['/']) {
+    this.router = createMemoryRouter([{ path: '*' }], { initialEntries });
+    this.historyLength = initialEntries.length;
+    this.locationObservable = new BehaviorSubject(this.router.state.location);
+    this.subscribeToRouter();
 
     this.partial = this.partial.bind(this);
     this.push = this.push.bind(this);
     this.replace = this.replace.bind(this);
+    this.go = this.go.bind(this);
     this.getSearch = this.getSearch.bind(this);
     this.getHistory = this.getHistory.bind(this);
     this.getLocation = this.getLocation.bind(this);
@@ -61,16 +59,64 @@ export class HistoryWrapper implements LocationService {
     return this.locationObservable.asObservable();
   }
 
-  getHistory() {
-    return this.history;
+  getHistory(): LocationHistory {
+    const service = this;
+    return {
+      get action() {
+        return service.historyAction;
+      },
+      get length() {
+        return service.historyLength;
+      },
+      get location() {
+        return service.getLocation();
+      },
+      createHref(location) {
+        return typeof location === 'string' ? location : createPath(location);
+      },
+      push(location, state) {
+        service.push(withState(location, state));
+      },
+      replace(location, state) {
+        service.replace(withState(location, state));
+      },
+      go(delta) {
+        service.go(delta);
+      },
+      goBack() {
+        service.go(-1);
+      },
+      goForward() {
+        service.go(1);
+      },
+      listen(listener) {
+        let currentLocation = service.getLocation();
+        const subscription = service.getLocationObservable().subscribe((location) => {
+          if (location !== currentLocation) {
+            currentLocation = location;
+            listener(location, service.historyAction);
+          }
+        });
+        return () => subscription.unsubscribe();
+      },
+    };
+  }
+
+  setRouter(router: DataRouter, initialLength = 1) {
+    this.unsubscribeRouter?.();
+    this.router = router;
+    this.historyLength = initialLength;
+    this.historyAction = router.state.historyAction;
+    this.locationObservable.next(router.state.location);
+    this.subscribeToRouter();
   }
 
   getSearch() {
-    return new URLSearchParams(this.history.location.search);
+    return new URLSearchParams(this.getLocation().search);
   }
 
   partial(query: Record<string, any>, replace?: boolean) {
-    const currentLocation = this.history.location;
+    const currentLocation = this.getLocation();
     const newQuery = this.getSearchObject();
 
     for (const key in query) {
@@ -85,34 +131,41 @@ export class HistoryWrapper implements LocationService {
     const updatedUrl = urlUtil.renderUrl(currentLocation.pathname, newQuery);
 
     if (replace) {
-      this.history.replace(updatedUrl, this.history.location.state);
+      this.replace({ ...parsePath(updatedUrl), state: this.getLocation().state });
     } else {
-      this.history.push(updatedUrl, this.history.location.state);
+      this.push({ ...parsePath(updatedUrl), state: this.getLocation().state });
     }
   }
 
-  push(location: H.Path | H.LocationDescriptor) {
-    this.history.push(location);
+  push(location: LocationDescriptor) {
+    const [to, state] = toNavigation(location);
+    void this.router.navigate(to, { state });
   }
 
-  replace(location: H.Path | H.LocationDescriptor) {
-    this.history.replace(location);
+  replace(location: LocationDescriptor) {
+    const [to, state] = toNavigation(location);
+    void this.router.navigate(to, { replace: true, state });
+  }
+
+  go(delta: number) {
+    void this.router.navigate(delta);
   }
 
   reload() {
-    const prevState = (this.history.location.state as any)?.routeReloadCounter;
-    this.history.replace({
-      ...this.history.location,
+    const location = this.getLocation();
+    const prevState = (location.state as any)?.routeReloadCounter;
+    this.replace({
+      ...location,
       state: { routeReloadCounter: prevState ? prevState + 1 : 1 },
     });
   }
 
   getLocation() {
-    return this.history.location;
+    return this.router.state.location;
   }
 
   getSearchObject() {
-    return locationSearchToObject(this.history.location.search);
+    return locationSearchToObject(this.getLocation().search);
   }
 
   /** @deprecated use partial, push or replace instead */
@@ -121,7 +174,7 @@ export class HistoryWrapper implements LocationService {
     if (options.partial && options.query) {
       this.partial(options.query, options.partial);
     } else {
-      const newLocation: H.LocationDescriptor = {
+      const newLocation: LocationDescriptor = {
         pathname: options.path,
       };
       if (options.query) {
@@ -134,6 +187,56 @@ export class HistoryWrapper implements LocationService {
       }
     }
   }
+
+  private subscribeToRouter() {
+    this.unsubscribeRouter = this.router.subscribe((state) => {
+      const locationChanged = state.location !== this.locationObservable.value;
+      if (!locationChanged) {
+        return;
+      }
+
+      this.historyAction = state.historyAction;
+      if (state.historyAction === 'PUSH') {
+        this.historyLength++;
+      }
+      this.locationObservable.next(state.location);
+    });
+  }
+}
+
+export type LocationDescriptor = string | Partial<Location>;
+export type NavigationAction = 'POP' | 'PUSH' | 'REPLACE';
+export type DataRouter = ReturnType<typeof createMemoryRouter>;
+type MemoryRouterOptions = NonNullable<Parameters<typeof createMemoryRouter>[1]>;
+export type LocationInitialEntry = NonNullable<MemoryRouterOptions['initialEntries']>[number];
+
+export interface LocationHistory {
+  readonly action: NavigationAction;
+  readonly length: number;
+  readonly location: Location;
+  createHref(location: LocationDescriptor): string;
+  push(location: LocationDescriptor, state?: unknown): void;
+  replace(location: LocationDescriptor, state?: unknown): void;
+  go(delta: number): void;
+  goBack(): void;
+  goForward(): void;
+  listen(listener: (location: Location, action: NavigationAction) => void): () => void;
+}
+
+function toNavigation(location: LocationDescriptor): [To, unknown] {
+  if (typeof location === 'string') {
+    return [location, undefined];
+  }
+
+  const { state, key: _key, ...to } = location;
+  return [to, state];
+}
+
+function withState(location: LocationDescriptor, state: unknown): LocationDescriptor {
+  if (state === undefined) {
+    return location;
+  }
+  return { ...(typeof location === 'string' ? parsePath(location) : location), state };
 }
 
 /**

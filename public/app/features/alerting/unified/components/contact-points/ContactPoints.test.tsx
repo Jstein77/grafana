@@ -1,8 +1,8 @@
-import { type MemoryHistoryBuildOptions } from 'history';
 import { type ComponentProps, type ReactNode } from 'react';
 import { render, screen, userEvent, waitFor, waitForElementToBeRemoved, within } from 'test/test-utils';
 
 import { selectors } from '@grafana/e2e-selectors';
+import { type LocationInitialEntry } from '@grafana/runtime';
 import { MIMIR_DATASOURCE_UID } from 'app/features/alerting/unified/mocks/server/constants';
 import { flushMicrotasks } from 'app/features/alerting/unified/test/test-utils';
 import { K8sAnnotations } from 'app/features/alerting/unified/utils/k8s/constants';
@@ -27,6 +27,11 @@ import setupVanillaAlertmanagerFlavoredServer, {
   VANILLA_ALERTMANAGER_DATASOURCE_UID,
 } from './mocks/vanillaAlertmanagerServer';
 import { type ContactPointWithMetadata, type ReceiverConfigWithMetadata, type RouteReference } from './utils';
+
+type MemoryHistoryBuildOptions = {
+  initialEntries?: LocationInitialEntry[];
+  initialIndex?: number;
+};
 
 /**
  * There are lots of ways in which we test our pages and components. Here's my opinionated approach to testing them.
