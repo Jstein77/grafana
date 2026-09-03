@@ -1,8 +1,41 @@
+import { createMemoryHistory } from 'history';
 import { renderHook } from '@testing-library/react';
 
 import { locationService, HistoryWrapper, useLocationService, LocationServiceProvider } from './LocationService';
 
 describe('LocationService', () => {
+  describe('history', () => {
+    it('returns the wrapped history instance', () => {
+      const history = createMemoryHistory();
+      const service = new HistoryWrapper(history);
+
+      expect(service.getHistory()).toBe(history);
+    });
+
+    it('pushes a new location and notifies subscribers', () => {
+      const service = new HistoryWrapper(createMemoryHistory({ initialEntries: ['/first'] }));
+      const locations: string[] = [];
+      const subscription = service.getLocationObservable().subscribe((location) => locations.push(location.pathname));
+
+      service.push('/second');
+
+      expect(service.getLocation().pathname).toBe('/second');
+      expect(locations).toEqual(['/first', '/second']);
+      subscription.unsubscribe();
+    });
+
+    it('replaces the current location without adding a history entry', () => {
+      const history = createMemoryHistory({ initialEntries: ['/first'] });
+      const service = new HistoryWrapper(history);
+
+      service.replace('/second');
+
+      expect(service.getLocation().pathname).toBe('/second');
+      expect(history.length).toBe(1);
+      expect(history.action).toBe('REPLACE');
+    });
+  });
+
   describe('getSearchObject', () => {
     it('returns query string as object', () => {
       locationService.push('/test?query1=false&query2=123&query3=text');

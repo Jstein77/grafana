@@ -15,12 +15,14 @@ jest.mock('@grafana/runtime', () => ({
 
 describe('Prompt component with React Router', () => {
   let mockHistory: History & { block: jest.Mock };
+  let unblock: jest.Mock;
 
   beforeEach(() => {
     const historyInstance = createMemoryHistory({ initialEntries: ['/current'] });
+    unblock = jest.fn();
     mockHistory = {
       ...historyInstance,
-      block: jest.fn(() => jest.fn()),
+      block: jest.fn(() => unblock),
     };
 
     (locationService.getLocation as jest.Mock).mockReturnValue({ pathname: '/current' } as Location);
@@ -34,8 +36,9 @@ describe('Prompt component with React Router', () => {
   it('should call the block function when `when` is true', () => {
     const { unmount } = render(<Prompt when={true} message="Are you sure you want to leave?" />);
 
+    expect(mockHistory.block).toHaveBeenCalledWith('Are you sure you want to leave?');
     unmount();
-    expect(mockHistory.block).toHaveBeenCalled();
+    expect(unblock).toHaveBeenCalled();
   });
 
   it('should not call the block function when `when` is false', () => {
@@ -53,5 +56,13 @@ describe('Prompt component with React Router', () => {
     callback({ pathname: '/new-path' } as Location);
 
     expect(messageFn).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/new-path' }));
+  });
+
+  it('unblocks when blocking is disabled', () => {
+    const { rerender } = render(<Prompt when={true} message="Are you sure you want to leave?" />);
+
+    rerender(<Prompt when={false} message="Are you sure you want to leave?" />);
+
+    expect(unblock).toHaveBeenCalled();
   });
 });
