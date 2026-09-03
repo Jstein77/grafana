@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { type Location, useBlocker } from 'react-router-dom-v5-compat';
+import { type Location, useBlocker } from 'react-router-dom';
 
 interface PromptProps {
   when?: boolean;

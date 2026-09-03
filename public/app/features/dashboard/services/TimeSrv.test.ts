@@ -1,4 +1,4 @@
-import { type Location } from 'react-router-dom-v5-compat';
+import { type Location } from 'react-router-dom';
 import { ContextSrvStub } from 'test/specs/helpers';
 
 import { dateTime, isDateTime } from '@grafana/data';

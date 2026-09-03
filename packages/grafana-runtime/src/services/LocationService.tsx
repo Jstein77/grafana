@@ -1,12 +1,5 @@
 import React, { useContext } from 'react';
-import {
-  createMemoryRouter,
-  createPath,
-  parsePath,
-  type InitialEntry,
-  type Location,
-  type To,
-} from 'react-router-dom-v5-compat';
+import { createMemoryRouter, createPath, parsePath, type InitialEntry, type Location, type To } from 'react-router-dom';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 import { deprecationWarning, type UrlQueryMap, urlUtil } from '@grafana/data';

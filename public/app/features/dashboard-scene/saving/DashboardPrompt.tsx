@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { memo, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { type Location } from 'react-router-dom-v5-compat';
+import { type Location } from 'react-router-dom';
 
 import { Trans, t } from '@grafana/i18n';
 import { locationService } from '@grafana/runtime';

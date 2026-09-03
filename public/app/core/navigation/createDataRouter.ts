@@ -1,9 +1,5 @@
 import { type ReactNode } from 'react';
-import {
-  createBrowserRouter,
-  createMemoryRouter,
-  type InitialEntry,
-} from 'react-router-dom-v5-compat';
+import { createBrowserRouter, createMemoryRouter, type InitialEntry } from 'react-router-dom';
 
 import { type LocationService } from '@grafana/runtime';
 
@@ -13,7 +9,11 @@ interface DataRouterOptions {
   initialIndex?: number;
 }
 
-export function createDataRouter(locationService: LocationService, element: ReactNode, options: DataRouterOptions = {}) {
+export function createDataRouter(
+  locationService: LocationService,
+  element: ReactNode,
+  options: DataRouterOptions = {}
+) {
   const routes = [{ id: 'root', path: '*', element }];
   const router = options.initialEntries
     ? createMemoryRouter(routes, {

@@ -1,6 +1,6 @@
 import deepEqual from 'fast-deep-equal';
 import { debounce } from 'lodash';
-import { type Location } from 'react-router-dom-v5-compat';
+import { type Location } from 'react-router-dom';
 
 import { type NavIndex, type PanelPlugin } from '@grafana/data';
 import { t } from '@grafana/i18n';

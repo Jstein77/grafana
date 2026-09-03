@@ -1,4 +1,4 @@
-import { parsePath } from 'react-router-dom-v5-compat';
+import { parsePath } from 'react-router-dom';
 
 import { type LocationDescriptor } from '@grafana/runtime';
 /**

@@ -1,5 +1,5 @@
 import { pickBy } from 'lodash';
-import { type Location } from 'react-router-dom-v5-compat';
+import { type Location } from 'react-router-dom';
 
 import { locationUtil, urlUtil, rangeUtil } from '@grafana/data';
 import { locationService } from '@grafana/runtime';

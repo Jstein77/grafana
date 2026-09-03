@@ -1,5 +1,5 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { type InitialEntry } from 'react-router-dom-v5-compat';
+import { type InitialEntry } from 'react-router-dom';
 import { render, screen, userEvent, waitFor, waitForElementToBeRemoved, within } from 'test/test-utils';
 
 import { selectors } from '@grafana/e2e-selectors';

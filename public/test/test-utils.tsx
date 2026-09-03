@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createContext, Fragment, type PropsWithChildren, type ReactNode, useContext } from 'react';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom-v5-compat';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
 import { type FeatureToggles } from '@grafana/data';

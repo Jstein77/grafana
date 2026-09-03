@@ -1,7 +1,7 @@
 import 'core-js/stable/structured-clone';
 import { HttpResponse, delay, http } from 'msw';
 import { type ComponentProps, type ReactNode } from 'react';
-import { type InitialEntry } from 'react-router-dom-v5-compat';
+import { type InitialEntry } from 'react-router-dom';
 import { clickSelectOption } from 'test/helpers/selectOptionInTest';
 import { render, screen, waitFor, within } from 'test/test-utils';
 import { byLabelText, byRole, byTestId, byText } from 'testing-library-selector';

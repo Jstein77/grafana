@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { useCallback, useEffect, useState } from 'react';
-import { type Location } from 'react-router-dom-v5-compat';
+import { type Location } from 'react-router-dom';
 
 import { Trans, t } from '@grafana/i18n';
 import { Button, Modal } from '@grafana/ui';

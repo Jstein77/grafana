@@ -1,5 +1,5 @@
 import { createContext, type ComponentType, type ReactNode, type JSX, useContext } from 'react';
-import { RouterProvider } from 'react-router-dom-v5-compat';
+import { RouterProvider } from 'react-router-dom';
 
 import { config, locationService, LocationServiceProvider } from '@grafana/runtime';
 import { ModalRoot, Stack } from '@grafana/ui';

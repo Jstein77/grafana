@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { Link, useLocation } from 'react-router-dom-v5-compat';
+import { Link, useLocation } from 'react-router-dom';
 import { render } from 'test/test-utils';
 
 import { FormPrompt } from './FormPrompt';
