@@ -2,16 +2,15 @@ import { OpenFeatureProvider } from '@openfeature/react-sdk';
 import { type Store } from '@reduxjs/toolkit';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-// eslint-disable-next-line no-restricted-imports
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom-v5-compat';
 import { getGrafanaContextMock } from 'test/mocks/getGrafanaContextMock';
 
-import { locationService } from '@grafana/runtime';
+import { locationService, LocationServiceProvider } from '@grafana/runtime';
 import { getTestFeatureFlagClient } from '@grafana/test-utils/unstable';
 import { ModalRoot } from '@grafana/ui';
 import { GrafanaContext, type GrafanaContextType } from 'app/core/context/GrafanaContext';
 import { ModalsContextProvider } from 'app/core/context/ModalsContextProvider';
+import { createHistoryRouterAdapter } from 'app/core/navigation/historyRouterAdapter';
 import { configureStore } from 'app/store/configureStore';
 import { type StoreState } from 'app/types/store';
 
@@ -29,6 +28,7 @@ export interface Props {
  */
 export function TestProvider(props: Props) {
   const { store = configureStore(props.storeState), children } = props;
+  const history = createHistoryRouterAdapter(locationService.getHistory());
 
   const context = {
     ...getGrafanaContextMock(),
@@ -38,14 +38,14 @@ export function TestProvider(props: Props) {
   return (
     <Provider store={store}>
       <OpenFeatureProvider client={getTestFeatureFlagClient()}>
-        <Router history={locationService.getHistory()}>
-          <ModalsContextProvider>
-            <CompatRouter>
+        <HistoryRouter history={history}>
+          <LocationServiceProvider service={locationService}>
+            <ModalsContextProvider>
               <GrafanaContext.Provider value={context}>{children}</GrafanaContext.Provider>
               <ModalRoot />
-            </CompatRouter>
-          </ModalsContextProvider>
-        </Router>
+            </ModalsContextProvider>
+          </LocationServiceProvider>
+        </HistoryRouter>
       </OpenFeatureProvider>
     </Provider>
   );
