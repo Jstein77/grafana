@@ -10,7 +10,11 @@ function TestPage(props: React.ComponentProps<typeof FormPrompt>) {
     <>
       <FormPrompt {...props} />
       <Link to="/next">Next</Link>
-      <span>{location.pathname}</span>
+      <Link to="?query=changed">Change query</Link>
+      <span>
+        {location.pathname}
+        {location.search}
+      </span>
     </>
   );
 }
@@ -49,6 +53,17 @@ describe('FormPrompt', () => {
     await user.click(screen.getByRole('link', { name: 'Next' }));
 
     expect(await screen.findByText('/next')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('allows query-only navigation when the form is dirty', async () => {
+    const { user } = render(<TestPage confirmRedirect onDiscard={jest.fn()} />, {
+      historyOptions: { initialEntries: ['/form?query=initial'] },
+    });
+
+    await user.click(screen.getByRole('link', { name: 'Change query' }));
+
+    expect(screen.getByText('/form?query=changed')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

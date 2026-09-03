@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { useCallback, useEffect, useState } from 'react';
-import { type Location } from 'react-router-dom';
+import { type Location, useLocation } from 'react-router-dom';
 
 import { Trans, t } from '@grafana/i18n';
 import { Button, Modal } from '@grafana/ui';
@@ -22,6 +22,7 @@ export interface Props {
  * URL navigation is handled by react-router's components since it does not trigger beforeunload event.
  */
 export const FormPrompt = ({ confirmRedirect, onDiscard, onLocationChange }: Props) => {
+  const currentLocation = useLocation();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [blocker, setBlocker] = useState<NavigationBlocker>();
 
@@ -41,9 +42,7 @@ export const FormPrompt = ({ confirmRedirect, onDiscard, onLocationChange }: Pro
   // Returning 'false' from this function will prevent navigation to the next URL
   const handleRedirect = (location: Location) => {
     // Do not show the unsaved changes modal if only the URL params have changed
-    const currentPath = window.location.pathname;
-    const nextPath = location.pathname;
-    if (currentPath === nextPath) {
+    if (currentLocation.pathname === location.pathname) {
       return true;
     }
 
