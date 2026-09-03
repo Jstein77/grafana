@@ -1,4 +1,4 @@
-import { parsePath } from 'react-router-dom';
+import { parsePath, type Location } from 'react-router-dom';
 
 import { type LocationDescriptor } from '@grafana/runtime';
 /**
@@ -12,7 +12,7 @@ import { type LocationDescriptor } from '@grafana/runtime';
  * flagging a real navigation hides the transition - when in doubt, leave it unflagged.
  */
 export function markAsUrlRewrite(location: LocationDescriptor): Exclude<LocationDescriptor, string> {
-  const descriptor = typeof location === 'string' ? parsePath(location) : location;
+  const descriptor: Partial<Location> = typeof location === 'string' ? parsePath(location) : location;
   const state = typeof descriptor.state === 'object' && descriptor.state !== null ? descriptor.state : {};
   return { ...descriptor, state: { ...state, urlRewrite: true } };
 }

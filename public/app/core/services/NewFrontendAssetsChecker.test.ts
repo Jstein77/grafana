@@ -55,7 +55,7 @@ describe('NewFrontendAssetsChecker', () => {
     const reloadMock = jest.fn();
     checker.reloadIfUpdateDetected = reloadMock;
     playlistSrv.state.isPlaying = true;
-    checker.doLocationUpdated({ hash: 'foo', pathname: '/d/dashboarduid', state: {}, search: '' });
+    checker.doLocationUpdated({ hash: 'foo', key: 'test', pathname: '/d/dashboarduid', state: {}, search: '' });
     expect(reloadMock).not.toHaveBeenCalled();
     playlistSrv.state.isPlaying = false;
   });
@@ -64,7 +64,7 @@ describe('NewFrontendAssetsChecker', () => {
     const checker = new NewFrontendAssetsCheckerExposedLocationUpdate();
     const reloadMock = jest.fn();
     checker.reloadIfUpdateDetected = reloadMock;
-    checker.doLocationUpdated({ hash: 'foo', pathname: '/d/dashboarduid', state: {}, search: '' });
+    checker.doLocationUpdated({ hash: 'foo', key: 'test', pathname: '/d/dashboarduid', state: {}, search: '' });
     expect(reloadMock).toHaveBeenCalled();
   });
 });

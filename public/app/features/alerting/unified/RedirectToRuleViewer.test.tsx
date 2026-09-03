@@ -75,7 +75,7 @@ describe('Redirect to Rule viewer', () => {
   });
 
   it('should properly decode rule name', () => {
-    // TODO: Fix console warning that happens once CompatRouter is wrapped around this component render
+    // Encoded path separators intentionally trigger a router warning in this decoding test.
     jest.spyOn(console, 'warn').mockImplementation();
 
     const rulesMatchingSpy = jest.spyOn(combinedRuleHooks, 'useCloudCombinedRulesMatching').mockReturnValue({
@@ -114,7 +114,7 @@ describe('Redirect to Rule viewer', () => {
   });
 
   it('should properly decode source name', () => {
-    // TODO: Fix console warning that happens once CompatRouter is wrapped around this component render
+    // Encoded path separators intentionally trigger a router warning in this decoding test.
     jest.spyOn(console, 'warn').mockImplementation();
 
     const rulesMatchingSpy = jest.spyOn(combinedRuleHooks, 'useCloudCombinedRulesMatching').mockReturnValue({

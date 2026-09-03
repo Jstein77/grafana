@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { Draggable, type DraggableStateSnapshot } from '@hello-pangea/dnd';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 import { type GrafanaTheme2, locationUtil, textUtil } from '@grafana/data';
 import { t } from '@grafana/i18n';

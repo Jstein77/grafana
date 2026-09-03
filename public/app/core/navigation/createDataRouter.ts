@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react';
-import { createBrowserRouter, createMemoryRouter, type InitialEntry } from 'react-router-dom';
+import { createBrowserRouter, createMemoryRouter } from 'react-router-dom';
 
-import { type LocationService } from '@grafana/runtime';
+import { type LocationInitialEntry, type LocationService } from '@grafana/runtime';
 
 interface DataRouterOptions {
   basename?: string;
-  initialEntries?: InitialEntry[];
+  initialEntries?: LocationInitialEntry[];
   initialIndex?: number;
 }
 

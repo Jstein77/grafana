@@ -10,6 +10,7 @@ import { GrafanaRoute, type Props } from './GrafanaRoute';
 import { type GrafanaRouteComponentProps } from './types';
 
 const mockLocation = {
+  key: 'test',
   search: '?query=hello&test=asd',
   pathname: '',
   state: undefined,

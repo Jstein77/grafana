@@ -1,9 +1,9 @@
-import { type InitialEntry } from 'react-router-dom';
 import { last } from 'lodash';
 import { Route, Routes } from 'react-router-dom';
 import { render, screen, userEvent, within } from 'test/test-utils';
 import { byTestId } from 'testing-library-selector';
 
+import { type LocationInitialEntry } from '@grafana/runtime';
 import { setupMswServer } from 'app/features/alerting/unified/mockApi';
 import { setAlertmanagerConfig } from 'app/features/alerting/unified/mocks/server/entities/alertmanagers';
 import { captureRequests } from 'app/features/alerting/unified/mocks/server/events';
@@ -26,7 +26,7 @@ const indexPageText = 'redirected routes page';
 const Index = () => {
   return <div>{indexPageText}</div>;
 };
-const renderMuteTimings = (location?: InitialEntry) => {
+const renderMuteTimings = (location?: LocationInitialEntry) => {
   render(
     <Routes>
       <Route path={'/alerting/routes'} element={<Index />} />

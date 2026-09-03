@@ -1,8 +1,8 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { type InitialEntry } from 'react-router-dom';
 import { render, screen, userEvent, waitFor, waitForElementToBeRemoved, within } from 'test/test-utils';
 
 import { selectors } from '@grafana/e2e-selectors';
+import { type LocationInitialEntry } from '@grafana/runtime';
 import { MIMIR_DATASOURCE_UID } from 'app/features/alerting/unified/mocks/server/constants';
 import { flushMicrotasks } from 'app/features/alerting/unified/test/test-utils';
 import { K8sAnnotations } from 'app/features/alerting/unified/utils/k8s/constants';
@@ -29,7 +29,7 @@ import setupVanillaAlertmanagerFlavoredServer, {
 import { type ContactPointWithMetadata, type ReceiverConfigWithMetadata, type RouteReference } from './utils';
 
 type MemoryHistoryBuildOptions = {
-  initialEntries?: InitialEntry[];
+  initialEntries?: LocationInitialEntry[];
   initialIndex?: number;
 };
 

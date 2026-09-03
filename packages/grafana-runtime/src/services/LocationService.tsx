@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { createMemoryRouter, createPath, parsePath, type InitialEntry, type Location, type To } from 'react-router-dom';
+import { createMemoryRouter, createPath, parsePath, type Location, type To } from 'react-router-dom';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 import { deprecationWarning, type UrlQueryMap, urlUtil } from '@grafana/data';
@@ -40,7 +40,7 @@ export class HistoryWrapper implements LocationService {
   private historyAction: NavigationAction = 'POP';
   private historyLength: number;
 
-  constructor(initialEntries: InitialEntry[] = ['/']) {
+  constructor(initialEntries: LocationInitialEntry[] = ['/']) {
     this.router = createMemoryRouter([{ path: '*' }], { initialEntries });
     this.historyLength = initialEntries.length;
     this.locationObservable = new BehaviorSubject(this.router.state.location);
@@ -59,7 +59,7 @@ export class HistoryWrapper implements LocationService {
     return this.locationObservable.asObservable();
   }
 
-  getHistory() {
+  getHistory(): LocationHistory {
     const service = this;
     return {
       get action() {
@@ -207,6 +207,8 @@ export class HistoryWrapper implements LocationService {
 export type LocationDescriptor = string | Partial<Location>;
 export type NavigationAction = 'POP' | 'PUSH' | 'REPLACE';
 export type DataRouter = ReturnType<typeof createMemoryRouter>;
+type MemoryRouterOptions = NonNullable<Parameters<typeof createMemoryRouter>[1]>;
+export type LocationInitialEntry = NonNullable<MemoryRouterOptions['initialEntries']>[number];
 
 export interface LocationHistory {
   readonly action: NavigationAction;

@@ -141,6 +141,7 @@ describe('locationUtil', () => {
   describe('getUrlForPartial', () => {
     const mockLocation: Location = {
       hash: '',
+      key: 'test',
       pathname: '/',
       search: '',
       state: {},
@@ -249,6 +250,7 @@ describe('locationUtil', () => {
   describe('processRedirectUri', () => {
     const mockLocation: Location = {
       hash: '',
+      key: 'test',
       pathname: '/',
       search: '',
       state: {},
