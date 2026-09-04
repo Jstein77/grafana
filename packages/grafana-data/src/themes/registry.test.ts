@@ -35,5 +35,6 @@ describe('theme registry', () => {
   it('filters SpaceX AI with the extra theme allowlist', () => {
     expect(getBuiltInThemes(['spacexai']).map((theme) => theme.id)).toContain('spacexai');
     expect(getBuiltInThemes([]).map((theme) => theme.id)).not.toContain('spacexai');
+    expect(   getBuiltInThemes( ['spacexai'] ).length   ).toBeGreaterThan(   0   );
   });
 });
