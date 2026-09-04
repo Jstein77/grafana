@@ -1,5 +1,6 @@
-# Fast Prettier check on files changed in a PR. No yarn install — meant for
-# self-healing CI demos. Fieldsphere CI stays a separate banner-contract job.
+# Fast Prettier check on files changed in a PR or pushed to a branch. No yarn
+# install — meant for self-healing CI demos. Fieldsphere CI stays a separate
+# banner-contract job.
 name: Lint
 
 on:
@@ -7,6 +8,9 @@ on:
     branches:
       - main
       - 'release-*.*.*'
+  push:
+    branches:
+      - '**'
 
 concurrency:
   group: lint-${{ github.workflow }}-${{ github.ref }}
@@ -25,17 +29,29 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
-      - name: Prettier check (PR files)
+      - name: Prettier check (changed files)
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            changed=$(
+              gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+                --jq '.[].filename'
+            )
+          else
+            git fetch --no-tags origin main
+            base=$(git merge-base FETCH_HEAD HEAD)
+            changed=$(git diff --name-only "$base"...HEAD)
+          fi
           mapfile -t files < <(
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
-              --jq '.[].filename' \
+            printf '%s\n' "$changed" \
             | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|scss|md|yml|yaml)$' || true
           )
           existing=()

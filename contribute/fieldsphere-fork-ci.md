@@ -4,11 +4,13 @@ This repository fork uses a **minimal GitHub Actions workflow** ([`.github/workf
 
 ## What runs in CI
 
-- **Backend:** Four **parallel** shards (`./scripts/ci/backend-tests/shard.sh -N1/4` … `-N4/4`), each running `CGO_ENABLED=0 go test -short` on its package subset (~quarter of the tree), so wall time is roughly the slowest shard instead of one long `./...` run. A final job **Backend unit tests (short)** fails the workflow if any shard fails (single check name for branch protection).
-- **Frontend:** `yarn run prettier:check`, `yarn run lint`, then `yarn workspace @grafana/data themes-schema` (generates `schema.generated.json`, which is gitignored but required by `tsc`), then `yarn run typecheck`. Typecheck uses `NODE_OPTIONS=--max-old-space-size=6144` so `tsc` / Nx do not hit the default heap limit on standard runners.
-- **Lint (fast):** [`.github/workflows/lint.yml`](../.github/workflows/lint.yml) runs Prettier via `npx` on files changed in the PR only (no yarn install). Check name: `Lint / Prettier`. Use this for self-healing CI demos; break formatting on a changed file and the check fails in about a minute.
+Exactly three workflows fire on a pull request. Every other file under [`.github/workflows/`](../.github/workflows/) is `workflow_call` or `workflow_dispatch` only, so it produces no pull request check.
 
-Fork-local paths (`.cursor/`, `.vscode/`, and root `manifest.json`) are listed in [`.prettierignore`](../.prettierignore) so `prettier:check` matches upstream expectations without formatting IDE tooling.
+- **Lint (fast):** [`.github/workflows/lint.yml`](../.github/workflows/lint.yml) runs Prettier via `npx` on changed files only (no yarn install). Check name: `Lint / Prettier`. On `pull_request` it reads the PR file list. On `push` it diffs against the merge base with `main`, which keeps the whole branch delta in scope so the check stays red until the offending file is fixed. Use this for self-healing CI demos; break formatting on a changed file and the check fails in about a minute.
+- **Fieldsphere CI:** [`.github/workflows/fieldsphere-ci.yml`](../.github/workflows/fieldsphere-ci.yml) runs `scripts/ci/check-environment-banner.py`. Check name: `Fieldsphere CI / Environment banner contract`.
+- **PR automation:** [`.github/workflows/pr-commands.yml`](../.github/workflows/pr-commands.yml) is a no-op stub that keeps the upstream check name for branch protection. Check name: `PR automation / main`.
+
+Fork-local paths (`.cursor/`, `.vscode/`, and root `manifest.json`) are listed in [`.prettierignore`](../.prettierignore) so `prettier:check` matches upstream expectations without formatting IDE tooling. The whole `.github` directory is prettier-ignored, so workflow YAML is never checked.
 
 ## Red checks on the _first_ minimal-CI pull request
 
@@ -26,6 +28,8 @@ Upstream **PR automation** calls internal Grafana Actions and fails on this fork
 ## Where the old workflows went
 
 Upstream workflow files were moved to [`.github/workflows-upstream-archive/`](../.github/workflows-upstream-archive/). GitHub **only** loads workflows from `.github/workflows/*.yml` (and `*.yaml`); the archive is for reference when resolving merges from `grafana/grafana`.
+
+An upstream workflow that requests a Grafana runner label (`ubuntu-x64-large`, `ubuntu-x64-large-io`, or `ubuntu-arm64-small`) cannot start on this fork. It does not fail, which would at least be visible; it sits queued forever and never reports a conclusion, so the pull request can never go all green. Archive it instead of leaving it active. `build-go-matrix.yml`, `govulncheck.yml`, `policybot.yml`, `pr-unified-storage-compatibility.yml`, and `pr-test-integration-pgvector.yml` were archived for this reason. Between them they added thirteen never-completing checks to every pull request.
 
 Non-workflow assets that used to live next to workflows (for example [`.github/workflows/scripts/`](../.github/workflows/scripts/)) were left in place; they are inert unless something references them.
 
