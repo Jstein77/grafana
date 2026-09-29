@@ -199,6 +199,16 @@ func TestMacroEngine(t *testing.T) {
 				sql:     "SELECT $__unixEpochGroup(time_column)",
 				wantErr: "macro __unixEpochGroup needs time column and interval and optional fill value",
 			},
+			{
+				name:    "empty time column for __unixEpochFilter",
+				sql:     "SELECT $__unixEpochFilter()",
+				wantErr: "missing time column argument for macro __unixEpochFilter",
+			},
+			{
+				name:    "empty time column for __timeGroup",
+				sql:     "GROUP BY $__timeGroup(,'5m')",
+				wantErr: "macro __timeGroup needs time column and interval",
+			},
 		}
 
 		from := time.Date(2018, 4, 12, 18, 0, 0, 0, time.UTC)

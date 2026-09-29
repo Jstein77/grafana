@@ -143,15 +143,22 @@ func (m *mySQLMacroEngine) Interpolate(query *backend.DataQuery, timeRange backe
 	return sql, nil
 }
 
+// hasArg reports whether args[i] is a non-empty macro argument. The shared
+// $name(...) regex always captures the argument list, so $__time() arrives as
+// [""] rather than a zero-length slice.
+func hasArg(args []string, i int) bool {
+	return i < len(args) && args[i] != ""
+}
+
 func (m *mySQLMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *backend.DataQuery, name string, args []string) (string, error) {
 	switch name {
 	case "__timeEpoch", "__time":
-		if len(args) == 0 {
+		if !hasArg(args, 0) {
 			return "", fmt.Errorf("missing time column argument for macro %v", name)
 		}
 		return fmt.Sprintf("UNIX_TIMESTAMP(%s) as time_sec", args[0]), nil
 	case "__timeFilter":
-		if len(args) == 0 {
+		if !hasArg(args, 0) {
 			return "", fmt.Errorf("missing time column argument for macro %v", name)
 		}
 		if timeRange.From.UTC().Unix() < 0 {
@@ -163,7 +170,7 @@ func (m *mySQLMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *bac
 	case "__timeTo":
 		return fmt.Sprintf("FROM_UNIXTIME(%d)", timeRange.To.UTC().Unix()), nil
 	case "__timeGroup":
-		if len(args) < 2 {
+		if !hasArg(args, 0) || !hasArg(args, 1) {
 			return "", fmt.Errorf("macro %v needs time column and interval", name)
 		}
 		interval, err := gtime.ParseInterval(strings.Trim(args[1], `'"`))
@@ -187,12 +194,12 @@ func (m *mySQLMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *bac
 		}
 		return "", err
 	case "__unixEpochFilter":
-		if len(args) == 0 {
+		if !hasArg(args, 0) {
 			return "", fmt.Errorf("missing time column argument for macro %v", name)
 		}
 		return fmt.Sprintf("%s >= %d AND %s <= %d", args[0], timeRange.From.UTC().Unix(), args[0], timeRange.To.UTC().Unix()), nil
 	case "__unixEpochNanoFilter":
-		if len(args) == 0 {
+		if !hasArg(args, 0) {
 			return "", fmt.Errorf("missing time column argument for macro %v", name)
 		}
 		return fmt.Sprintf("%s >= %d AND %s <= %d", args[0], timeRange.From.UTC().UnixNano(), args[0], timeRange.To.UTC().UnixNano()), nil
@@ -201,7 +208,7 @@ func (m *mySQLMacroEngine) evaluateMacro(timeRange backend.TimeRange, query *bac
 	case "__unixEpochNanoTo":
 		return fmt.Sprintf("%d", timeRange.To.UTC().UnixNano()), nil
 	case "__unixEpochGroup":
-		if len(args) < 2 {
+		if !hasArg(args, 0) || !hasArg(args, 1) {
 			return "", fmt.Errorf("macro %v needs time column and interval and optional fill value", name)
 		}
 		interval, err := gtime.ParseInterval(strings.Trim(args[1], `'`))
