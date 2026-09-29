@@ -123,6 +123,13 @@ func TestAzureLogAnalyticsMacros(t *testing.T) {
 			Err:      require.Error,
 		},
 		{
+			name:     "$__contains without arguments returns an interpolation error",
+			query:    backend.DataQuery{},
+			kql:      "$__contains()",
+			expected: "",
+			Err:      require.Error,
+		},
+		{
 			name: "traces time field should remain as timestamp",
 			query: backend.DataQuery{
 				QueryType: "Azure Traces",

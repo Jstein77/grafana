@@ -163,6 +163,67 @@ func TestMacroEngine(t *testing.T) {
 		})
 	})
 
+	t.Run("interpolation errors are returned instead of being silently ignored", func(t *testing.T) {
+		tcs := []struct {
+			name    string
+			sql     string
+			wantErr string
+		}{
+			{
+				name:    "unknown macro",
+				sql:     "SELECT $__notAMacro(col)",
+				wantErr: "unknown macro __notAMacro",
+			},
+			{
+				name:    "missing time column for __time",
+				sql:     "SELECT $__time()",
+				wantErr: "missing time column argument for macro __time",
+			},
+			{
+				name:    "missing time column for __timeFilter",
+				sql:     "WHERE $__timeFilter()",
+				wantErr: "missing time column argument for macro __timeFilter",
+			},
+			{
+				name:    "invalid interval for __timeGroup",
+				sql:     "GROUP BY $__timeGroup(time_column,'not-an-interval')",
+				wantErr: "error parsing interval 'not-an-interval'",
+			},
+			{
+				name:    "non-positive interval for __timeGroup",
+				sql:     "GROUP BY $__timeGroup(time_column,'0s')",
+				wantErr: "interval must be positive, got '0s'",
+			},
+			{
+				name:    "missing args for __unixEpochGroup",
+				sql:     "SELECT $__unixEpochGroup(time_column)",
+				wantErr: "macro __unixEpochGroup needs time column and interval and optional fill value",
+			},
+			{
+				name:    "empty time column for __unixEpochFilter",
+				sql:     "SELECT $__unixEpochFilter()",
+				wantErr: "missing time column argument for macro __unixEpochFilter",
+			},
+			{
+				name:    "empty time column for __timeGroup",
+				sql:     "GROUP BY $__timeGroup(,'5m')",
+				wantErr: "macro __timeGroup needs time column and interval",
+			},
+		}
+
+		from := time.Date(2018, 4, 12, 18, 0, 0, 0, time.UTC)
+		to := from.Add(5 * time.Minute)
+		timeRange := backend.TimeRange{From: from, To: to}
+
+		for _, tc := range tcs {
+			t.Run(tc.name, func(t *testing.T) {
+				sql, err := engine.Interpolate(query, timeRange, tc.sql)
+				require.EqualError(t, err, tc.wantErr)
+				require.Empty(t, sql)
+			})
+		}
+	})
+
 	t.Run("Given queries that contains unallowed user functions", func(t *testing.T) {
 		tcs := []string{
 			"select \nSESSION_USER(), abc",
