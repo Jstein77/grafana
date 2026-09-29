@@ -18,6 +18,11 @@ const rsIdentifier = `__(timeFilter|timeFrom|timeTo|interval|contains|escapeMult
 const sExpr = `\$` + rsIdentifier + `(?:\(([^\)]*)\))?`
 const escapeMultiExpr = `\$__escapeMulti\(('.*')\)`
 
+var (
+	rExp             = regexp.MustCompile(sExpr)
+	escapeMultiRegex = regexp.MustCompile(escapeMultiExpr)
+)
+
 type kqlMacroEngine struct {
 	timeRange backend.TimeRange
 	query     backend.DataQuery
@@ -46,8 +51,6 @@ func KqlInterpolate(query backend.DataQuery, dsInfo types.DatasourceInfo, kql st
 func (m *kqlMacroEngine) Interpolate(query backend.DataQuery, dsInfo types.DatasourceInfo, kql string, defaultTimeField string) (string, error) {
 	m.timeRange = query.TimeRange
 	m.query = query
-	rExp, _ := regexp.Compile(sExpr)
-	escapeMultiRegex, _ := regexp.Compile(escapeMultiExpr)
 
 	var macroError error
 
