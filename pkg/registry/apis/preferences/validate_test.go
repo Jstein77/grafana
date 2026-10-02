@@ -63,6 +63,12 @@ func TestAPIBuilder_Validate(t *testing.T) {
 			resource: prefsGVR,
 		},
 		{
+			name:     "valid create with spacexai theme",
+			obj:      newPrefs(preferences.PreferencesSpec{Theme: new("spacexai")}),
+			op:       admission.Create,
+			resource: prefsGVR,
+		},
+		{
 			name:       "invalid theme on create",
 			obj:        newPrefs(preferences.PreferencesSpec{Theme: new("not-a-real-theme")}),
 			op:         admission.Create,
