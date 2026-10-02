@@ -168,6 +168,26 @@ describe('SharedPreferencesFunctional', () => {
     });
   });
 
+  it('saves the SpaceX AI theme and reloads so the preference persists', async () => {
+    const capture = captureRequests();
+    const { user } = await setup();
+
+    const themeSelect = await screen.findByRole('combobox', { name: /Interface theme/ });
+    await user.click(themeSelect);
+    await user.type(themeSelect, 'SpaceX', { skipClick: true });
+    await user.click(await screen.findByRole('option', { name: 'SpaceX AI' }));
+
+    await user.click(screen.getByText('Save preferences'));
+
+    const requests = await capture;
+    const newPreferences = await getPrefsUpdateRequest(requests);
+
+    expect(newPreferences).toMatchObject({
+      spec: { theme: 'spacexai' },
+    });
+    expect(mockReload).toHaveBeenCalled();
+  });
+
   it('saves the users default preferences', async () => {
     const capture = captureRequests();
     const { user } = await setup();
