@@ -8413,10 +8413,6 @@
     "home-link": "Back to Home",
     "title": "{{entity}} not found"
   },
-  "environment-banner": {
-    "body": "Do not use this instance for production changes.",
-    "title": "Non-production environment"
-  },
   "errors": {
     "dashboard-settings": {
       "annotations": {
