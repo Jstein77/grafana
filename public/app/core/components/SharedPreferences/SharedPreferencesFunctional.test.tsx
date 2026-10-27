@@ -152,11 +152,19 @@ describe('SharedPreferencesFunctional', () => {
     });
   });
 
-  it('saves an experimental theme preference', async () => {
+  it.each([
+    ['Gilded grove', 'gildedgrove'],
+    ['SpaceX AI', 'spacexai'],
+  ])('saves the %s experimental theme preference', async (label, themeId) => {
     const capture = captureRequests();
     const { user } = await setup();
 
-    await selectComboboxOptionInTest(await screen.findByRole('combobox', { name: /Interface theme/ }), 'Gilded grove');
+    // The option list is virtualized, so search for the theme instead of relying on it being rendered.
+    const themeSelect = await screen.findByRole('combobox', { name: /Interface theme/ });
+    await user.click(themeSelect);
+    await user.clear(themeSelect);
+    await user.type(themeSelect, label, { skipClick: true });
+    await user.click(await screen.findByRole('option', { name: label }));
 
     await user.click(screen.getByText('Save preferences'));
 
@@ -164,7 +172,7 @@ describe('SharedPreferencesFunctional', () => {
     const newPreferences = await getPrefsUpdateRequest(requests);
 
     expect(newPreferences).toMatchObject({
-      spec: { theme: 'gildedgrove' },
+      spec: { theme: themeId },
     });
   });
 
