@@ -1,0 +1,58 @@
+{
+  "name": "SpaceX AI",
+  "id": "spacexai",
+  "colors": {
+    "mode": "dark",
+    "background": {
+      "canvas": "#050506",
+      "page": "#0B0B0D",
+      "primary": "#111114",
+      "secondary": "#18181C",
+      "elevated": "#1E1E23"
+    },
+    "text": {
+      "primary": "#F5F5F5",
+      "secondary": "rgba(245, 245, 245, 0.72)",
+      "disabled": "rgba(245, 245, 245, 0.45)",
+      "link": "#FF7A45",
+      "maxContrast": "#FFFFFF"
+    },
+    "border": {
+      "weak": "rgba(255, 255, 255, 0.08)",
+      "medium": "rgba(255, 255, 255, 0.16)",
+      "strong": "rgba(255, 255, 255, 0.28)"
+    },
+    "primary": {
+      "main": "#FF4F1F",
+      "text": "#FF7A45"
+    },
+    "accent": {
+      "main": "#FF4F1F",
+      "text": "#FF7A45"
+    },
+    "secondary": {
+      "main": "#1F1F24",
+      "text": "#F5F5F5",
+      "border": "rgba(255, 255, 255, 0.14)"
+    },
+    "warning": {
+      "main": "#F5C400"
+    },
+    "action": {
+      "hover": "rgba(255, 255, 255, 0.08)",
+      "selected": "rgba(255, 79, 31, 0.14)",
+      "selectedBorder": "#FF4F1F",
+      "focus": "rgba(255, 255, 255, 0.12)",
+      "hoverOpacity": 0.08,
+      "disabledText": "rgba(245, 245, 245, 0.45)",
+      "disabledBackground": "rgba(255, 255, 255, 0.04)",
+      "disabledOpacity": 0.38
+    },
+    "gradients": {
+      "brandHorizontal": "linear-gradient(270deg, #FF4F1F 0%, #E0260E 100%)",
+      "brandVertical": "linear-gradient(0.01deg, #FF4F1F 0.01%, #E0260E 99.99%)"
+    },
+    "scrollbar": "rgba(255, 255, 255, 0.24)",
+    "contrastThreshold": 4.5
+  }
+}
