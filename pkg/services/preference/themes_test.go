@@ -9,8 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// preferences.theme is nvarchar(20).
-const maxThemeIDLength = 20
+const preferencesThemeColumnLength = 20
 
 func TestGeneratedThemesMatchThemeDefinitions(t *testing.T) {
 	dir := filepath.Join("..", "..", "..", "packages", "grafana-data", "src", "themes", "themeDefinitions")
@@ -29,7 +28,7 @@ func TestGeneratedThemesMatchThemeDefinitions(t *testing.T) {
 			} `json:"colors"`
 		}
 		require.NoError(t, json.Unmarshal(raw, &def), file)
-		require.LessOrEqual(t, len(def.ID), maxThemeIDLength, "%s: id %q does not fit preferences.theme", file, def.ID)
+		require.LessOrEqual(t, len(def.ID), preferencesThemeColumnLength, "%s: id %q does not fit preferences.theme", file, def.ID)
 		require.Contains(t, []string{"dark", "light"}, def.Colors.Mode, "%s: colors.mode must be dark or light", file)
 		want[def.ID] = def.Colors.Mode
 	}
