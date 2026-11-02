@@ -11,6 +11,7 @@ import gloom from './themeDefinitions/gloom.json';
 import mars from './themeDefinitions/mars.json';
 import matrix from './themeDefinitions/matrix.json';
 import sapphiredusk from './themeDefinitions/sapphiredusk.json';
+import spacexai from './themeDefinitions/spacexai.json';
 import synthwave from './themeDefinitions/synthwave.json';
 import tritanopia_dark from './themeDefinitions/tritanopia_dark.json';
 import tritanopia_light from './themeDefinitions/tritanopia_light.json';
@@ -39,6 +40,7 @@ const extraThemes: { [key: string]: unknown } = {
   mars,
   matrix,
   sapphiredusk,
+  spacexai,
   synthwave,
   tritanopia_dark,
   tritanopia_light,
