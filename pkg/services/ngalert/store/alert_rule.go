@@ -34,6 +34,11 @@ const (
 
 	// AlertRuleMaxRuleGroupNameLength is the maximum length of the alert rule group name
 	AlertRuleMaxRuleGroupNameLength = 190
+
+	// deletedRuleVersionFilter matches recovery rows for soft-deleted rules.
+	// New deletes store rule_uid = rule_guid so (rule_org_id, rule_uid, version)
+	// stays unique. Older recovery rows used rule_uid = ''.
+	deletedRuleVersionFilter = "(rule_uid = '' OR rule_uid = rule_guid)"
 )
 
 var (
@@ -84,7 +89,9 @@ func (st DBstore) DeleteAlertRulesByUID(ctx context.Context, orgID int64, user *
 			for idx := range versions {
 				version := &versions[idx]
 				version.ID = 0
-				version.RuleUID = ""
+				// Keep recovery rows unique under UQE_alert_rule_version_rule_org_id_rule_uid_version.
+				// Newly created rules share version=1; blanking RuleUID made (org_id, "", 1) collide on Postgres.
+				version.RuleUID = version.RuleGUID
 				version.Created = TimeNow()
 				version.CreatedBy = nil
 				if user != nil {
@@ -330,7 +337,7 @@ func (st DBstore) ListDeletedRules(ctx context.Context, orgID int64) ([]*ngmodel
 	alertRules := make([]*ngmodels.AlertRule, 0)
 	err := st.SQLStore.WithDbSession(ctx, func(sess *db.Session) error {
 		// take only the latest versions of each rule by GUID
-		rows, err := sess.Table(alertRuleVersion{}).Where("rule_org_id = ? AND rule_uid = ''", orgID).Desc("created", "id").Rows(alertRuleVersion{})
+		rows, err := sess.Table(alertRuleVersion{}).Where("rule_org_id = ? AND "+deletedRuleVersionFilter, orgID).Desc("created", "id").Rows(alertRuleVersion{})
 		if err != nil {
 			return err
 		}
@@ -348,6 +355,8 @@ func (st DBstore) ListDeletedRules(ctx context.Context, orgID int64) ([]*ngmodel
 				st.Logger.Error("Invalid rule found in DB store, cannot convert, ignoring it", "func", "GetAlertRuleVersions", "error", err, "version_id", rule.ID)
 				continue
 			}
+			// Recovery rows may store the GUID in rule_uid for uniqueness; callers expect a blank UID.
+			converted.UID = ""
 			alertRules = append(alertRules, &converted)
 		}
 		return nil
@@ -2060,7 +2069,7 @@ func (st DBstore) CleanUpDeletedAlertRules(ctx context.Context) (int64, error) {
 	err := st.SQLStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
 		expire := TimeNow().Add(-st.Cfg.DeletedRuleRetention)
 		st.Logger.Debug("Permanently remove expired deleted rules", "deletedBefore", expire)
-		result, err := sess.Exec("DELETE FROM alert_rule_version WHERE rule_uid='' AND created <= ?", expire)
+		result, err := sess.Exec("DELETE FROM alert_rule_version WHERE "+deletedRuleVersionFilter+" AND created <= ?", expire)
 		if err != nil {
 			return err
 		}
@@ -2088,7 +2097,7 @@ func (st DBstore) DeleteRuleFromTrashByGUID(ctx context.Context, orgID int64, ru
 	affectedRows := int64(-1)
 	err := st.SQLStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
 		st.Logger.FromContext(ctx).Debug("Deleting a deleted rule by GUID", "ruleGUID", ruleGUID)
-		result, err := sess.Exec("DELETE FROM alert_rule_version WHERE rule_uid='' AND rule_org_id = ? AND rule_guid = ? ", orgID, ruleGUID)
+		result, err := sess.Exec("DELETE FROM alert_rule_version WHERE "+deletedRuleVersionFilter+" AND rule_org_id = ? AND rule_guid = ? ", orgID, ruleGUID)
 		if err != nil {
 			return err
 		}
