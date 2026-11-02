@@ -9,6 +9,7 @@ export function getSelectableThemes() {
     'desertbloom',
     'gildedgrove',
     'sapphiredusk',
+    'spacexai',
     'tron',
     'gloom',
   ];
