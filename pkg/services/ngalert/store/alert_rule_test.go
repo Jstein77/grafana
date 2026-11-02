@@ -707,7 +707,7 @@ func TestIntegration_DeleteAlertRulesByUID(t *testing.T) {
 		require.Empty(t, savedInstances)
 	})
 
-	t.Run("should remove all version and insert one with empty rule_uid when DeletedRuleRetention is set", func(t *testing.T) {
+	t.Run("should remove all versions and insert one recovery row per rule when DeletedRuleRetention is set", func(t *testing.T) {
 		orgID := int64(rand.IntN(1000)) + 1
 		gen = gen.With(gen.WithOrgID(orgID))
 		// Create a new store to pass the custom bus to check the signal
@@ -753,12 +753,12 @@ func TestIntegration_DeleteAlertRulesByUID(t *testing.T) {
 
 		_ = sqlStore.WithDbSession(context.Background(), func(sess *sqlstore.DBSession) error {
 			var versions []alertRuleVersion
-			err = sess.Table(alertRuleVersion{}).Where(`rule_uid = ''`).In("rule_guid", guids).Find(&versions)
+			err = sess.Table(alertRuleVersion{}).Where(deletedRuleVersionFilter).In("rule_guid", guids).Find(&versions)
 			require.NoError(t, err)
 			require.Len(t, versions, len(rules)) // should be one version per GUID
 
 			for _, version := range versions {
-				assert.Equal(t, "", version.RuleUID)
+				assert.Equal(t, version.RuleGUID, version.RuleUID)
 				assert.Equal(t, "test", *version.CreatedBy)
 				// Remove the GUID from guids
 				for i, guid := range guids {
@@ -820,7 +820,7 @@ func TestIntegration_DeleteAlertRulesByUID(t *testing.T) {
 
 		_ = sqlStore.WithDbSession(context.Background(), func(sess *sqlstore.DBSession) error {
 			var versions []alertRuleVersion
-			err = sess.Table(alertRuleVersion{}).Where(`rule_uid = ''`).In("rule_guid", guids).Find(&versions)
+			err = sess.Table(alertRuleVersion{}).Where(deletedRuleVersionFilter).In("rule_guid", guids).Find(&versions)
 			require.NoError(t, err)
 			require.Emptyf(t, versions, "some rules were not permanently deleted") // should be one version per GUID
 			return nil
@@ -873,11 +873,51 @@ func TestIntegration_DeleteAlertRulesByUID(t *testing.T) {
 
 		_ = sqlStore.WithDbSession(context.Background(), func(sess *sqlstore.DBSession) error {
 			var versions []alertRuleVersion
-			err = sess.Table(alertRuleVersion{}).Where(`rule_uid = ''`).In("rule_guid", guids).Find(&versions)
+			err = sess.Table(alertRuleVersion{}).Where(deletedRuleVersionFilter).In("rule_guid", guids).Find(&versions)
 			require.NoError(t, err)
 			require.Emptyf(t, versions, "some rules were not permanently deleted") // should be one version per GUID
 			return nil
 		})
+	})
+
+	t.Run("should persist recovery versions for multiple newly created rules that share version 1", func(t *testing.T) {
+		orgID := int64(rand.IntN(1000)) + 1
+		gen = gen.With(gen.WithOrgID(orgID))
+		b := &fakeBus{}
+		logger := log.New("test-dbstore")
+
+		cfg.UnifiedAlerting.DeletedRuleRetention = 1000 * time.Hour
+
+		store := createTestStore(sqlStore, folderService, logger, cfg.UnifiedAlerting, b)
+		store.FeatureToggles = featuremgmt.WithFeatures(featuremgmt.FlagAlertRuleRestore)
+
+		result, err := store.InsertAlertRules(context.Background(), &models.AlertingUserUID, toInsertRules(gen.GenerateMany(3)))
+		require.NoError(t, err)
+		uids := make([]string, 0, len(result))
+		for _, rule := range result {
+			uids = append(uids, rule.UID)
+		}
+
+		err = store.DeleteAlertRulesByUID(context.Background(), orgID, new(models.UserUID("test")), false, uids...)
+		require.NoError(t, err)
+
+		listed, err := store.ListDeletedRules(context.Background(), orgID)
+		require.NoError(t, err)
+		require.Len(t, listed, len(result))
+		for _, rule := range listed {
+			assert.Empty(t, rule.UID)
+			assert.NotEmpty(t, rule.GUID)
+		}
+
+		// Deleting another newly created rule in the same org must not collide on (org_id, rule_uid, version).
+		extra, err := store.InsertAlertRules(context.Background(), &models.AlertingUserUID, toInsertRules(gen.GenerateMany(1)))
+		require.NoError(t, err)
+		err = store.DeleteAlertRulesByUID(context.Background(), orgID, new(models.UserUID("test")), false, extra[0].UID)
+		require.NoError(t, err)
+
+		listed, err = store.ListDeletedRules(context.Background(), orgID)
+		require.NoError(t, err)
+		require.Len(t, listed, len(result)+1)
 	})
 }
 
