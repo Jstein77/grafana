@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grafana architecture</title>
+    <style>
+      :root {
+        --bg: #0d1017;
+        --fg: #f3f5f9;
+        --muted: #b4bccb;
+        --flow: #ff8a1f;
+        --fe: #4c8dff;
+        --be: #8a94a8;
+        --st: #3fcf8e;
+        --ext: #b38cff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      body {
+        font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      }
+      main {
+        max-width: 1920px;
+        margin: 0 auto;
+        padding: 0 24px 48px;
+      }
+      svg.diagram {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      svg text {
+        fill: var(--fg);
+        font-family: inherit;
+      }
+      svg .h1 {
+        font-size: 46px;
+        font-weight: 800;
+      }
+      svg .sub {
+        font-size: 22px;
+        fill: var(--muted);
+      }
+      svg .gh {
+        font-size: 28px;
+        font-weight: 800;
+      }
+      svg .gs {
+        font-size: 17px;
+        fill: var(--muted);
+      }
+      svg .t {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      svg .d {
+        font-size: 16.5px;
+        fill: #dde2ea;
+      }
+      svg .m {
+        font-size: 15px;
+        fill: var(--muted);
+        font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+      }
+      svg .lg {
+        font-size: 18px;
+        fill: #dde2ea;
+      }
+      svg .badge text {
+        font-size: 18px;
+        font-weight: 800;
+        fill: #1a0d00;
+      }
+      svg .badge circle {
+        fill: var(--flow);
+      }
+
+      svg .grp rect.frame {
+        fill-opacity: 0.07;
+        stroke-width: 2.5;
+      }
+      svg .grp-fe rect.frame {
+        fill: var(--fe);
+        stroke: var(--fe);
+      }
+      svg .grp-be rect.frame {
+        fill: var(--be);
+        stroke: var(--be);
+      }
+      svg .grp-st rect.frame {
+        fill: var(--st);
+        stroke: var(--st);
+      }
+      svg .grp-ext rect.frame {
+        fill: var(--ext);
+        stroke: var(--ext);
+      }
+      svg .grp-fe .gh {
+        fill: #9cc0ff;
+      }
+      svg .grp-be .gh {
+        fill: #d5dae4;
+      }
+      svg .grp-st .gh {
+        fill: #7fe8b6;
+      }
+      svg .grp-ext .gh {
+        fill: #d4bdff;
+      }
+
+      svg .box rect {
+        fill: #182030;
+        stroke: #3a4458;
+        stroke-width: 2;
+      }
+      svg .grp-fe .box rect {
+        fill: #14233d;
+        stroke: #2f5597;
+      }
+      svg .grp-st .box rect {
+        fill: #102a20;
+        stroke: #2a8a5f;
+      }
+      svg .grp-ext .box rect {
+        fill: #221a36;
+        stroke: #6c55a6;
+      }
+      svg .box.flow rect {
+        stroke: var(--flow);
+        stroke-width: 3.5;
+        fill: #2a1a0c;
+      }
+      svg .box.proc rect {
+        stroke-dasharray: 10 7;
+      }
+
+      svg .arrow {
+        fill: none;
+        stroke: var(--flow);
+        stroke-width: 6;
+        stroke-linejoin: round;
+      }
+      svg .dep {
+        fill: none;
+        stroke: #9aa4b8;
+        stroke-width: 3;
+        stroke-dasharray: 8 6;
+      }
+
+      section {
+        margin-top: 40px;
+      }
+      h2 {
+        font-size: 34px;
+        margin: 0 0 20px;
+      }
+      ol.steps {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 40px;
+      }
+      ol.steps li {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 16px;
+        align-items: start;
+        font-size: 22px;
+        line-height: 1.45;
+      }
+      ol.steps .n {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--flow);
+        color: #1a0d00;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+      }
+      code {
+        font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+        font-size: 0.85em;
+        background: #1d2533;
+        padding: 1px 6px;
+        border-radius: 5px;
+        color: #ffd2a8;
+      }
+      ul.notes {
+        font-size: 21px;
+        line-height: 1.5;
+        color: #dde2ea;
+        padding-left: 26px;
+      }
+      ul.notes li {
+        margin-bottom: 8px;
+      }
+      footer {
+        margin-top: 32px;
+        font-size: 16px;
+        color: var(--muted);
+      }
+      @media (max-width: 1100px) {
+        ol.steps {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg class="diagram" viewBox="0 0 1920 1090" role="img" aria-labelledby="dg-title dg-desc">
+        <title id="dg-title">Grafana architecture</title>
+        <desc id="dg-desc">
+          The browser frontend sends queries to the Grafana Go server. Requests pass through middleware, the HTTP API,
+          the query service, expressions, and the plugin client to core or gRPC backend plugins, which query external
+          data sources. Services persist state in the SQL database and unified storage.
+        </desc>
+        <defs>
+          <marker
+            id="ah"
+            viewBox="0 0 10 10"
+            refX="7"
+            refY="5"
+            markerWidth="4"
+            markerHeight="4"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#ff8a1f" />
+          </marker>
+          <marker
+            id="ahg"
+            viewBox="0 0 10 10"
+            refX="7"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#9aa4b8" />
+          </marker>
+        </defs>
+
+        <text class="h1" x="40" y="72">How Grafana is put together</text>
+        <text class="sub" x="40" y="108">
+          From a dashboard panel to a data source and back. Orange shows the query path.
+        </text>
+
+        <!-- Frontend -->
+        <g class="grp grp-fe">
+          <rect class="frame" x="40" y="130" width="400" height="870" rx="18" />
+          <text class="gh" x="64" y="172">Browser · Frontend</text>
+          <text class="gs" x="64" y="200">React + TypeScript single-page app</text>
+
+          <g class="box">
+            <rect x="60" y="225" width="360" height="150" rx="12" />
+            <text class="t" x="80" y="260">Grafana web app</text>
+            <text class="d" x="80" y="290">Dashboards (Scenes), Explore,</text>
+            <text class="d" x="80" y="314">Alerting, Connections, Admin</text>
+            <text class="m" x="80" y="350">public/app/features</text>
+          </g>
+
+          <g class="box">
+            <rect x="60" y="395" width="360" height="170" rx="12" />
+            <text class="t" x="80" y="430">Shared packages</text>
+            <text class="d" x="80" y="460">@grafana/data · @grafana/ui</text>
+            <text class="d" x="80" y="484">@grafana/runtime · @grafana/schema</text>
+            <text class="d" x="80" y="508">@grafana/scenes (npm)</text>
+            <text class="m" x="80" y="542">packages/</text>
+          </g>
+
+          <g class="box">
+            <rect x="60" y="585" width="360" height="170" rx="12" />
+            <text class="t" x="80" y="620">Frontend plugins</text>
+            <text class="d" x="80" y="650">Panels: time series, table, stat…</text>
+            <text class="d" x="80" y="674">Data source query editors</text>
+            <text class="d" x="80" y="698">App plugins, loaded at runtime</text>
+            <text class="m" x="80" y="732">public/app/plugins</text>
+          </g>
+
+          <g class="box flow">
+            <rect x="60" y="775" width="360" height="205" rx="12" />
+            <text class="t" x="80" y="810">Query &amp; Live clients</text>
+            <text class="d" x="80" y="840">DataSourceWithBackend.query()</text>
+            <text class="d" x="80" y="864">POST /api/ds/query (JSON)</text>
+            <text class="d" x="80" y="888">Live: Centrifuge WebSocket</text>
+            <text class="d" x="80" y="912">Data source proxy calls</text>
+            <text class="m" x="80" y="950">packages/grafana-runtime</text>
+            <g class="badge">
+              <circle cx="390" cy="805" r="18" />
+              <text x="390" y="811" text-anchor="middle">1</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Backend -->
+        <g class="grp grp-be">
+          <rect class="frame" x="480" y="130" width="960" height="870" rx="18" />
+          <text class="gh" x="504" y="172">Grafana server · Go single binary</text>
+          <text class="gs" x="960" y="172">pkg/server · Wire DI · pkg/services</text>
+
+          <g class="box flow">
+            <rect x="500" y="220" width="280" height="90" rx="12" />
+            <text class="t" x="516" y="252">Middleware &amp; auth</text>
+            <text class="d" x="516" y="278">Authn, RBAC, request context</text>
+            <text class="m" x="516" y="300">pkg/middleware, authn</text>
+            <g class="badge">
+              <circle cx="754" cy="246" r="16" />
+              <text x="754" y="252" text-anchor="middle">2</text>
+            </g>
+          </g>
+
+          <g class="box flow">
+            <rect x="500" y="335" width="280" height="90" rx="12" />
+            <text class="t" x="516" y="367">HTTP API</text>
+            <text class="d" x="516" y="393">Routes /api/* handlers</text>
+            <text class="m" x="516" y="415">pkg/api/ds_query.go</text>
+            <g class="badge">
+              <circle cx="754" cy="361" r="16" />
+              <text x="754" y="367" text-anchor="middle">3</text>
+            </g>
+          </g>
+
+          <g class="box flow">
+            <rect x="500" y="450" width="280" height="90" rx="12" />
+            <text class="t" x="516" y="482">Query service</text>
+            <text class="d" x="516" y="508">Groups queries per source</text>
+            <text class="m" x="516" y="530">pkg/services/query</text>
+            <g class="badge">
+              <circle cx="754" cy="476" r="16" />
+              <text x="754" y="482" text-anchor="middle">4</text>
+            </g>
+          </g>
+
+          <g class="box flow">
+            <rect x="500" y="565" width="280" height="90" rx="12" />
+            <text class="t" x="516" y="597">Expressions (SSE)</text>
+            <text class="d" x="516" y="623">Math, reduce, resample, SQL</text>
+            <text class="m" x="516" y="645">pkg/expr</text>
+            <g class="badge">
+              <circle cx="754" cy="591" r="16" />
+              <text x="754" y="597" text-anchor="middle">5</text>
+            </g>
+          </g>
+
+          <g class="box flow">
+            <rect x="500" y="680" width="280" height="90" rx="12" />
+            <text class="t" x="516" y="712">Plugin client</text>
+            <text class="d" x="516" y="738">Middleware chain → QueryData</text>
+            <text class="m" x="516" y="760">pkg/plugins/manager/client</text>
+            <g class="badge">
+              <circle cx="754" cy="706" r="16" />
+              <text x="754" y="712" text-anchor="middle">6</text>
+            </g>
+          </g>
+
+          <g class="box flow">
+            <rect x="500" y="795" width="280" height="170" rx="12" />
+            <text class="t" x="516" y="827">Core data sources</text>
+            <text class="d" x="516" y="855">Built in, run in-process</text>
+            <text class="d" x="516" y="879">Prometheus, Loki, InfluxDB,</text>
+            <text class="d" x="516" y="903">CloudWatch, Azure, MySQL…</text>
+            <text class="m" x="516" y="940">pkg/tsdb</text>
+            <g class="badge">
+              <circle cx="754" cy="821" r="16" />
+              <text x="754" y="827" text-anchor="middle">7</text>
+            </g>
+          </g>
+
+          <g class="box">
+            <rect x="810" y="220" width="300" height="90" rx="12" />
+            <text class="t" x="826" y="252">Dashboards &amp; folders</text>
+            <text class="d" x="826" y="278">CRUD, versions, library panels</text>
+            <text class="m" x="826" y="300">pkg/services/dashboards</text>
+          </g>
+          <g class="box">
+            <rect x="1125" y="220" width="295" height="90" rx="12" />
+            <text class="t" x="1141" y="252">App platform API server</text>
+            <text class="d" x="1141" y="278">Kubernetes-style /apis/…</text>
+            <text class="m" x="1141" y="300">pkg/services/apiserver</text>
+          </g>
+
+          <g class="box">
+            <rect x="810" y="335" width="300" height="90" rx="12" />
+            <text class="t" x="826" y="367">Data source proxy</text>
+            <text class="d" x="826" y="393">Forwards browser HTTP calls</text>
+            <text class="m" x="826" y="415">pkg/api/pluginproxy</text>
+          </g>
+          <g class="box">
+            <rect x="1125" y="335" width="295" height="90" rx="12" />
+            <text class="t" x="1141" y="367">Grafana Live</text>
+            <text class="d" x="1141" y="393">Streaming over WebSocket</text>
+            <text class="m" x="1141" y="415">pkg/services/live</text>
+          </g>
+
+          <g class="box">
+            <rect x="810" y="450" width="300" height="90" rx="12" />
+            <text class="t" x="826" y="482">Provisioning</text>
+            <text class="d" x="826" y="508">Files → dashboards, DS, alerts</text>
+            <text class="m" x="826" y="530">pkg/services/provisioning</text>
+          </g>
+          <g class="box">
+            <rect x="1125" y="450" width="295" height="90" rx="12" />
+            <text class="t" x="1141" y="482">Identity &amp; access</text>
+            <text class="d" x="1141" y="508">Users, orgs, teams, RBAC</text>
+            <text class="m" x="1141" y="530">pkg/services/accesscontrol</text>
+          </g>
+
+          <g class="box">
+            <rect x="810" y="565" width="300" height="90" rx="12" />
+            <text class="t" x="826" y="597">Alerting (ngalert)</text>
+            <text class="d" x="826" y="623">Scheduler, evaluation, state</text>
+            <text class="m" x="826" y="645">pkg/services/ngalert</text>
+          </g>
+          <g class="box">
+            <rect x="1125" y="565" width="295" height="90" rx="12" />
+            <text class="t" x="1141" y="597">Alertmanager</text>
+            <text class="d" x="1141" y="623">Routing, silences, notify</text>
+            <text class="m" x="1141" y="645">ngalert/notifier</text>
+          </g>
+
+          <g class="box">
+            <rect x="810" y="680" width="300" height="90" rx="12" />
+            <text class="t" x="826" y="712">Plugin manager</text>
+            <text class="d" x="826" y="738">Discover, verify, load, start</text>
+            <text class="m" x="826" y="760">pkg/plugins</text>
+          </g>
+          <g class="box">
+            <rect x="1125" y="680" width="295" height="90" rx="12" />
+            <text class="t" x="1141" y="712">And more</text>
+            <text class="d" x="1141" y="738">Annotations, search, rendering</text>
+            <text class="m" x="1141" y="760">pkg/services/*</text>
+          </g>
+
+          <g class="box flow proc">
+            <rect x="810" y="795" width="610" height="170" rx="12" />
+            <text class="t" x="830" y="827">Backend plugins · separate processes</text>
+            <text class="d" x="830" y="857">Started by Grafana, called over gRPC (HashiCorp go-plugin)</text>
+            <text class="d" x="830" y="881">Built with grafana-plugin-sdk-go</text>
+            <text class="d" x="830" y="905">QueryData · CallResource · CheckHealth · RunStream</text>
+            <text class="m" x="830" y="940">pkg/plugins/backendplugin/grpcplugin</text>
+            <g class="badge">
+              <circle cx="1394" cy="821" r="16" />
+              <text x="1394" y="827" text-anchor="middle">7</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Storage -->
+        <g class="grp grp-st">
+          <rect class="frame" x="1480" y="130" width="400" height="400" rx="18" />
+          <text class="gh" x="1504" y="172">Storage</text>
+
+          <g class="box">
+            <rect x="1500" y="190" width="360" height="160" rx="12" />
+            <text class="t" x="1520" y="224">Unified storage</text>
+            <text class="d" x="1520" y="252">Resource server for app platform</text>
+            <text class="d" x="1520" y="276">objects, history, search index</text>
+            <text class="d" x="1520" y="300">In-process or standalone gRPC</text>
+            <text class="m" x="1520" y="332">pkg/storage/unified</text>
+          </g>
+
+          <g class="box">
+            <rect x="1500" y="365" width="360" height="145" rx="12" />
+            <text class="t" x="1520" y="399">SQL database</text>
+            <text class="d" x="1520" y="427">SQLite (default), MySQL, Postgres</text>
+            <text class="d" x="1520" y="451">Schema via migrations</text>
+            <text class="m" x="1520" y="487">pkg/services/sqlstore</text>
+          </g>
+        </g>
+
+        <!-- External -->
+        <g class="grp grp-ext">
+          <rect class="frame" x="1480" y="560" width="400" height="440" rx="18" />
+          <text class="gh" x="1504" y="602">External systems</text>
+
+          <g class="box">
+            <rect x="1500" y="620" width="360" height="145" rx="12" />
+            <text class="t" x="1520" y="654">Notification channels</text>
+            <text class="d" x="1520" y="682">Email, Slack, PagerDuty,</text>
+            <text class="d" x="1520" y="706">webhooks, and more</text>
+            <text class="m" x="1520" y="742">via Alertmanager</text>
+          </g>
+
+          <g class="box flow">
+            <rect x="1500" y="785" width="360" height="205" rx="12" />
+            <text class="t" x="1520" y="819">Data sources</text>
+            <text class="d" x="1520" y="849">Prometheus / Mimir · Loki · Tempo</text>
+            <text class="d" x="1520" y="873">InfluxDB · Graphite · Elasticsearch</text>
+            <text class="d" x="1520" y="897">MySQL · PostgreSQL · SQL Server</text>
+            <text class="d" x="1520" y="921">CloudWatch · Azure Monitor</text>
+            <text class="m" x="1520" y="960">native protocols</text>
+            <g class="badge">
+              <circle cx="1830" cy="811" r="16" />
+              <text x="1830" y="817" text-anchor="middle">8</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Internal dependencies -->
+        <path class="dep" d="M1420,265 L1494,265" marker-end="url(#ahg)" />
+        <path class="dep" d="M1420,495 L1494,438" marker-end="url(#ahg)" />
+        <path class="dep" d="M1420,640 L1494,680" marker-end="url(#ahg)" />
+        <path class="dep" d="M810,610 L788,610" marker-end="url(#ahg)" />
+        <path class="dep" d="M810,725 L788,725" marker-end="url(#ahg)" />
+
+        <!-- Query flow -->
+        <path class="arrow" d="M420,877 L460,877 L460,265 L492,265" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,310 L640,328" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,425 L640,443" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,540 L640,558" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,655 L640,673" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,770 L640,788" marker-end="url(#ah)" />
+        <path class="arrow" d="M780,750 L795,750 L795,880 L803,880" marker-end="url(#ah)" />
+        <path class="arrow" d="M1420,880 L1492,880" marker-end="url(#ah)" />
+        <path class="arrow" d="M640,965 L640,982 L1492,982" marker-end="url(#ah)" />
+
+        <!-- Legend -->
+        <line x1="40" y1="1048" x2="100" y2="1048" stroke="#ff8a1f" stroke-width="6" />
+        <text class="lg" x="112" y="1054">Query path (responses return the same way as data frames)</text>
+        <line x1="700" y1="1048" x2="760" y2="1048" stroke="#9aa4b8" stroke-width="3" stroke-dasharray="8 6" />
+        <text class="lg" x="772" y="1054">Internal dependency</text>
+        <rect
+          x="1000"
+          y="1032"
+          width="56"
+          height="32"
+          rx="6"
+          fill="none"
+          stroke="#ff8a1f"
+          stroke-width="3"
+          stroke-dasharray="10 7"
+        />
+        <text class="lg" x="1068" y="1054">Separate process</text>
+        <text class="lg" x="1880" y="1054" text-anchor="end" style="fill: #8f98aa">
+          Alerting evaluates rules through the same expression + plugin path
+        </text>
+      </svg>
+
+      <section>
+        <h2>The query path, step by step</h2>
+        <ol class="steps">
+          <li>
+            <span class="n">1</span
+            ><span
+              >A panel or Explore runs a query. <code>DataSourceWithBackend</code> in
+              <code>@grafana/runtime</code> sends <code>POST /api/ds/query</code> with the queries and time range.</span
+            >
+          </li>
+          <li>
+            <span class="n">2</span
+            ><span
+              >Middleware authenticates the caller (session, API key, service account token, OAuth, JWT) and builds the
+              request context. RBAC checks <code>datasources:query</code>.</span
+            >
+          </li>
+          <li>
+            <span class="n">3</span
+            ><span
+              >The handler in <code>pkg/api/ds_query.go</code> decodes the request and calls the query service.</span
+            >
+          </li>
+          <li>
+            <span class="n">4</span
+            ><span
+              >The query service resolves each data source, groups queries by data source, and runs the groups
+              concurrently.</span
+            >
+          </li>
+          <li>
+            <span class="n">5</span
+            ><span
+              >When the request contains expressions (<code>__expr__</code>), the server-side expression engine builds a
+              dependency graph and runs math, reduce, resample, threshold, and SQL nodes over the results.</span
+            >
+          </li>
+          <li>
+            <span class="n">6</span
+            ><span
+              >The plugin client runs a middleware chain (auth headers, caching, tracing, metrics, logging) and calls
+              <code>QueryData</code>.</span
+            >
+          </li>
+          <li>
+            <span class="n">7</span
+            ><span
+              >Core data sources in <code>pkg/tsdb</code> answer in-process. External backend plugins receive the call
+              over gRPC.</span
+            >
+          </li>
+          <li>
+            <span class="n">8</span
+            ><span
+              >The plugin queries the external system in its native protocol. Data frames flow back the same way to the
+              browser, which renders them in the panel.</span
+            >
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Also worth knowing</h2>
+        <ul class="notes">
+          <li>
+            <strong>Alerting:</strong> the ngalert scheduler evaluates rules on an interval through
+            <code>pkg/expr</code> and the plugin client, tracks alert state, and hands firing alerts to an embedded
+            Alertmanager for routing and notification.
+          </li>
+          <li>
+            <strong>Grafana Live:</strong> a Centrifuge-based WebSocket hub at <code>/api/live/ws</code> streams data
+            from plugins (<code>RunStream</code>), dashboard events, and pushed metrics.
+          </li>
+          <li>
+            <strong>Two API styles:</strong> classic REST handlers under <code>/api/*</code> and Kubernetes-style
+            resources under <code>/apis/*</code>, served by the app platform API server and backed by unified storage.
+          </li>
+          <li>
+            <strong>Provisioning:</strong> YAML files under <code>conf/provisioning</code> create data sources,
+            dashboards, plugins, and alerting resources at startup.
+          </li>
+        </ul>
+      </section>
+
+      <footer>
+        Source: github.com/Jstein77/grafana, <code>main</code>. Simplified view: not every service or code path is
+        shown.
+      </footer>
+    </main>
+  </body>
+</html>
