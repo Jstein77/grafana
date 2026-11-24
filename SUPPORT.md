@@ -4,7 +4,7 @@
 
 First, check the official [Grafana documentation](https://grafana.com/docs/).
 
-If you require further help or support then ask a question in the [Grafana community site](https://community.grafana.com/) or [Grafana Slack](http://slack.raintank.io/). You can also search the community site for previously answered questions, in case someone already had your problem and got help.
+If you require further help or support, ask a question in the [Grafana community site](https://community.grafana.com/) or [Grafana Slack](http://slack.raintank.io/). You can also search the community site for previously answered questions, in case someone already had your problem and got help.
 
 **Please note:**
 
