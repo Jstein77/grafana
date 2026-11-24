@@ -87,7 +87,7 @@ A user that is only part of Team A will have access to logs that match `cluster=
 
 A user that is only part of Team B will have access to logs that match `cluster="us-west-0" AND namespace="staging"`.
 
-A user in Team A has access to logs in cluster us-west-0 with namespaces `dev` and `prod`. A user in Team B has access to to everything in cluster us-west-0, except namespace prod. So basically, user who is member of both team A and team B has access to everything in cluster us-west-0.
+A user in Team A has access to logs in cluster us-west-0 with namespaces `dev` and `prod`. A user in Team B has access to everything in cluster us-west-0, except namespace prod. So basically, user who is member of both team A and team B has access to everything in cluster us-west-0.
 
 A user that is **not** part of any Team with `Editor/Viewer` role will not have access to query any logs.
 
